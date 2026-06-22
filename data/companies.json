@@ -1,0 +1,82 @@
+{
+  "namma": {
+    "name": "Namma Al Enjaz Factory for Industry Company",
+    "departments": {
+      "hr": "HR",
+      "account": "Account",
+      "it": "IT",
+      "maintenance": "Maintenance",
+      "tax-audit": "Tax & Audit"
+    }
+  },
+  "al-yaqeen": {
+    "name": "Advanced Al Yaqeen Trading Company",
+    "departments": {
+      "hr": "HR",
+      "account": "Account",
+      "it": "IT",
+      "maintenance": "Maintenance",
+      "tax-audit": "Tax & Audit"
+    }
+  },
+  "diamond-star": {
+    "name": "Diamond Star Arabia Industrial Company",
+    "departments": {
+      "hr": "HR",
+      "account": "Account",
+      "it": "IT",
+      "maintenance": "Maintenance",
+      "tax-audit": "Tax & Audit"
+    }
+  },
+  "madina": {
+    "name": "Madina Al Akhdar International Trading Company",
+    "departments": {
+      "hr": "HR",
+      "account": "Account",
+      "it": "IT",
+      "maintenance": "Maintenance",
+      "tax-audit": "Tax & Audit"
+    }
+  },
+  "ajwad": {
+    "name": "Ajwad Almasia Salon for Men",
+    "departments": {
+      "hr": "HR",
+      "account": "Account",
+      "it": "IT",
+      "maintenance": "Maintenance",
+      "tax-audit": "Tax & Audit"
+    }
+  },
+  "diamond-star-recycling": {
+    "name": "Diamond Star for Waste Recycling Company",
+    "departments": {
+      "hr": "HR",
+      "account": "Account",
+      "it": "IT",
+      "maintenance": "Maintenance",
+      "tax-audit": "Tax & Audit"
+    }
+  },
+  "abu-rayhan": {
+    "name": "Abu Rayhan Perfume Factory",
+    "departments": {
+      "hr": "HR",
+      "account": "Account",
+      "it": "IT",
+      "maintenance": "Maintenance",
+      "tax-audit": "Tax & Audit"
+    }
+  },
+  "tadwir": {
+    "name": "Tadwir Al Jazirah Trading Company LLC",
+    "departments": {
+      "hr": "HR",
+      "account": "Account",
+      "it": "IT",
+      "maintenance": "Maintenance",
+      "tax-audit": "Tax & Audit"
+    }
+  }
+}
