@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
@@ -7,9 +7,11 @@ import { useRouter } from "next/navigation";
 import {
   LogOut, ChevronRight, LayoutDashboard,
   TrendingUp, TrendingDown, Wallet, CreditCard,
-  ArrowUpRight, ArrowDownRight,
+  ArrowUpRight, ArrowDownRight, Download,
 } from "lucide-react";
 import CompanySelector, { COMPANIES } from "@/components/company-selector";
+import * as XLSX from "xlsx-js-style";
+import { applyStyles } from "@/lib/excel-styles";
 
 const BRAND = "#1B3A6B";
 const PIE_R  = 70;
@@ -139,6 +141,159 @@ export default function AccountDashboardPage() {
 
   const isSingle = selectedIds.length === 1;
 
+  function exportFullReport() {
+    const wb = XLSX.utils.book_new();
+    const dateStr = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
+    const timeStr = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+
+    type HEntry = { id: string; companyId: string; companyName: string; savedAt: string; rows: Record<string, string>[]; total: number };
+    const parseHist = (key: string): HEntry[] => { try { return JSON.parse(localStorage.getItem(key) ?? "[]"); } catch { return []; } };
+
+    const incHist = parseHist("account_income_history");
+    const payHist = parseHist("account_payables_history");
+    const recHist = parseHist("account_receivables_history");
+    const expHist = parseHist("account_expenses_history");
+
+    const numV = (v: string) => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
+    const monV = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    // ── Sheet 1: Combined Summary ──────────────────────────────────────────
+    const incTotal = incHist.reduce((s, e) => s + e.total, 0);
+    const payTotal = payHist.reduce((s, e) => s + e.total, 0);
+    const recTotal = recHist.reduce((s, e) => s + e.total, 0);
+    const expTotal = expHist.reduce((s, e) => s + e.total, 0);
+    const netBal   = (incTotal + recTotal) - (payTotal + expTotal);
+
+    const ws1Data: (string | number | null)[][] = [
+      ["NAMMA DASHBOARD — FULL FINANCIAL REPORT", null, null, null],
+      [`Generated: ${dateStr} ${timeStr}`, null, null, null],
+      [],
+      ["SUMMARY", null, null, null],
+      [],
+      ["Category", "Submissions", "Total Entries", "Total (SAR)"],
+      ["Income",      incHist.length, incHist.reduce((s,e)=>s+e.rows.length,0), incTotal],
+      ["Payables",    payHist.length, payHist.reduce((s,e)=>s+e.rows.length,0), payTotal],
+      ["Receivables", recHist.length, recHist.reduce((s,e)=>s+e.rows.length,0), recTotal],
+      ["Expenses",    expHist.length, expHist.reduce((s,e)=>s+e.rows.length,0), expTotal],
+      [],
+      ["Net Balance (Income + Receivables − Payables − Expenses)", null, null, netBal],
+    ];
+    const ws1 = XLSX.utils.aoa_to_sheet(ws1Data);
+    ws1["!cols"] = [{ wch: 50 }, { wch: 16 }, { wch: 16 }, { wch: 18 }];
+    applyStyles(ws1, { metaEnd: 1, headerRow: 5, dataStart: 6, dataEnd: 9, totalRow: 11, amountCols: [3], accent: "1B3A6B", colCount: 4 });
+    XLSX.utils.book_append_sheet(wb, ws1, "Summary");
+
+    // ── Sheet 2: All Income ────────────────────────────────────────────────
+    const incRows: (string | number)[][] = [];
+    let rn = 1;
+    incHist.forEach(e => e.rows.forEach((r: Record<string,string>) => incRows.push([
+      rn++, e.companyName, r.bankName ?? "", r.month, numV(r.amount),
+      new Date(e.savedAt).toLocaleDateString("en-GB"),
+    ])));
+    const ws2Data: (string | number | null)[][] = [
+      ["INCOME REPORT", null, null, null, null, null],
+      [`Grand Total: SAR ${monV(incTotal)}`, null, null, null, null, null],
+      [],
+      ["#", "Company", "Bank Name", "Month", "Amount (SAR)", "Saved Date"],
+      ...incRows,
+      [], [null, null, null, "TOTAL SAR", incTotal, null],
+    ];
+    const ws2 = XLSX.utils.aoa_to_sheet(ws2Data);
+    ws2["!cols"] = [{ wch: 5 }, { wch: 40 }, { wch: 26 }, { wch: 20 }, { wch: 18 }, { wch: 16 }];
+    applyStyles(ws2, { metaEnd: 1, headerRow: 3, dataStart: 4, dataEnd: 3 + incRows.length, totalRow: 5 + incRows.length, amountCols: [4], accent: "059669", colCount: 6 });
+    XLSX.utils.book_append_sheet(wb, ws2, "Income");
+
+    // ── Sheet 3: All Payables ──────────────────────────────────────────────
+    const payRows: (string | number)[][] = [];
+    rn = 1;
+    payHist.forEach(e => e.rows.forEach((r: Record<string,string>) => payRows.push([
+      rn++, e.companyName, r.customerName ?? "", r.month, numV(r.amount),
+      new Date(e.savedAt).toLocaleDateString("en-GB"),
+    ])));
+    const ws3Data: (string | number | null)[][] = [
+      ["PAYABLES REPORT", null, null, null, null, null],
+      [`Grand Total: SAR ${monV(payTotal)}`, null, null, null, null, null],
+      [],
+      ["#", "Company", "Customer Name", "Month", "Amount (SAR)", "Saved Date"],
+      ...payRows,
+      [], [null, null, null, "TOTAL SAR", payTotal, null],
+    ];
+    const ws3 = XLSX.utils.aoa_to_sheet(ws3Data);
+    ws3["!cols"] = [{ wch: 5 }, { wch: 40 }, { wch: 28 }, { wch: 20 }, { wch: 18 }, { wch: 16 }];
+    applyStyles(ws3, { metaEnd: 1, headerRow: 3, dataStart: 4, dataEnd: 3 + payRows.length, totalRow: 5 + payRows.length, amountCols: [4], accent: "DC2626", colCount: 6 });
+    XLSX.utils.book_append_sheet(wb, ws3, "Payables");
+
+    // ── Sheet 4: All Receivables ───────────────────────────────────────────
+    const recRows: (string | number)[][] = [];
+    rn = 1;
+    recHist.forEach(e => e.rows.forEach((r: Record<string,string>) => recRows.push([
+      rn++, e.companyName, r.clientName ?? "", r.month, numV(r.amount),
+      new Date(e.savedAt).toLocaleDateString("en-GB"),
+    ])));
+    const ws4Data: (string | number | null)[][] = [
+      ["RECEIVABLES REPORT", null, null, null, null, null],
+      [`Grand Total: SAR ${monV(recTotal)}`, null, null, null, null, null],
+      [],
+      ["#", "Company", "Client Name", "Month", "Amount (SAR)", "Saved Date"],
+      ...recRows,
+      [], [null, null, null, "TOTAL SAR", recTotal, null],
+    ];
+    const ws4 = XLSX.utils.aoa_to_sheet(ws4Data);
+    ws4["!cols"] = [{ wch: 5 }, { wch: 40 }, { wch: 28 }, { wch: 20 }, { wch: 18 }, { wch: 16 }];
+    applyStyles(ws4, { metaEnd: 1, headerRow: 3, dataStart: 4, dataEnd: 3 + recRows.length, totalRow: 5 + recRows.length, amountCols: [4], accent: "0891B2", colCount: 6 });
+    XLSX.utils.book_append_sheet(wb, ws4, "Receivables");
+
+    // ── Sheet 5: All Expenses ──────────────────────────────────────────────
+    const expRows: (string | number)[][] = [];
+    rn = 1;
+    expHist.forEach(e => e.rows.forEach((r: Record<string,string>) => expRows.push([
+      rn++, e.companyName, r.expenseName ?? "", r.month, numV(r.amount),
+      new Date(e.savedAt).toLocaleDateString("en-GB"),
+    ])));
+    const ws5Data: (string | number | null)[][] = [
+      ["EXPENSES REPORT", null, null, null, null, null],
+      [`Grand Total: SAR ${monV(expTotal)}`, null, null, null, null, null],
+      [],
+      ["#", "Company", "Expense Name", "Month", "Amount (SAR)", "Saved Date"],
+      ...expRows,
+      [], [null, null, null, "TOTAL SAR", expTotal, null],
+    ];
+    const ws5 = XLSX.utils.aoa_to_sheet(ws5Data);
+    ws5["!cols"] = [{ wch: 5 }, { wch: 40 }, { wch: 28 }, { wch: 20 }, { wch: 18 }, { wch: 16 }];
+    applyStyles(ws5, { metaEnd: 1, headerRow: 3, dataStart: 4, dataEnd: 3 + expRows.length, totalRow: 5 + expRows.length, amountCols: [4], accent: "D97706", colCount: 6 });
+    XLSX.utils.book_append_sheet(wb, ws5, "Expenses");
+
+    // ── Sheet 6: Monthly Breakdown (chart-ready) ───────────────────────────
+    const monthAll: Record<string, number[]> = {};
+    const addToMonth = (hist: HEntry[], idx: number, field: string) => {
+      hist.forEach(e => e.rows.forEach((r: Record<string,string>) => {
+        if (!monthAll[r.month]) monthAll[r.month] = [0,0,0,0];
+        monthAll[r.month][idx] += numV(r.amount);
+      }));
+    };
+    addToMonth(incHist, 0, "amount");
+    addToMonth(payHist, 1, "amount");
+    addToMonth(recHist, 2, "amount");
+    addToMonth(expHist, 3, "amount");
+    const sortedMonths = Object.entries(monthAll).sort((a, b) => {
+      const p = (s: string) => new Date(`${s.split(" ")[0]} 1, ${s.split(" ")[1]}`).getTime();
+      return p(a[0]) - p(b[0]);
+    });
+    const ws6Data: (string | number | null)[][] = [
+      ["MONTHLY BREAKDOWN — CHART DATA", null, null, null, null],
+      ["Tip: Select all columns → Insert → Chart (Stacked Bar)", null, null, null, null],
+      [],
+      ["Month", "Income (SAR)", "Payables (SAR)", "Receivables (SAR)", "Expenses (SAR)"],
+      ...sortedMonths.map(([m, v]) => [m, v[0], v[1], v[2], v[3]]),
+    ];
+    const ws6 = XLSX.utils.aoa_to_sheet(ws6Data);
+    ws6["!cols"] = [{ wch: 20 }, { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 18 }];
+    applyStyles(ws6, { metaEnd: 1, headerRow: 3, dataStart: 4, dataEnd: 3 + sortedMonths.length, amountCols: [1, 2, 3, 4], accent: "1B3A6B", colCount: 5 });
+    XLSX.utils.book_append_sheet(wb, ws6, "Monthly Breakdown");
+
+    XLSX.writeFile(wb, `Full_Financial_Report_${new Date().toISOString().split("T")[0]}.xlsx`);
+  }
+
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#F4F6FA" }}>
 
@@ -177,13 +332,23 @@ export default function AccountDashboardPage() {
                 </p>
               </div>
             </div>
-            {/* Company count badge */}
-            {!loading && selectedIds.length > 1 && (
-              <span className="text-[11px] font-bold px-3 py-1.5 rounded-full"
-                style={{ background: `${BRAND}15`, color: BRAND }}>
-                Comparing {selectedIds.length} companies
-              </span>
-            )}
+            <div className="flex items-center gap-3">
+              {!loading && selectedIds.length > 1 && (
+                <span className="text-[11px] font-bold px-3 py-1.5 rounded-full"
+                  style={{ background: `${BRAND}15`, color: BRAND }}>
+                  Comparing {selectedIds.length} companies
+                </span>
+              )}
+              {!loading && (
+                <button
+                  onClick={exportFullReport}
+                  className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-all hover:shadow-md active:scale-95"
+                  style={{ backgroundColor: BRAND, boxShadow: `0 2px 8px ${BRAND}40` }}
+                >
+                  <Download size={15} /> Export Full Report
+                </button>
+              )}
+            </div>
           </div>
 
           {loading ? (
@@ -471,64 +636,130 @@ export default function AccountDashboardPage() {
                 const gt   = vals.reduce((s, v) => s + v, 0);
                 const net  = (vals[0] + vals[2]) - (vals[1] + vals[3]);
                 const totalRows = METRICS.reduce((s, { key }) => s + (d?.rows[key as MetricKey]?.length ?? 0), 0);
+
+                // Group income rows by bank name
+                const bankMap: Record<string, number> = {};
+                (d?.rows.income ?? []).forEach(row => {
+                  const bank = (row.bankName as string) || "Unknown";
+                  bankMap[bank] = (bankMap[bank] ?? 0) + num(row.amount);
+                });
+                const bankEntries = Object.entries(bankMap).sort((a, b) => b[1] - a[1]);
+
                 return (
-                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-10">
-                    <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/60 flex items-center justify-between">
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500">Full Tally</h3>
-                      <span className="text-xs text-gray-400">{totalRows} total entr{totalRows === 1 ? "y" : "ies"}</span>
-                    </div>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm min-w-[540px]">
-                        <thead>
-                          <tr style={{ backgroundColor: BRAND }} className="text-white text-xs uppercase tracking-wide">
-                            <th className="px-5 py-3 text-left">Category</th>
-                            <th className="px-4 py-3 text-center">Entries</th>
-                            <th className="px-4 py-3 text-right">Total (SAR)</th>
-                            <th className="px-4 py-3 text-right">Share</th>
-                            <th className="px-5 py-3 text-left">Distribution</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {METRICS.map(({ key, label, color, bg, Icon }, i) => {
-                            const pct = gt > 0 ? (vals[i] / gt) * 100 : 0;
-                            return (
-                              <tr key={key} className={`border-b border-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/40"}`}>
-                                <td className="px-5 py-3.5">
-                                  <div className="flex items-center gap-2">
-                                    <div className="flex h-7 w-7 items-center justify-center rounded-lg flex-shrink-0"
-                                      style={{ backgroundColor: bg, color }}>
-                                      <Icon size={14} />
+                  <>
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-5">
+                      <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/60 flex items-center justify-between">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500">Full Tally</h3>
+                        <span className="text-xs text-gray-400">{totalRows} total entr{totalRows === 1 ? "y" : "ies"}</span>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm min-w-[540px]">
+                          <thead>
+                            <tr style={{ backgroundColor: BRAND }} className="text-white text-xs uppercase tracking-wide">
+                              <th className="px-5 py-3 text-left">Category</th>
+                              <th className="px-4 py-3 text-center">Entries</th>
+                              <th className="px-4 py-3 text-right">Total (SAR)</th>
+                              <th className="px-4 py-3 text-right">Share</th>
+                              <th className="px-5 py-3 text-left">Distribution</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {METRICS.map(({ key, label, color, bg, Icon }, i) => {
+                              const pct = gt > 0 ? (vals[i] / gt) * 100 : 0;
+                              return (
+                                <tr key={key} className={`border-b border-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/40"}`}>
+                                  <td className="px-5 py-3.5">
+                                    <div className="flex items-center gap-2">
+                                      <div className="flex h-7 w-7 items-center justify-center rounded-lg flex-shrink-0"
+                                        style={{ backgroundColor: bg, color }}>
+                                        <Icon size={14} />
+                                      </div>
+                                      <span className="font-medium text-gray-700">{label}</span>
                                     </div>
-                                    <span className="font-medium text-gray-700">{label}</span>
-                                  </div>
-                                </td>
-                                <td className="px-4 py-3.5 text-center text-gray-500">{d?.rows[key as MetricKey]?.length ?? 0}</td>
-                                <td className="px-4 py-3.5 text-right font-bold tabular-nums" style={{ color }}>{money(vals[i])}</td>
-                                <td className="px-4 py-3.5 text-right text-gray-500 tabular-nums text-xs">{pct.toFixed(1)}%</td>
-                                <td className="px-5 py-3.5">
-                                  <div className="w-28 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                    <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: color }} />
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                        <tfoot>
-                          <tr className="border-t-2 border-gray-200 bg-gray-50/80">
-                            <td className="px-5 py-3.5 font-bold text-gray-700">Net Balance</td>
-                            <td className="px-4 py-3.5 text-center text-gray-400 text-xs">{totalRows} total</td>
-                            <td className="px-4 py-3.5 text-right font-bold tabular-nums text-base"
-                              style={{ color: net >= 0 ? "#059669" : "#DC2626" }}>
-                              {net >= 0 ? "+" : "−"} SAR {money(Math.abs(net))}
-                            </td>
-                            <td className="px-4 py-3.5 text-right text-gray-400 text-xs">100%</td>
-                            <td className="px-5 py-3.5" />
-                          </tr>
-                        </tfoot>
-                      </table>
+                                  </td>
+                                  <td className="px-4 py-3.5 text-center text-gray-500">{d?.rows[key as MetricKey]?.length ?? 0}</td>
+                                  <td className="px-4 py-3.5 text-right font-bold tabular-nums" style={{ color }}>{money(vals[i])}</td>
+                                  <td className="px-4 py-3.5 text-right text-gray-500 tabular-nums text-xs">{pct.toFixed(1)}%</td>
+                                  <td className="px-5 py-3.5">
+                                    <div className="w-28 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                      <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: color }} />
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                          <tfoot>
+                            <tr className="border-t-2 border-gray-200 bg-gray-50/80">
+                              <td className="px-5 py-3.5 font-bold text-gray-700">Net Balance</td>
+                              <td className="px-4 py-3.5 text-center text-gray-400 text-xs">{totalRows} total</td>
+                              <td className="px-4 py-3.5 text-right font-bold tabular-nums text-base"
+                                style={{ color: net >= 0 ? "#059669" : "#DC2626" }}>
+                                {net >= 0 ? "+" : "−"} SAR {money(Math.abs(net))}
+                              </td>
+                              <td className="px-4 py-3.5 text-right text-gray-400 text-xs">100%</td>
+                              <td className="px-5 py-3.5" />
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
                     </div>
-                  </div>
+
+                    {/* ── Income by Bank breakdown ─────────────────────────── */}
+                    {bankEntries.length > 0 && (
+                      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-10">
+                        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/60 flex items-center justify-between">
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500">Income by Bank</h3>
+                          <span className="text-xs text-gray-400">{bankEntries.length} bank{bankEntries.length === 1 ? "" : "s"}</span>
+                        </div>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm min-w-[400px]">
+                            <thead>
+                              <tr style={{ backgroundColor: BRAND }} className="text-white text-xs uppercase tracking-wide">
+                                <th className="px-5 py-3 text-center w-10">#</th>
+                                <th className="px-5 py-3 text-left">Bank Name</th>
+                                <th className="px-4 py-3 text-right">Total (SAR)</th>
+                                <th className="px-4 py-3 text-right">Share</th>
+                                <th className="px-5 py-3 text-left">Distribution</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {bankEntries.map(([bank, total], i) => {
+                                const pct = vals[0] > 0 ? (total / vals[0]) * 100 : 0;
+                                return (
+                                  <tr key={bank} className={`border-b border-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/40"}`}>
+                                    <td className="px-5 py-3.5 text-center text-xs font-semibold text-gray-400">{i + 1}</td>
+                                    <td className="px-5 py-3.5 font-medium text-gray-700">{bank}</td>
+                                    <td className="px-4 py-3.5 text-right font-bold tabular-nums" style={{ color: "#059669" }}>
+                                      {money(total)}
+                                    </td>
+                                    <td className="px-4 py-3.5 text-right text-gray-500 tabular-nums text-xs">{pct.toFixed(1)}%</td>
+                                    <td className="px-5 py-3.5">
+                                      <div className="w-28 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                        <div className="h-full rounded-full transition-all duration-700"
+                                          style={{ width: `${pct}%`, backgroundColor: "#059669" }} />
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                            <tfoot>
+                              <tr className="border-t-2 border-gray-200 bg-gray-50/80">
+                                <td className="px-5 py-3.5" />
+                                <td className="px-5 py-3.5 font-bold text-gray-700">Total Income</td>
+                                <td className="px-4 py-3.5 text-right font-bold tabular-nums text-base" style={{ color: "#059669" }}>
+                                  {money(vals[0])}
+                                </td>
+                                <td className="px-4 py-3.5 text-right text-gray-400 text-xs">100%</td>
+                                <td className="px-5 py-3.5" />
+                              </tr>
+                            </tfoot>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 );
               })()}
             </>
