@@ -80,13 +80,15 @@ export default function PurchasePage() {
         className="w-full flex items-center justify-between px-6 py-3 shadow-md"
         style={{ backgroundColor: BRAND }}
       >
-        <Image
-          src="/logo.png"
-          alt="Diamond Star Arabia"
-          width={110}
-          height={65}
-          className="object-contain brightness-0 invert"
-        />
+        <Link href="/dashboard">
+          <Image
+            src="/logo.png"
+            alt="Diamond Star Arabia"
+            width={110}
+            height={65}
+            className="object-contain brightness-0 invert cursor-pointer"
+          />
+        </Link>
         <button
           onClick={() => router.push("/login")}
           className="flex items-center gap-2 text-white/80 hover:text-white text-sm font-medium transition-colors"

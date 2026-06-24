@@ -542,7 +542,7 @@ export default function CurrentExpensesPage() {
 function PageHeader({ onLogout }: { onLogout: () => void }) {
   return (
     <header className="w-full flex items-center justify-between px-6 py-3 shadow-md gap-4 relative z-20" style={{ backgroundColor: BRAND }}>
-      <Image src="/logo.png" alt="Diamond Star Arabia" width={110} height={65} className="object-contain brightness-0 invert flex-shrink-0" />
+      <Link href="/dashboard"><Image src="/logo.png" alt="Diamond Star Arabia" width={110} height={65} className="object-contain brightness-0 invert flex-shrink-0 cursor-pointer" /></Link>
       <div className="flex-1 flex justify-center"><CompanySelector single /></div>
       <button onClick={onLogout} className="flex items-center gap-2 text-white/80 hover:text-white text-sm font-medium transition-colors flex-shrink-0">
         <LogOut size={16} /> Log out

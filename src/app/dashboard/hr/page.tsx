@@ -167,14 +167,16 @@ export default function HRPage() {
                 "0 12px 30px -8px rgba(0,0,0,0.35), 0 4px 10px rgba(0,0,0,0.15)",
             }}
           >
-            <Image
-              src="/logo.png"
-              alt="Diamond Star Arabia"
-              width={220}
-              height={72}
-              priority
-              className="object-contain h-16 w-auto"
-            />
+            <Link href="/dashboard">
+              <Image
+                src="/logo.png"
+                alt="Diamond Star Arabia"
+                width={220}
+                height={72}
+                priority
+                className="object-contain h-16 w-auto cursor-pointer"
+              />
+            </Link>
           </div>
 
           <Link
