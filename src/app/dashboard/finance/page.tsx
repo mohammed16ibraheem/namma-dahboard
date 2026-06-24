@@ -3,9 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  BookOpenCheck,
   LogOut,
   LayoutDashboard,
+  FileBarChart,
 } from "lucide-react";
 import CompanySelector from "@/components/company-selector";
 
@@ -18,18 +18,18 @@ type Tile = {
   Icon: React.ComponentType<{ size?: number; className?: string }>;
 };
 
-const ACCOUNT: Tile = {
-  title: "Account",
-  description: "Ledgers, journals, reconciliations",
-  href: "/dashboard/account",
-  Icon: BookOpenCheck,
-};
-
 const ACCOUNT_DASHBOARD: Tile = {
   title: "Account Dashboard",
   description: "Overview of income, payables, receivables & expenses",
   href: "/dashboard/account-dashboard",
   Icon: LayoutDashboard,
+};
+
+const FINANCIAL_REPORTS: Tile = {
+  title: "Financial Reports",
+  description: "Balance Sheet, Profit & Loss, Cash Flow, Executive Summary, Tax Report",
+  href: "/dashboard/account",
+  Icon: FileBarChart,
 };
 
 function ModuleCard({ tile, delay }: { tile: Tile; delay: number }) {
@@ -196,8 +196,8 @@ export default function FinancePage() {
           <div className="mx-auto max-w-7xl">
             {/* Account */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-              <ModuleCard tile={ACCOUNT} delay={0} />
-              <ModuleCard tile={ACCOUNT_DASHBOARD} delay={100} />
+              <ModuleCard tile={ACCOUNT_DASHBOARD} delay={0} />
+              <ModuleCard tile={FINANCIAL_REPORTS} delay={100} />
             </div>
           </div>
         </main>

@@ -77,8 +77,8 @@ export default function CompanySelector({ single = false }: Props) {
       localStorage.setItem("active_company", guarded[0]);
     } else {
       localStorage.setItem("selected_companies", JSON.stringify(guarded));
-      window.dispatchEvent(new CustomEvent("companiesChanged", { detail: guarded }));
     }
+    window.dispatchEvent(new CustomEvent("companiesChanged", { detail: guarded }));
   }
 
   function pick(id: string) {
