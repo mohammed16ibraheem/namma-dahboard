@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell, PieChart as RPieChart, Pie,
@@ -10,7 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   LogOut, ChevronRight, LayoutDashboard,
-  TrendingUp, TrendingDown, Wallet, CreditCard,
+  TrendingUp,
   ArrowUpRight, ArrowDownRight, Download,
   BarChart3, PieChart, Banknote, Receipt, FileText,
 } from "lucide-react";
@@ -22,8 +22,6 @@ import JarvisAssistant from "@/components/jarvis-assistant";
 const BRAND = "#1B3A6B";
 
 /* ── helpers ───────────────────────────────────────────────────────────── */
-const num = (v: string) => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
-const money = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtN = (n: number) => Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 const fmtM = (n: number) => {
   const a = Math.abs(n), s = n < 0 ? "−" : "";
@@ -36,20 +34,6 @@ const fmtNeg = (n: number) =>
         : n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 const coName = (id: string) => COMPANIES.find(c => c.id === id)?.name ?? id;
 const isAr = (s: string) => /[؀-ۿ]/.test(s);
-
-/* ── account-module metric config (localStorage) ───────────────────────── */
-const METRICS = [
-  { key: "income",      label: "Income",      color: "#059669", bg: "#ECFDF5", Icon: TrendingUp,   href: "/dashboard/account/current-income"      },
-  { key: "payables",    label: "Payables",    color: "#DC2626", bg: "#FEF2F2", Icon: TrendingDown,  href: "/dashboard/account/current-payables"    },
-  { key: "receivables", label: "Receivables", color: "#0891B2", bg: "#ECFEFF", Icon: Wallet,        href: "/dashboard/account/current-receivables" },
-  { key: "expenses",    label: "Expenses",    color: "#D97706", bg: "#FFFBEB", Icon: CreditCard,    href: "/dashboard/account/current-expenses"    },
-] as const;
-type MetricKey = "income" | "payables" | "receivables" | "expenses";
-
-interface PerCompany {
-  income: number; payables: number; receivables: number; expenses: number;
-  rows: Record<MetricKey, Array<{ amount: string; month: string; [k: string]: string }>>;
-}
 
 /* ── row-finder helpers ─────────────────────────────────────────────────── */
 function bsFind(arr: PeriodFile["bs"], ...keys: string[]): number {
@@ -90,9 +74,6 @@ function ChartTooltip({ active, payload, label, fmt = fmtM }: {
 /* ═══════════════════════════════════════════════════════════════════════ */
 export default function AccountDashboardPage() {
   const router = useRouter();
-  const [selectedIds, setSelectedIds]   = useState<string[]>([]);
-  const [data, setData]                 = useState<Record<string, PerCompany>>({});
-  const [loading, setLoading]           = useState(true);
 
   /* financial-reports states */
   const [bsPeriods, setBsPeriods]   = useState<PeriodFile[]>([]);
@@ -105,43 +86,22 @@ export default function AccountDashboardPage() {
 
   useEffect(() => setMounted(true), []);
 
-  /* load localStorage metrics */
+  /* read active company from localStorage */
   useEffect(() => {
-    function load() {
-      setLoading(true);
-      const raw = localStorage.getItem("selected_companies");
-      const ids: string[] = raw ? JSON.parse(raw) : ["diamond-star"];
-      setSelectedIds(ids);
-
-      type DM = Record<string, { rows: Array<{ amount: string; month: string; [k: string]: string }>; total: number }>;
-      const parse = (k: string): DM => JSON.parse(localStorage.getItem(k) ?? "{}");
-      const incMap = parse("account_income");
-      const payMap = parse("account_payables");
-      const recMap = parse("account_receivables");
-      const expMap = parse("account_expenses");
-
-      const built: Record<string, PerCompany> = {};
-      ids.forEach(id => {
-        built[id] = {
-          income:      incMap?.[id]?.total ?? 0,
-          payables:    payMap?.[id]?.total ?? 0,
-          receivables: recMap?.[id]?.total ?? 0,
-          expenses:    expMap?.[id]?.total ?? 0,
-          rows: {
-            income:      incMap?.[id]?.rows ?? [],
-            payables:    payMap?.[id]?.rows ?? [],
-            receivables: recMap?.[id]?.rows ?? [],
-            expenses:    expMap?.[id]?.rows ?? [],
-          },
-        };
-      });
-      setData(built);
-      setFrCompany(ids[0] ?? "diamond-star");
-      setLoading(false);
+    function readCompany() {
+      try {
+        const raw = localStorage.getItem("selected_companies");
+        const ids: string[] = raw ? JSON.parse(raw) : ["diamond-star"];
+        setFrCompany(ids[0] ?? "diamond-star");
+      } catch {}
     }
-    load();
-    window.addEventListener("companiesChanged", load);
-    return () => window.removeEventListener("companiesChanged", load);
+    readCompany();
+    const handler = (e: Event) => {
+      const ids = (e as CustomEvent<string[]>).detail;
+      if (ids?.length) setFrCompany(ids[0]);
+    };
+    window.addEventListener("companiesChanged", handler);
+    return () => window.removeEventListener("companiesChanged", handler);
   }, []);
 
   /* fetch all 5 report types */
@@ -238,39 +198,6 @@ export default function AccountDashboardPage() {
   const netChange  = prevNet !== 0 ? ((netProfit - prevNet) / Math.abs(prevNet)) * 100 : 0;
   const assetsChange = prevAssets > 0 ? ((totalAssets - prevAssets) / prevAssets) * 100 : 0;
 
-  /* ── localStorage aggregates ──────────────────────────────────────────── */
-  const isSingle   = selectedIds.length === 1;
-  const totals = useMemo(() => {
-    const t = { income: 0, payables: 0, receivables: 0, expenses: 0 };
-    selectedIds.forEach(id => {
-      const d = data[id];
-      if (d) { t.income += d.income; t.payables += d.payables; t.receivables += d.receivables; t.expenses += d.expenses; }
-    });
-    return t;
-  }, [selectedIds, data]);
-  const netBalance = (totals.income + totals.receivables) - (totals.payables + totals.expenses);
-  const grandTotal = totals.income + totals.payables + totals.receivables + totals.expenses;
-  const pieVals = [totals.income, totals.payables, totals.receivables, totals.expenses];
-  const { chartMonths, monthlyMap, maxBarVal } = useMemo(() => {
-    const mm: Record<string, number[]> = {};
-    selectedIds.forEach(id => {
-      const d = data[id];
-      if (!d) return;
-      METRICS.forEach(({ key }, ci) => {
-        d.rows[key].forEach(row => {
-          if (!mm[row.month]) mm[row.month] = [0, 0, 0, 0];
-          mm[row.month][ci] += num(row.amount);
-        });
-      });
-    });
-    const sorted = Object.keys(mm).sort((a, b) => {
-      const p = (s: string) => new Date(`${s.split(" ")[0]} 1, ${s.split(" ")[1]}`).getTime();
-      return p(a) - p(b);
-    });
-    const months = sorted.slice(-6);
-    const maxV = Math.max(1, ...months.map(m => mm[m].reduce((s, v) => s + v, 0)));
-    return { chartMonths: months, monthlyMap: mm, maxBarVal: maxV };
-  }, [selectedIds, data]);
 
   /* ── Export ─────────────────────────────────────────────────────────── */
   function exportFullReport() {
@@ -487,7 +414,6 @@ export default function AccountDashboardPage() {
   }
 
   const hasFinancialData = bsPeriods.length > 0 || plPeriods.length > 0;
-  const hasAccountData   = Object.values(totals).some(v => v > 0);
 
   /* ══════════════════════════════════════════════════════════════════════ */
   return (
@@ -529,7 +455,7 @@ export default function AccountDashboardPage() {
               <div>
                 <h1 className="text-2xl font-bold text-gray-800">Account Dashboard</h1>
                 <p className="text-sm text-gray-500">
-                  {loading ? "Loading…" : coName(frCompany)}
+                  {coName(frCompany)}
                 </p>
               </div>
             </div>
@@ -545,25 +471,15 @@ export default function AccountDashboardPage() {
                   ))}
                 </div>
               )}
-              {!loading && (
-                <button onClick={exportFullReport}
-                  className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-all hover:shadow-md active:scale-95"
-                  style={{ backgroundColor: BRAND, boxShadow: `0 2px 8px ${BRAND}40` }}>
-                  <Download size={15} /> Export
-                </button>
-              )}
+              <button onClick={exportFullReport}
+                className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-all hover:shadow-md active:scale-95"
+                style={{ backgroundColor: BRAND, boxShadow: `0 2px 8px ${BRAND}40` }}>
+                <Download size={15} /> Export
+              </button>
             </div>
           </div>
 
-          {loading ? (
-            <div className="flex items-center justify-center py-32">
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-8 h-8 rounded-full border-2 border-[#1B3A6B] border-t-transparent animate-spin" />
-                <p className="text-sm text-gray-400">Loading dashboard…</p>
-              </div>
-            </div>
-          ) : (
-            <>
+          <>
               {/* ════════════════════════════════════════════════════════
                    FINANCIAL REPORTS SECTION
               ════════════════════════════════════════════════════════ */}
@@ -986,166 +902,8 @@ export default function AccountDashboardPage() {
                 </div>
               )}
 
-              {/* ════════════════════════════════════════════════════════
-                   ACCOUNT METRICS SECTION (localStorage data)
-              ════════════════════════════════════════════════════════ */}
-              {hasAccountData && (
-                <div className="space-y-5">
-                  <div className="flex items-center gap-3">
-                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-                    <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 px-3">Account Metrics</span>
-                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-                  </div>
-
-                  {/* 4 metric cards */}
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    {METRICS.map(({ key, label, color, bg, Icon, href }) => (
-                      <Link key={key} href={href}
-                        className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-[#1B3A6B]/20 transition-all">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-lg group-hover:scale-105 transition-transform"
-                            style={{ backgroundColor: bg, color }}>
-                            <Icon size={18} />
-                          </div>
-                          <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color }}>{label}</span>
-                        </div>
-                        <p className="text-[11px] text-gray-400 mb-0.5">{!isSingle ? "Combined " : ""}{label}</p>
-                        <p className="text-xl font-bold text-gray-800 tabular-nums">SAR {money(totals[key as MetricKey])}</p>
-                      </Link>
-                    ))}
-                  </div>
-
-                  {/* Net balance banner */}
-                  <div className="rounded-2xl px-6 py-4 flex items-center justify-between"
-                    style={{ backgroundColor: BRAND }}>
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-white/60 mb-0.5">Net Balance</p>
-                      <p className="text-[10px] text-white/40">(Income + Receivables) − (Payables + Expenses)</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {netBalance >= 0 ? <ArrowUpRight size={22} className="text-emerald-400" /> : <ArrowDownRight size={22} className="text-red-400" />}
-                      <div className="text-right">
-                        <p className="text-[10px] uppercase tracking-wider text-white/50 mb-0.5">{netBalance >= 0 ? "Surplus" : "Deficit"}</p>
-                        <p className={`text-2xl font-bold tabular-nums ${netBalance >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                          SAR {money(Math.abs(netBalance))}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Charts */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                    {/* ── Metrics Donut (Recharts) ── */}
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                      <h3 className="text-sm font-bold text-gray-700 mb-0.5">Distribution</h3>
-                      <p className="text-[11px] text-gray-400 mb-3">Share of each account category</p>
-                      {mounted ? (
-                        <div className="flex items-center gap-4">
-                          <div className="relative flex-shrink-0" style={{ width: 148, height: 148 }}>
-                            <RPieChart width={148} height={148}>
-                              <Pie
-                                data={grandTotal > 0
-                                  ? METRICS.map((m, i) => ({ name: m.label, value: pieVals[i], color: m.color }))
-                                  : [{ name: "Empty", value: 1, color: "#e5e7eb" }]}
-                                cx="50%" cy="50%" innerRadius={46} outerRadius={66}
-                                dataKey="value" paddingAngle={grandTotal > 0 ? 2 : 0} strokeWidth={0}
-                                animationBegin={0} animationDuration={1000} animationEasing="ease-out">
-                                {(grandTotal > 0 ? METRICS : [{ color: "#e5e7eb" }]).map((m, i) => (
-                                  <Cell key={i} fill={m.color} />
-                                ))}
-                              </Pie>
-                              <Tooltip content={({ active, payload }) => {
-                                if (!active || !payload?.length) return null;
-                                return (
-                                  <div className="rounded-xl shadow-lg border bg-white px-3 py-2 text-[11px]">
-                                    <p className="font-bold text-gray-700">{payload[0].name}</p>
-                                    <p className="font-mono" style={{ color: payload[0].payload.color }}>
-                                      SAR {money(payload[0].value as number)}
-                                    </p>
-                                  </div>
-                                );
-                              }} />
-                            </RPieChart>
-                            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                              <p className="text-[7px] text-gray-400 uppercase tracking-wide">TOTAL SAR</p>
-                              <p className="text-[10px] font-bold text-gray-800">{money(grandTotal)}</p>
-                            </div>
-                          </div>
-                          <div className="flex-1 flex flex-col gap-2.5">
-                            {METRICS.map(({ key, label, color }, i) => {
-                              const pct = grandTotal > 0 ? (pieVals[i] / grandTotal) * 100 : 0;
-                              return (
-                                <div key={key}>
-                                  <div className="flex items-center justify-between mb-0.5">
-                                    <div className="flex items-center gap-1.5">
-                                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-                                      <span className="text-[11px] text-gray-500">{label}</span>
-                                    </div>
-                                    <span className="text-[11px] font-semibold tabular-nums" style={{ color }}>{pct.toFixed(1)}%</span>
-                                  </div>
-                                  <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
-                                    <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ) : <div style={{ height: 148 }} />}
-                    </div>
-
-                    {/* ── Monthly Stacked Bar (Recharts) ── */}
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                      <h3 className="text-sm font-bold text-gray-700 mb-0.5">Monthly Breakdown</h3>
-                      <p className="text-[11px] text-gray-400 mb-3">Stacked totals by month (last 6)</p>
-                      {mounted && chartMonths.length > 0 ? (() => {
-                        const chartData = chartMonths.map(month => {
-                          const vals = monthlyMap[month];
-                          return {
-                            month: month.split(" ")[0].slice(0, 3),
-                            Income: vals[0], Payables: vals[1], Receivables: vals[2], Expenses: vals[3],
-                          };
-                        });
-                        return (
-                          <>
-                            <div style={{ height: 148 }}>
-                              <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={chartData} barCategoryGap="28%"
-                                  margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
-                                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-                                  <XAxis dataKey="month" tick={{ fontSize: 9, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
-                                  <YAxis hide />
-                                  <Tooltip content={<ChartTooltip fmt={money} />} cursor={{ fill: "#f8faff" }} />
-                                  {METRICS.map((m, i) => (
-                                    <Bar key={m.key} dataKey={m.label} stackId="a" fill={m.color}
-                                      radius={i === METRICS.length - 1 ? [4,4,0,0] : [0,0,0,0]}
-                                      animationBegin={i * 80} animationDuration={1000} animationEasing="ease-out" />
-                                  ))}
-                                </BarChart>
-                              </ResponsiveContainer>
-                            </div>
-                            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 pt-2 border-t border-gray-100">
-                              {METRICS.map(({ key, label, color }) => (
-                                <div key={key} className="flex items-center gap-1">
-                                  <div className="w-2 h-2 rounded-sm" style={{ backgroundColor: color }} />
-                                  <span className="text-[10px] text-gray-400">{label}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </>
-                        );
-                      })() : (
-                        <div className="flex items-center justify-center" style={{ height: 148 }}>
-                          <p className="text-xs text-gray-300">No entries yet</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* empty state */}
-              {!hasFinancialData && !hasAccountData && (
+              {!hasFinancialData && (
                 <div className="flex flex-col items-center justify-center py-24 gap-4">
                   <div className="flex h-16 w-16 items-center justify-center rounded-2xl"
                     style={{ background: `${BRAND}15` }}>
@@ -1163,7 +921,6 @@ export default function AccountDashboardPage() {
                 </div>
               )}
             </>
-          )}
         </div>
       </main>
 
