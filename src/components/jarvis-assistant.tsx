@@ -51,7 +51,7 @@ function timeGreet() {
 
 /* ── opening briefing ────────────────────────────────────────────────────  */
 function openingBriefing(d: JarvisData): string {
-  return `${timeGreet()} Financial briefing for ${d.company.toUpperCase()}. I am ready for your questions, sir.`;
+  return `${timeGreet()} I am Diamond Star A.I., responsible for handling and analyzing ${d.company}'s financial data. I am ready to provide you with the financial briefing and answer your questions, sir.`;
 }
 
 /* ── JARVIS brain ─────────────────────────────────────────────────────────
