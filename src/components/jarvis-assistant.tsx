@@ -319,8 +319,12 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
   const openRef      = useRef(false);
   const dataRef      = useRef(data);
   dataRef.current    = data;
-  const containerRef = useRef<HTMLDivElement>(null);
-  const phaseRef     = useRef<"idle"|"speaking"|"listening"|"processing">("idle");
+  const containerRef  = useRef<HTMLDivElement>(null);
+  const phaseRef      = useRef<"idle"|"speaking"|"listening"|"processing">("idle");
+  const analyserRef   = useRef<AnalyserNode | null>(null);
+  const audioDataRef  = useRef<Uint8Array<ArrayBuffer> | null>(null);
+  const audioCtxRef   = useRef<AudioContext | null>(null);
+  const micStreamRef  = useRef<MediaStream | null>(null);
 
   /* ── find voice ─────────────────────────────────────────────────────── */
   const findVoice = useCallback(() => {
@@ -335,14 +339,17 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
       null;
   }, []);
 
-  /* ── Three.js audio-reactive particle sphere ─────────────────────────── */
+  /* ── Three.js audio-reactive particle sphere ────────────────────────────
+     Depends on [open]: runs when panel mounts (open=true), cleans up on close.
+     Real mic FFT data drives particles when user is speaking (listening phase).
+  ── */
   useEffect(() => {
+    if (!open) return;
     const container = containerRef.current;
     if (!container) return;
 
     const SIZE = 180;
 
-    /* scene */
     const scene    = new THREE.Scene();
     const camera   = new THREE.PerspectiveCamera(60, 1, 0.1, 5000);
     camera.position.z = 1;
@@ -370,9 +377,8 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
     geometry.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
     geometry.setAttribute("normal",   new THREE.Float32BufferAttribute(pos, 3));
 
-    /* uniforms */
-    const baseColorVec  = new THREE.Vector3(...(PHASE_COLORS.idle as [number,number,number]));
-    const targetColorVec = new THREE.Vector3(...(PHASE_COLORS.idle as [number,number,number]));
+    const baseColorVec   = new THREE.Vector3(...(PHASE_COLORS.idle as [number, number, number]));
+    const targetColorVec = new THREE.Vector3(...(PHASE_COLORS.idle as [number, number, number]));
     const uniforms = {
       uTime:      { value: 0 },
       uAudioLow:  { value: 0.04 },
@@ -388,35 +394,46 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
       transparent: true,
       depthWrite:  false,
     });
-
     scene.add(new THREE.Points(geometry, material));
 
-    /* smooth audio level state */
     let curLow = 0.04, curMid = 0.02, curHigh = 0.01;
 
-    /* animation loop */
+    /* helper: average a frequency range from the mic data array */
+    function freqAvg(data: Uint8Array<ArrayBuffer>, start: number, end: number) {
+      let sum = 0;
+      for (let i = start; i < end; i++) sum += data[i];
+      return (sum / (end - start) / 255) * 0.7;
+    }
+
     let rafId = 0;
-    function animate() {
-      rafId = requestAnimationFrame(animate);
-      const t  = performance.now() * 0.001;
+    function draw() {
+      rafId = requestAnimationFrame(draw);
+      const t = performance.now() * 0.001;
       uniforms.uTime.value = t;
 
-      /* lerp colour toward current phase target */
       const ph = phaseRef.current;
       const [cr, cg, cb] = PHASE_COLORS[ph] ?? PHASE_COLORS.idle;
       targetColorVec.set(cr, cg, cb);
       baseColorVec.lerp(targetColorVec, 0.04);
 
-      /* simulate audio-reactive values per phase */
       let tLow: number, tMid: number, tHigh: number;
-      if (ph === "speaking") {
+
+      /* listening phase: use REAL mic FFT data if available */
+      if (ph === "listening" && analyserRef.current && audioDataRef.current) {
+        analyserRef.current.getByteFrequencyData(audioDataRef.current as Uint8Array<ArrayBuffer>);
+        const d = audioDataRef.current as Uint8Array<ArrayBuffer>;
+        tLow  = freqAvg(d,  0,  20);
+        tMid  = freqAvg(d, 20,  50);
+        tHigh = freqAvg(d, 50, 100);
+      } else if (ph === "listening") {
+        /* mic not yet granted — subtle simulated pulse so sphere reacts */
+        tLow  = 0.20 + 0.15 * Math.abs(Math.sin(t * 4.0));
+        tMid  = 0.16 + 0.12 * Math.abs(Math.sin(t * 5.3));
+        tHigh = 0.10 + 0.08 * Math.abs(Math.sin(t * 7.1));
+      } else if (ph === "speaking") {
         tLow  = 0.35 + 0.25 * Math.abs(Math.sin(t * 3.1));
         tMid  = 0.28 + 0.20 * Math.abs(Math.sin(t * 4.7));
         tHigh = 0.18 + 0.15 * Math.abs(Math.sin(t * 6.3));
-      } else if (ph === "listening") {
-        tLow  = 0.45 + 0.30 * Math.abs(Math.sin(t * 5.0));
-        tMid  = 0.38 + 0.28 * Math.abs(Math.sin(t * 7.3));
-        tHigh = 0.25 + 0.22 * Math.abs(Math.sin(t * 9.1));
       } else if (ph === "processing") {
         tLow  = 0.20 + 0.12 * Math.abs(Math.sin(t * 2.0));
         tMid  = 0.30 + 0.18 * Math.abs(Math.sin(t * 3.5));
@@ -427,7 +444,6 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
         tHigh = 0.01 + 0.008 * Math.abs(Math.sin(t * 1.1));
       }
 
-      /* smooth lerp toward target levels */
       curLow  += (tLow  - curLow)  * 0.08;
       curMid  += (tMid  - curMid)  * 0.08;
       curHigh += (tHigh - curHigh) * 0.08;
@@ -438,7 +454,7 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
 
       renderer.render(scene, camera);
     }
-    animate();
+    draw();
 
     return () => {
       cancelAnimationFrame(rafId);
@@ -449,10 +465,42 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
         container.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [open]);
 
   /* keep phaseRef in sync so the RAF loop reads current phase */
   useEffect(() => { phaseRef.current = phase; }, [phase]);
+
+  /* ── mic audio capture for real voice-reactive particles ──────────────── */
+  useEffect(() => {
+    if (phase !== "listening") {
+      /* stop mic when not listening */
+      analyserRef.current  = null;
+      audioDataRef.current = null;
+      audioCtxRef.current?.close().catch(() => {});
+      audioCtxRef.current  = null;
+      micStreamRef.current?.getTracks().forEach(t => t.stop());
+      micStreamRef.current = null;
+      return;
+    }
+
+    let cancelled = false;
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+      .then(stream => {
+        if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
+        micStreamRef.current = stream;
+        const ctx      = new AudioContext();
+        audioCtxRef.current = ctx;
+        const source   = ctx.createMediaStreamSource(stream);
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 512;
+        source.connect(analyser);
+        analyserRef.current  = analyser;
+        audioDataRef.current = new Uint8Array(analyser.frequencyBinCount) as Uint8Array<ArrayBuffer>;
+      })
+      .catch(() => { /* mic permission denied — simulated fallback is used */ });
+
+    return () => { cancelled = true; };
+  }, [phase]);
 
   /* ── speak → then auto-listen ────────────────────────────────────────── */
   const speak = useCallback((text: string, autoListen = true) => {
@@ -515,6 +563,10 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
     return () => {
       synthRef.current?.cancel();
       recognRef.current?.abort();
+      analyserRef.current  = null;
+      audioDataRef.current = null;
+      audioCtxRef.current?.close().catch(() => {});
+      micStreamRef.current?.getTracks().forEach(t => t.stop());
     };
   }, [findVoice, handleInput]);
 
