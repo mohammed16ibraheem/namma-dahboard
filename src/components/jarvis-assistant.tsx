@@ -350,16 +350,18 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
     const container = containerRef.current;
     if (!container) return;
 
-    const SIZE = 180;
+    const W = container.clientWidth  || 360;
+    const H = 260;
 
-    const scene    = new THREE.Scene();
-    const camera   = new THREE.PerspectiveCamera(60, 1, 0.1, 5000);
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, W / H, 0.1, 5000);
     camera.position.z = 1;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(SIZE, SIZE);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setSize(W, H);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x000000, 0);
+    renderer.setClearColor(0x000000, 1);
+    renderer.domElement.style.display = "block";
     container.appendChild(renderer.domElement);
 
     /* geometry — 45 k particles */
@@ -612,157 +614,133 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
     phase === "processing" ? "#fbbf24" :
                              "#00d4ff55";
 
+  /* mic button colours by phase */
+  const micBg     = phase === "listening" ? "#1a1a1a" : "#111";
+  const micBorder = phase === "listening" ? "#e8603c" : phase === "speaking" ? "#c84b8f" : "#444";
+  const micGlow   = phase === "listening" ? "0 0 20px #e8603caa" : phase === "speaking" ? "0 0 16px #c84b8f88" : "none";
+
   return (
     <>
       <style>{`
-        @keyframes arc-pulse {
-          0%,100%{box-shadow:0 0 20px 5px #00d4ffaa,0 0 50px 10px #00d4ff44,inset 0 0 18px #00d4ff55}
-          50%    {box-shadow:0 0 35px 10px #00d4ffdd,0 0 80px 20px #00d4ff77,inset 0 0 30px #00d4ffaa}
+        @keyframes btn-idle {
+          0%,100%{ box-shadow:0 0 10px 2px #e8603c44,0 0 24px 4px #c84b8f22 }
+          50%    { box-shadow:0 0 18px 5px #e8603c77,0 0 40px 8px #c84b8f44 }
         }
-        @keyframes arc-idle {
-          0%,100%{box-shadow:0 0 12px 3px #00d4ff55,0 0 24px 5px #00d4ff22,inset 0 0 10px #00d4ff33}
-          50%    {box-shadow:0 0 18px 5px #00d4ff77,0 0 36px 8px #00d4ff44,inset 0 0 18px #00d4ff55}
+        @keyframes btn-speak {
+          0%,100%{ box-shadow:0 0 18px 5px #c84b8faa,0 0 40px 10px #e8603c55 }
+          50%    { box-shadow:0 0 30px 10px #c84b8fdd,0 0 60px 16px #e8603c88 }
         }
-        @keyframes arc-listen {
-          0%,100%{box-shadow:0 0 18px 5px #00ff8877,0 0 40px 8px #00ff8833,inset 0 0 14px #00ff8844}
-          50%    {box-shadow:0 0 30px 9px #00ff88bb,0 0 60px 14px #00ff8866,inset 0 0 24px #00ff8877}
+        @keyframes btn-listen {
+          0%,100%{ box-shadow:0 0 18px 5px #e8603caa,0 0 40px 10px #ffb74d55 }
+          50%    { box-shadow:0 0 30px 10px #e8603cdd,0 0 60px 16px #ffb74d88 }
         }
         @keyframes panel-in {
-          from{opacity:0;transform:translateY(14px) scale(.97)}
+          from{opacity:0;transform:translateY(12px) scale(.98)}
           to  {opacity:1;transform:translateY(0)    scale(1)}
         }
-        @keyframes ring-cw  { to{transform:rotate(360deg)}  }
-        @keyframes ring-ccw { to{transform:rotate(-360deg)} }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
-        @keyframes scan  { from{top:-100%} to{top:200%} }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
 
-        .j-arc-idle   { animation:arc-idle   2.4s ease-in-out infinite }
-        .j-arc-speak  { animation:arc-pulse  0.8s ease-in-out infinite }
-        .j-arc-listen { animation:arc-listen 0.7s ease-in-out infinite }
-        .j-ring-cw    { animation:ring-cw   8s linear infinite }
-        .j-ring-ccw   { animation:ring-ccw 12s linear infinite }
-        .j-panel      { animation:panel-in  0.3s cubic-bezier(.22,1,.36,1) both }
+        .j-btn-idle   { animation:btn-idle   2.6s ease-in-out infinite }
+        .j-btn-speak  { animation:btn-speak  0.9s ease-in-out infinite }
+        .j-btn-listen { animation:btn-listen 0.7s ease-in-out infinite }
+        .j-panel      { animation:panel-in   0.28s cubic-bezier(.22,1,.36,1) both }
         .j-blink      { animation:blink 1.1s ease-in-out infinite }
-        .j-scan::after {
-          content:'';position:absolute;left:0;right:0;height:40px;
-          background:linear-gradient(transparent,rgba(0,212,255,0.04),transparent);
-          animation:scan 3s linear infinite;pointer-events:none;
-        }
       `}</style>
 
-      {/* ── Arc Reactor Button ────────────────────────────────────── */}
+      {/* ── Floating trigger button — minimal dark orb ─────────────── */}
       <button
         onClick={toggleOpen}
-        title="J.A.R.V.I.S — Click to activate"
-        className={`fixed bottom-7 right-7 z-[9999] w-16 h-16 rounded-full border-2 border-cyan-400
-          bg-[#001a2e] flex items-center justify-center
-          transition-transform duration-200 hover:scale-110 focus:outline-none
-          ${phase === "speaking" ? "j-arc-speak" : phase === "listening" ? "j-arc-listen" : "j-arc-idle"}`}
+        title="Diamond Star A.I."
+        className={`fixed bottom-7 right-7 z-[9999] w-14 h-14 rounded-full
+          flex items-center justify-center focus:outline-none
+          transition-transform duration-200 hover:scale-105
+          ${phase === "speaking" ? "j-btn-speak" : phase === "listening" ? "j-btn-listen" : "j-btn-idle"}`}
+        style={{ background:"#0a0a0a", border:"1px solid #333" }}
       >
-        <div className="j-ring-cw  absolute inset-[-6px]  rounded-full border border-cyan-400/30 pointer-events-none" />
-        <div className="j-ring-ccw absolute inset-[-11px] rounded-full border border-cyan-400/15 pointer-events-none" />
-        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-          <circle cx="18" cy="18" r="16" stroke="#00d4ff" strokeWidth="1.2" strokeOpacity=".4"/>
-          <circle cx="18" cy="18" r="10" stroke="#00d4ff" strokeWidth="1.4" strokeOpacity=".75"/>
-          <circle cx="18" cy="18" r="4"  fill="#00d4ff"  fillOpacity=".95"/>
-          {[0,60,120,180,240,300].map(deg => (
-            <line key={deg}
-              x1={18 + 4.8*Math.cos(deg*Math.PI/180)} y1={18 + 4.8*Math.sin(deg*Math.PI/180)}
-              x2={18 + 9.4*Math.cos(deg*Math.PI/180)} y2={18 + 9.4*Math.sin(deg*Math.PI/180)}
-              stroke="#00d4ff" strokeWidth="1.5" strokeOpacity=".85"/>
-          ))}
+        {/* mic icon */}
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <rect x="9" y="2" width="6" height="11" rx="3"
+            fill={phase === "listening" ? "#e8603c" : phase === "speaking" ? "#c84b8f" : "#888"}/>
+          <path d="M5 12a7 7 0 0 0 14 0"
+            stroke={phase === "listening" ? "#e8603c" : phase === "speaking" ? "#c84b8f" : "#666"}
+            strokeWidth="1.6" strokeLinecap="round"/>
+          <line x1="12" y1="19" x2="12" y2="22"
+            stroke={phase === "listening" ? "#e8603c" : phase === "speaking" ? "#c84b8f" : "#555"}
+            strokeWidth="1.6" strokeLinecap="round"/>
+          <line x1="9"  y1="22" x2="15" y2="22"
+            stroke={phase === "listening" ? "#e8603c" : phase === "speaking" ? "#c84b8f" : "#555"}
+            strokeWidth="1.6" strokeLinecap="round"/>
         </svg>
       </button>
 
       {/* ── Panel ─────────────────────────────────────────────────── */}
       {open && (
-        <div className="j-panel fixed bottom-28 right-5 z-[9998] w-[370px] max-w-[calc(100vw-20px)]"
-          style={{ fontFamily: "'Share Tech Mono','Courier New',monospace" }}>
-          <div className="j-scan relative rounded-xl overflow-hidden"
-            style={{
-              background:     "linear-gradient(145deg,rgba(0,18,38,.97),rgba(0,8,24,.99))",
-              border:         "1px solid rgba(0,212,255,.35)",
-              boxShadow:      "0 0 50px rgba(0,212,255,.12),inset 0 0 30px rgba(0,212,255,.03)",
-              backdropFilter: "blur(18px)",
-            }}>
+        <div className="j-panel fixed bottom-24 right-5 z-[9998] w-[360px] max-w-[calc(100vw-16px)]"
+          style={{ fontFamily:"system-ui,sans-serif" }}>
+          <div className="rounded-xl overflow-hidden"
+            style={{ background:"#000", border:"1px solid #1a1a1a", boxShadow:"0 8px 40px rgba(0,0,0,.8)" }}>
 
-            {/* scan lines */}
-            <div className="absolute inset-0 pointer-events-none" style={{
-              backgroundImage:"repeating-linear-gradient(0deg,rgba(0,212,255,.022) 0,rgba(0,212,255,.022) 1px,transparent 1px,transparent 3px)"
-            }}/>
+            {/* header bar */}
+            <div className="flex items-center justify-between px-4 py-3"
+              style={{ borderBottom:"1px solid #1a1a1a" }}>
+              <span style={{ color:"#888", fontSize:11, letterSpacing:"0.15em", fontWeight:600 }}>
+                DIAMOND STAR A.I.
+              </span>
+              <button onClick={toggleOpen}
+                style={{ color:"#555", fontSize:16, lineHeight:1, background:"none", border:"none", cursor:"pointer" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color="#aaa"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color="#555"; }}>
+                ✕
+              </button>
+            </div>
 
-            {/* corner marks */}
-            {["tl","tr","bl","br"].map(cn => (
-              <div key={cn} className={`absolute w-5 h-5 pointer-events-none
-                ${cn==="tl"?"top-0 left-0  border-t-2 border-l-2":""}
-                ${cn==="tr"?"top-0 right-0 border-t-2 border-r-2":""}
-                ${cn==="bl"?"bottom-0 left-0  border-b-2 border-l-2":""}
-                ${cn==="br"?"bottom-0 right-0 border-b-2 border-r-2":""}
-                border-cyan-400/60`} />
-            ))}
+            {/* particle area — black background, full width, no clip */}
+            <div ref={containerRef} style={{ width:"100%", height:260, background:"#000", display:"block" }} />
 
-            <div className="relative p-5 space-y-4">
+            {/* status */}
+            <div className={phase !== "idle" ? "j-blink" : ""}
+              style={{
+                textAlign:"center", fontSize:10, letterSpacing:"0.2em", padding:"8px 0 4px",
+                color: phase==="listening" ? "#e8603c" : phase==="speaking" ? "#c84b8f" : phase==="processing" ? "#ffb74d" : "#333",
+              }}>
+              {statusLabel}
+            </div>
 
-              {/* header */}
-              <div className="flex items-center justify-between">
-                <div className="text-cyan-400 text-xs tracking-[.25em] font-bold">DIAMOND STAR A.I.</div>
-                <button onClick={toggleOpen} className="text-cyan-400/50 hover:text-cyan-400 transition-colors text-base leading-none">✕</button>
-              </div>
+            {/* mic toggle + quick buttons */}
+            <div className="px-4 pb-4 space-y-3">
 
-              <div className="h-px" style={{ background:"linear-gradient(90deg,transparent,#00d4ff44,transparent)" }}/>
-
-              {/* Three.js WebGL particle sphere */}
-              <div className="flex justify-center items-center" style={{ height: 180 }}>
-                <div
-                  ref={containerRef}
-                  style={{ width: 180, height: 180, borderRadius: "50%", overflow: "hidden" }}
-                />
-              </div>
-
-              {/* status */}
-              <div className={`text-center text-[10px] tracking-[.22em] -mt-2 ${phase!=="idle" ? "j-blink":""}`}
-                style={{ color: statusColor }}>
-                {statusLabel}
-              </div>
-
-              {/* mic button — icon only */}
-              <div className="flex justify-center py-1">
+              {/* mic button */}
+              <div style={{ display:"flex", justifyContent:"center", padding:"4px 0" }}>
                 <button onClick={toggleMic}
-                  className="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none"
                   style={{
-                    background:  phase==="listening" ? "rgba(0,255,136,.15)" : phase==="speaking" ? "rgba(0,212,255,.1)" : "rgba(0,212,255,.06)",
-                    border:      `2px solid ${phase==="listening" ? "rgba(0,255,136,.7)" : "rgba(0,212,255,.45)"}`,
-                    boxShadow:   phase==="listening" ? "0 0 22px rgba(0,255,136,.35), inset 0 0 12px rgba(0,255,136,.1)"
-                               : phase==="speaking"  ? "0 0 18px rgba(0,212,255,.3),  inset 0 0 10px rgba(0,212,255,.08)"
-                               : "none",
+                    width:52, height:52, borderRadius:"50%", display:"flex",
+                    alignItems:"center", justifyContent:"center", cursor:"pointer",
+                    background: micBg, border:`1.5px solid ${micBorder}`,
+                    boxShadow: micGlow, transition:"all .2s",
                   }}>
                   {phase === "listening" ? (
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                      <rect x="3" y="3" width="12" height="12" rx="2" fill="#00ff88" fillOpacity=".9"/>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <rect x="2" y="2" width="12" height="12" rx="2" fill="#e8603c"/>
                     </svg>
                   ) : phase === "speaking" ? (
-                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                      <circle cx="11" cy="11" r="3" fill="#00d4ff" fillOpacity=".9"/>
-                      <path d="M7 8a5.5 5.5 0 0 0 0 6" stroke="#00d4ff" strokeWidth="1.4" strokeLinecap="round" strokeOpacity=".7"/>
-                      <path d="M15 8a5.5 5.5 0 0 1 0 6" stroke="#00d4ff" strokeWidth="1.4" strokeLinecap="round" strokeOpacity=".7"/>
-                      <path d="M4.5 5.5A10 10 0 0 0 4.5 16.5" stroke="#00d4ff" strokeWidth="1.2" strokeLinecap="round" strokeOpacity=".4"/>
-                      <path d="M17.5 5.5A10 10 0 0 1 17.5 16.5" stroke="#00d4ff" strokeWidth="1.2" strokeLinecap="round" strokeOpacity=".4"/>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <circle cx="10" cy="10" r="2.5" fill="#c84b8f"/>
+                      <path d="M6.5 7.5a4.5 4.5 0 0 0 0 5" stroke="#c84b8f" strokeWidth="1.3" strokeLinecap="round"/>
+                      <path d="M13.5 7.5a4.5 4.5 0 0 1 0 5" stroke="#c84b8f" strokeWidth="1.3" strokeLinecap="round"/>
                     </svg>
                   ) : (
-                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                      <rect x="8" y="2" width="6" height="10" rx="3" fill="#00d4ff" fillOpacity=".85"/>
-                      <path d="M5 11a6 6 0 0 0 12 0" stroke="#00d4ff" strokeWidth="1.5" strokeLinecap="round" strokeOpacity=".8"/>
-                      <line x1="11" y1="17" x2="11" y2="20" stroke="#00d4ff" strokeWidth="1.5" strokeLinecap="round" strokeOpacity=".7"/>
-                      <line x1="8" y1="20" x2="14" y2="20" stroke="#00d4ff" strokeWidth="1.5" strokeLinecap="round" strokeOpacity=".7"/>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <rect x="7" y="1" width="6" height="9" rx="3" fill="#777"/>
+                      <path d="M4 9a6 6 0 0 0 12 0" stroke="#666" strokeWidth="1.4" strokeLinecap="round"/>
+                      <line x1="10" y1="15" x2="10" y2="18" stroke="#555" strokeWidth="1.4" strokeLinecap="round"/>
+                      <line x1="7" y1="18" x2="13" y2="18" stroke="#555" strokeWidth="1.4" strokeLinecap="round"/>
                     </svg>
                   )}
                 </button>
               </div>
 
-              <div className="h-px" style={{ background:"linear-gradient(90deg,transparent,#00d4ff33,transparent)" }}/>
-
               {/* quick command buttons */}
-              <div className="grid grid-cols-2 gap-1.5">
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6 }}>
                 {([
                   ["Revenue",        "How is the revenue going?"],
                   ["Are we profit?", "Are we in profit?"],
@@ -774,15 +752,24 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
                   <button key={label}
                     onClick={() => { setTranscript(cmd); handleInput(cmd); }}
                     disabled={phase === "speaking"}
-                    className="text-[10px] tracking-[.08em] px-2 py-2 rounded-md text-left transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{ background:"rgba(0,212,255,.06)", border:"1px solid rgba(0,212,255,.2)", color:"#7ecfea" }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background="rgba(0,212,255,.14)"; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background="rgba(0,212,255,.06)"; }}>
+                    style={{
+                      fontSize:10, letterSpacing:"0.06em", padding:"7px 10px",
+                      borderRadius:6, textAlign:"left", cursor:"pointer",
+                      background:"#0f0f0f", border:"1px solid #222", color:"#777",
+                      transition:"all .15s", opacity: phase==="speaking" ? 0.35 : 1,
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLButtonElement).style.background="#1a1a1a";
+                      (e.currentTarget as HTMLButtonElement).style.color="#aaa";
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLButtonElement).style.background="#0f0f0f";
+                      (e.currentTarget as HTMLButtonElement).style.color="#777";
+                    }}>
                     {label}
                   </button>
                 ))}
               </div>
-
 
             </div>
           </div>
