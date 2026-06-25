@@ -17,6 +17,7 @@ import {
 import CompanySelector, { COMPANIES } from "@/components/company-selector";
 import * as XLSX from "xlsx-js-style";
 import type { PeriodFile } from "@/app/api/account/route";
+import JarvisAssistant from "@/components/jarvis-assistant";
 
 const BRAND = "#1B3A6B";
 
@@ -1165,6 +1166,28 @@ export default function AccountDashboardPage() {
           )}
         </div>
       </main>
+
+      {/* J.A.R.V.I.S floating assistant */}
+      <JarvisAssistant data={{
+        company:      coName(frCompany),
+        period:       bsP?.period ?? plP?.period ?? "—",
+        revenue,
+        grossProfit,
+        netProfit,
+        gpMargin,
+        netMargin,
+        totalAssets,
+        totalEquity,
+        totalLiab,
+        cashBs,
+        operatingCF,
+        investingCF,
+        financingCF,
+        currentRatio,
+        debtToEquity,
+        taxTotal,
+        onExport:     exportFullReport,
+      }} />
     </div>
   );
 }
