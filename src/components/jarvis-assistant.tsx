@@ -592,7 +592,7 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
     setPhase("processing");
     const { text: reply, farewell } = jarvisReply(text, dataRef.current);
     setResponse(reply);
-    speak(reply, false);
+    speak(reply, !farewell);
   }, [speak]);
 
   /* ── init once ───────────────────────────────────────────────────────── */
@@ -651,7 +651,7 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
       setPhase("speaking");
       const intro = openingBriefing(dataRef.current);
       setResponse(intro);
-      setTimeout(() => speak(intro, false), 350);
+      setTimeout(() => speak(intro, true), 350);
     } else {
       openRef.current = false;
       synthRef.current?.cancel();
