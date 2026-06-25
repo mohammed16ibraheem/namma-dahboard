@@ -473,38 +473,39 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
 
       let tLow: number, tMid: number, tHigh: number;
 
-      /* listening phase: use REAL mic FFT data scaled down for calm movement */
+      /* listening — real mic FFT at full scale, matching GitHub repo */
       if (ph === "listening" && analyserRef.current && audioDataRef.current) {
         analyserRef.current.getByteFrequencyData(audioDataRef.current as Uint8Array<ArrayBuffer>);
         const d = audioDataRef.current as Uint8Array<ArrayBuffer>;
-        /* scale real mic data to 30% so particles flow gently, not explode */
-        tLow  = freqAvg(d,  0,  20) * 0.30;
-        tMid  = freqAvg(d, 20,  50) * 0.30;
-        tHigh = freqAvg(d, 50, 100) * 0.30;
+        tLow  = freqAvg(d,  0,  20) * 0.7;
+        tMid  = freqAvg(d, 20,  50) * 0.7;
+        tHigh = freqAvg(d, 50, 100) * 0.7;
       } else if (ph === "listening") {
-        /* mic not yet granted — slow breathing pulse */
-        tLow  = 0.06 + 0.04 * Math.abs(Math.sin(t * 0.9));
-        tMid  = 0.05 + 0.03 * Math.abs(Math.sin(t * 1.1));
-        tHigh = 0.03 + 0.02 * Math.abs(Math.sin(t * 1.3));
+        /* mic not yet granted — active pulse */
+        tLow  = 0.25 + 0.20 * Math.abs(Math.sin(t * 2.5));
+        tMid  = 0.20 + 0.15 * Math.abs(Math.sin(t * 3.1));
+        tHigh = 0.12 + 0.10 * Math.abs(Math.sin(t * 4.0));
       } else if (ph === "speaking") {
-        /* gentle slow swell — JARVIS voice, not explosive */
-        tLow  = 0.07 + 0.05 * Math.abs(Math.sin(t * 0.8));
-        tMid  = 0.06 + 0.04 * Math.abs(Math.sin(t * 1.0));
-        tHigh = 0.03 + 0.02 * Math.abs(Math.sin(t * 1.2));
+        /* bright, lively — matches GitHub repo energy level */
+        tLow  = 0.30 + 0.20 * Math.abs(Math.sin(t * 1.8));
+        tMid  = 0.25 + 0.18 * Math.abs(Math.sin(t * 2.4));
+        tHigh = 0.15 + 0.12 * Math.abs(Math.sin(t * 3.2));
       } else if (ph === "processing") {
-        tLow  = 0.05 + 0.03 * Math.abs(Math.sin(t * 0.7));
-        tMid  = 0.07 + 0.04 * Math.abs(Math.sin(t * 0.9));
-        tHigh = 0.03 + 0.02 * Math.abs(Math.sin(t * 1.1));
+        tLow  = 0.12 + 0.08 * Math.abs(Math.sin(t * 1.2));
+        tMid  = 0.15 + 0.10 * Math.abs(Math.sin(t * 1.6));
+        tHigh = 0.07 + 0.05 * Math.abs(Math.sin(t * 2.0));
       } else {
-        tLow  = 0.03 + 0.01 * Math.abs(Math.sin(t * 0.5));
-        tMid  = 0.02 + 0.008 * Math.abs(Math.sin(t * 0.6));
-        tHigh = 0.01 + 0.005 * Math.abs(Math.sin(t * 0.7));
+        /* idle — calm drift, very low energy */
+        tLow  = 0.03 + 0.01 * Math.abs(Math.sin(t * 0.4));
+        tMid  = 0.02 + 0.008 * Math.abs(Math.sin(t * 0.5));
+        tHigh = 0.01 + 0.004 * Math.abs(Math.sin(t * 0.6));
       }
 
-      /* slow lerp = smooth, gradual transitions */
-      curLow  += (tLow  - curLow)  * 0.04;
-      curMid  += (tMid  - curMid)  * 0.04;
-      curHigh += (tHigh - curHigh) * 0.04;
+      /* lerp speed: fast response when active, lazy when idle */
+      const lerpSpd = ph === "idle" ? 0.03 : 0.07;
+      curLow  += (tLow  - curLow)  * lerpSpd;
+      curMid  += (tMid  - curMid)  * lerpSpd;
+      curHigh += (tHigh - curHigh) * lerpSpd;
 
       uniforms.uAudioLow.value  = curLow;
       uniforms.uAudioMid.value  = curMid;
