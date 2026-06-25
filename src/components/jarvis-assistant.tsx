@@ -628,7 +628,20 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
     };
   }, [findVoice, handleInput]);
 
+  /* ── Ctrl+D keyboard shortcut ───────────────────────────────────────── */
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key.toLowerCase() === "d") {
+        e.preventDefault();
+        toggleOpenRef.current?.();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
   /* ── open / close ────────────────────────────────────────────────────── */
+  const toggleOpenRef = useRef<(() => void) | null>(null);
   const toggleOpen = () => {
     if (!open) {
       openRef.current = true;
@@ -646,6 +659,8 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
       setPhase("idle");
     }
   };
+
+  toggleOpenRef.current = toggleOpen;
 
   /* ── manual mic toggle ───────────────────────────────────────────────── */
   const toggleMic = () => {
