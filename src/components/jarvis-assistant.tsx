@@ -416,35 +416,38 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
 
       let tLow: number, tMid: number, tHigh: number;
 
-      /* listening phase: use REAL mic FFT data if available */
+      /* listening phase: use REAL mic FFT data scaled down for calm movement */
       if (ph === "listening" && analyserRef.current && audioDataRef.current) {
         analyserRef.current.getByteFrequencyData(audioDataRef.current as Uint8Array<ArrayBuffer>);
         const d = audioDataRef.current as Uint8Array<ArrayBuffer>;
-        tLow  = freqAvg(d,  0,  20);
-        tMid  = freqAvg(d, 20,  50);
-        tHigh = freqAvg(d, 50, 100);
+        /* scale real mic data to 30% so particles flow gently, not explode */
+        tLow  = freqAvg(d,  0,  20) * 0.30;
+        tMid  = freqAvg(d, 20,  50) * 0.30;
+        tHigh = freqAvg(d, 50, 100) * 0.30;
       } else if (ph === "listening") {
-        /* mic not yet granted — subtle simulated pulse so sphere reacts */
-        tLow  = 0.20 + 0.15 * Math.abs(Math.sin(t * 4.0));
-        tMid  = 0.16 + 0.12 * Math.abs(Math.sin(t * 5.3));
-        tHigh = 0.10 + 0.08 * Math.abs(Math.sin(t * 7.1));
+        /* mic not yet granted — slow breathing pulse */
+        tLow  = 0.06 + 0.04 * Math.abs(Math.sin(t * 0.9));
+        tMid  = 0.05 + 0.03 * Math.abs(Math.sin(t * 1.1));
+        tHigh = 0.03 + 0.02 * Math.abs(Math.sin(t * 1.3));
       } else if (ph === "speaking") {
-        tLow  = 0.35 + 0.25 * Math.abs(Math.sin(t * 3.1));
-        tMid  = 0.28 + 0.20 * Math.abs(Math.sin(t * 4.7));
-        tHigh = 0.18 + 0.15 * Math.abs(Math.sin(t * 6.3));
+        /* gentle slow swell — JARVIS voice, not explosive */
+        tLow  = 0.07 + 0.05 * Math.abs(Math.sin(t * 0.8));
+        tMid  = 0.06 + 0.04 * Math.abs(Math.sin(t * 1.0));
+        tHigh = 0.03 + 0.02 * Math.abs(Math.sin(t * 1.2));
       } else if (ph === "processing") {
-        tLow  = 0.20 + 0.12 * Math.abs(Math.sin(t * 2.0));
-        tMid  = 0.30 + 0.18 * Math.abs(Math.sin(t * 3.5));
-        tHigh = 0.12 + 0.10 * Math.abs(Math.sin(t * 5.0));
+        tLow  = 0.05 + 0.03 * Math.abs(Math.sin(t * 0.7));
+        tMid  = 0.07 + 0.04 * Math.abs(Math.sin(t * 0.9));
+        tHigh = 0.03 + 0.02 * Math.abs(Math.sin(t * 1.1));
       } else {
-        tLow  = 0.04 + 0.02 * Math.abs(Math.sin(t * 0.7));
-        tMid  = 0.02 + 0.01 * Math.abs(Math.sin(t * 0.9));
-        tHigh = 0.01 + 0.008 * Math.abs(Math.sin(t * 1.1));
+        tLow  = 0.03 + 0.01 * Math.abs(Math.sin(t * 0.5));
+        tMid  = 0.02 + 0.008 * Math.abs(Math.sin(t * 0.6));
+        tHigh = 0.01 + 0.005 * Math.abs(Math.sin(t * 0.7));
       }
 
-      curLow  += (tLow  - curLow)  * 0.08;
-      curMid  += (tMid  - curMid)  * 0.08;
-      curHigh += (tHigh - curHigh) * 0.08;
+      /* slow lerp = smooth, gradual transitions */
+      curLow  += (tLow  - curLow)  * 0.04;
+      curMid  += (tMid  - curMid)  * 0.04;
+      curHigh += (tHigh - curHigh) * 0.04;
 
       uniforms.uAudioLow.value  = curLow;
       uniforms.uAudioMid.value  = curMid;
