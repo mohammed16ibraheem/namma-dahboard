@@ -682,7 +682,7 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
     phase === "speaking"   ? "DIAMOND STAR A.I. SPEAKING..." :
     phase === "listening"  ? "LISTENING — SPEAK NOW" :
     phase === "processing" ? "PROCESSING..." :
-                             "TAP ANIMATION TO SPEAK";
+                             "TAP TO SPEAK TO A.I.";
 
   const statusColor =
     phase === "listening"  ? "#00ff88" :
