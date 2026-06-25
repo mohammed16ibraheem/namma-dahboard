@@ -678,10 +678,10 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
 
   /* ── derived UI ──────────────────────────────────────────────────────── */
   const statusLabel =
-    phase === "speaking"   ? "JARVIS SPEAKING..." :
+    phase === "speaking"   ? "DIAMOND STAR A.I. SPEAKING..." :
     phase === "listening"  ? "LISTENING — SPEAK NOW" :
     phase === "processing" ? "PROCESSING..." :
-                             "CLICK MIC TO SPEAK";
+                             "PRESS MIC TO SPEAK";
 
   const statusColor =
     phase === "listening"  ? "#00ff88" :
