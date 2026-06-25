@@ -180,7 +180,6 @@ const VERTEX_SHADER = `
   uniform float uAudioLow;
   uniform float uAudioMid;
   uniform float uAudioHigh;
-  uniform vec3  uBaseColor;
 
   varying vec3  vColor;
   varying float vAudioMid;
@@ -265,15 +264,25 @@ const VERTEX_SHADER = `
       snoise(position + vec3(0.0, 0.0, uTime*2.0))
     );
 
-    vec3 base     = position*(1.0 + uAudioLow*0.5);
-    vec3 ordered  = curl*(0.3 + uAudioMid*0.20) + normal*(noise*0.42);
-    vec3 chaotic  = rnd*chaos*2.0;
+    vec3 base      = position*(1.0 + uAudioLow*0.5);
+    vec3 ordered   = curl*(0.3 + uAudioMid*0.20) + normal*(noise*0.42);
+    vec3 chaotic   = rnd*chaos*2.0;
     vec3 displaced = base + mix(ordered, chaotic, chaos*0.7);
     displaced += curl*sin(uTime*10.0)*uAudioHigh*0.2;
 
-    /* phase-driven colour with subtle per-particle variation */
-    float vary = snoise(position*2.0 + uTime*0.3)*0.15;
-    vColor = clamp(uBaseColor + vec3(vary*0.4, vary*0.2, -vary*0.3), 0.0, 1.0);
+    /* original multicolour from the repo — time + curl driven */
+    vec3 baseColor = vec3(
+      0.5 + 0.5*sin(curl.y + 2.0),
+      0.5 + 0.5*sin(uTime*1.0 + curl.y),
+      0.5 + 0.5*sin(uTime*0.1 + curl.z + 4.0)
+    );
+    vec3 lowColor  = vec3(0.1, 0.4, 1.0);
+    vec3 midColor  = vec3(1.0, 0.4, 0.1);
+    vec3 highColor = vec3(1.0, 0.1, 0.4);
+    vColor  = baseColor;
+    vColor  = mix(vColor, lowColor,  uAudioLow  * 0.057);
+    vColor  = mix(vColor, midColor,  uAudioMid  * 0.057);
+    vColor  = mix(vColor, highColor, uAudioHigh * 0.057);
     vAudioMid = uAudioMid;
 
     vec4 mv = modelViewMatrix * vec4(displaced, 1.0);
@@ -298,13 +307,6 @@ const FRAGMENT_SHADER = `
   }
 `;
 
-/* ── phase colours (RGB 0-1) ─────────────────────────────────────────────  */
-const PHASE_COLORS: Record<string, [number, number, number]> = {
-  idle:       [0.00, 0.60, 0.85],
-  speaking:   [0.05, 0.78, 1.00],
-  listening:  [0.00, 1.00, 0.53],
-  processing: [0.95, 0.72, 0.10],
-};
 
 /* ══════════════════════════════════════════════════════════════════════════ */
 export default function JarvisAssistant({ data }: { data: JarvisData }) {
@@ -377,14 +379,11 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
     geometry.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
     geometry.setAttribute("normal",   new THREE.Float32BufferAttribute(pos, 3));
 
-    const baseColorVec   = new THREE.Vector3(...(PHASE_COLORS.idle as [number, number, number]));
-    const targetColorVec = new THREE.Vector3(...(PHASE_COLORS.idle as [number, number, number]));
     const uniforms = {
       uTime:      { value: 0 },
       uAudioLow:  { value: 0.04 },
       uAudioMid:  { value: 0.02 },
       uAudioHigh: { value: 0.01 },
-      uBaseColor: { value: baseColorVec },
     };
 
     const material = new THREE.ShaderMaterial({
@@ -412,9 +411,6 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
       uniforms.uTime.value = t;
 
       const ph = phaseRef.current;
-      const [cr, cg, cb] = PHASE_COLORS[ph] ?? PHASE_COLORS.idle;
-      targetColorVec.set(cr, cg, cb);
-      baseColorVec.lerp(targetColorVec, 0.04);
 
       let tLow: number, tMid: number, tHigh: number;
 
