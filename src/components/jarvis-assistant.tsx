@@ -486,10 +486,10 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
         tMid  = 0.20 + 0.15 * Math.abs(Math.sin(t * 3.1));
         tHigh = 0.12 + 0.10 * Math.abs(Math.sin(t * 4.0));
       } else if (ph === "speaking") {
-        /* bright, lively — matches GitHub repo energy level */
-        tLow  = 0.30 + 0.20 * Math.abs(Math.sin(t * 1.8));
-        tMid  = 0.25 + 0.18 * Math.abs(Math.sin(t * 2.4));
-        tHigh = 0.15 + 0.12 * Math.abs(Math.sin(t * 3.2));
+        /* slow gentle swell when AI speaks */
+        tLow  = 0.10 + 0.06 * Math.abs(Math.sin(t * 0.6));
+        tMid  = 0.08 + 0.05 * Math.abs(Math.sin(t * 0.8));
+        tHigh = 0.04 + 0.03 * Math.abs(Math.sin(t * 1.0));
       } else if (ph === "processing") {
         tLow  = 0.12 + 0.08 * Math.abs(Math.sin(t * 1.2));
         tMid  = 0.15 + 0.10 * Math.abs(Math.sin(t * 1.6));
