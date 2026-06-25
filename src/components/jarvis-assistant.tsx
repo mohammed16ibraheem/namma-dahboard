@@ -705,10 +705,7 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
 
               {/* header */}
               <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-cyan-400 text-xs tracking-[.25em] font-bold">J.A.R.V.I.S</div>
-                  <div className="text-cyan-400/40 text-[9px] tracking-[.18em]">FINANCIAL INTELLIGENCE SYSTEM</div>
-                </div>
+                <div className="text-cyan-400 text-xs tracking-[.25em] font-bold">DIAMOND STAR A.I.</div>
                 <button onClick={toggleOpen} className="text-cyan-400/50 hover:text-cyan-400 transition-colors text-base leading-none">✕</button>
               </div>
 
@@ -786,10 +783,6 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
                 ))}
               </div>
 
-              {/* footer */}
-              <div className="text-center text-[9px] tracking-[.15em]" style={{ color:"#00d4ff22" }}>
-                STARK INDUSTRIES · {data.company.toUpperCase()} · {data.period}
-              </div>
 
             </div>
           </div>
