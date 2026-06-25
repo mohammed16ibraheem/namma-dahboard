@@ -689,66 +689,19 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
     phase === "processing" ? "#fbbf24" :
                              "#00d4ff55";
 
-  /* mic button colours by phase */
-  const micBg     = phase === "listening" ? "#1a1a1a" : "#111";
-  const micBorder = phase === "listening" ? "#e8603c" : phase === "speaking" ? "#c84b8f" : "#444";
-  const micGlow   = phase === "listening" ? "0 0 20px #e8603caa" : phase === "speaking" ? "0 0 16px #c84b8f88" : "none";
-
   return (
     <>
       <style>{`
-        @keyframes btn-idle {
-          0%,100%{ box-shadow:0 0 10px 2px #e8603c44,0 0 24px 4px #c84b8f22 }
-          50%    { box-shadow:0 0 18px 5px #e8603c77,0 0 40px 8px #c84b8f44 }
-        }
-        @keyframes btn-speak {
-          0%,100%{ box-shadow:0 0 18px 5px #c84b8faa,0 0 40px 10px #e8603c55 }
-          50%    { box-shadow:0 0 30px 10px #c84b8fdd,0 0 60px 16px #e8603c88 }
-        }
-        @keyframes btn-listen {
-          0%,100%{ box-shadow:0 0 18px 5px #e8603caa,0 0 40px 10px #ffb74d55 }
-          50%    { box-shadow:0 0 30px 10px #e8603cdd,0 0 60px 16px #ffb74d88 }
-        }
         @keyframes panel-in {
           from{opacity:0;transform:translateY(12px) scale(.98)}
           to  {opacity:1;transform:translateY(0)    scale(1)}
         }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
-
-        .j-btn-idle   { animation:btn-idle   2.6s ease-in-out infinite }
-        .j-btn-speak  { animation:btn-speak  0.9s ease-in-out infinite }
-        .j-btn-listen { animation:btn-listen 0.7s ease-in-out infinite }
-        .j-panel      { animation:panel-in   0.28s cubic-bezier(.22,1,.36,1) both }
-        .j-blink      { animation:blink 1.1s ease-in-out infinite }
+        .j-panel { animation:panel-in 0.28s cubic-bezier(.22,1,.36,1) both }
+        .j-blink { animation:blink 1.1s ease-in-out infinite }
       `}</style>
 
-      {/* ── Floating trigger button — minimal dark orb ─────────────── */}
-      <button
-        onClick={toggleOpen}
-        title="Diamond Star A.I."
-        className={`fixed bottom-7 right-7 z-[9999] w-14 h-14 rounded-full
-          flex items-center justify-center focus:outline-none
-          transition-transform duration-200 hover:scale-105
-          ${phase === "speaking" ? "j-btn-speak" : phase === "listening" ? "j-btn-listen" : "j-btn-idle"}`}
-        style={{ background:"#0a0a0a", border:"1px solid #333" }}
-      >
-        {/* mic icon */}
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <rect x="9" y="2" width="6" height="11" rx="3"
-            fill={phase === "listening" ? "#e8603c" : phase === "speaking" ? "#c84b8f" : "#888"}/>
-          <path d="M5 12a7 7 0 0 0 14 0"
-            stroke={phase === "listening" ? "#e8603c" : phase === "speaking" ? "#c84b8f" : "#666"}
-            strokeWidth="1.6" strokeLinecap="round"/>
-          <line x1="12" y1="19" x2="12" y2="22"
-            stroke={phase === "listening" ? "#e8603c" : phase === "speaking" ? "#c84b8f" : "#555"}
-            strokeWidth="1.6" strokeLinecap="round"/>
-          <line x1="9"  y1="22" x2="15" y2="22"
-            stroke={phase === "listening" ? "#e8603c" : phase === "speaking" ? "#c84b8f" : "#555"}
-            strokeWidth="1.6" strokeLinecap="round"/>
-        </svg>
-      </button>
-
-      {/* ── Panel ─────────────────────────────────────────────────── */}
+      {/* ── Panel — opened only via Ctrl+D ───────────────────────── */}
       {open && (
         <div className="j-panel fixed bottom-24 right-5 z-[9998] w-[360px] max-w-[calc(100vw-16px)]"
           style={{ fontFamily:"system-ui,sans-serif" }}>
@@ -790,8 +743,10 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
                   style={{
                     width:52, height:52, borderRadius:"50%", display:"flex",
                     alignItems:"center", justifyContent:"center", cursor:"pointer",
-                    background: micBg, border:`1.5px solid ${micBorder}`,
-                    boxShadow: micGlow, transition:"all .2s",
+                    background: phase === "listening" ? "#1a1a1a" : "#111",
+                    border: `1.5px solid ${phase === "listening" ? "#e8603c" : phase === "speaking" ? "#c84b8f" : "#444"}`,
+                    boxShadow: phase === "listening" ? "0 0 20px #e8603caa" : phase === "speaking" ? "0 0 16px #c84b8f88" : "none",
+                    transition:"all .2s",
                   }}>
                   {phase === "listening" ? (
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
