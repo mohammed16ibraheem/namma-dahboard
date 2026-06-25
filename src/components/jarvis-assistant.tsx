@@ -54,111 +54,168 @@ function openingBriefing(d: JarvisData): string {
   return `${timeGreet()} Financial briefing for ${d.company.toUpperCase()}. I am ready for your questions, sir.`;
 }
 
-/* ── JARVIS brain ────────────────────────────────────────────────────────  */
+/* ── JARVIS brain ─────────────────────────────────────────────────────────
+   Questions are modelled on what a CEO / finance manager actually asks when
+   looking at this dashboard.  Every answer is driven by the live d values.
+── */
 function jarvisReply(input: string, d: JarvisData): { text: string; farewell: boolean } {
   const q = input.toLowerCase();
+  const say = (text: string) => ({ text, farewell: false });
 
-  const farewell = /thank|thanks|bye|goodbye|that.s all|that is all|dismiss|close/.test(q);
-  if (farewell)
-    return { text: "Of course, sir. I remain on standby should you require further analysis.", farewell: true };
+  /* ── farewell ── */
+  if (/thank|thanks|bye|goodbye|that.s all|that is all|dismiss|close/.test(q))
+    return { text: "Of course, sir. I remain on standby.", farewell: true };
 
-  if (/\b(hello|hi|hey|jarvis)\b/.test(q))
-    return { text: `${timeGreet()} All systems are operational for ${d.company}. How may I assist you?`, farewell: false };
+  /* ── greeting ── */
+  if (/\b(hello|hi|hey)\b/.test(q))
+    return say(`${timeGreet()} What would you like to know about ${d.company}?`);
 
-  if (/how.*(revenue|going|doing|performing)|revenue|income|sales|turnover/.test(q))
-    return {
-      text: `Revenue for the period ending ${d.period} stands at ${sar(d.revenue)}. ` +
-        `Gross profit is ${sar(d.grossProfit)}, giving a gross margin of ${pct(d.gpMargin)}. ` +
-        (d.gpMargin >= 35 ? "Excellent margins, sir." : d.gpMargin >= 20 ? "Margins are acceptable." : "Margins are below optimal — I recommend reviewing cost of goods sold."),
-      farewell: false,
-    };
-
-  if (/profit|net profit|net income|bottom line|are we in profit|making money/.test(q))
-    return {
-      text: `Net profit after tax is ${sar(d.netProfit)}, representing a net margin of ${pct(d.netMargin)}. ` +
-        (d.netProfit > 0
-          ? `The company is operating profitably, sir.`
-          : `I must flag that the company is currently at a loss. Immediate review is recommended.`),
-      farewell: false,
-    };
-
-  if (/gross profit|gross margin/.test(q))
-    return {
-      text: `Gross profit is ${sar(d.grossProfit)}, representing a gross margin of ${pct(d.gpMargin)}. ` +
-        (d.gpMargin >= 35 ? "Excellent margins." : d.gpMargin >= 20 ? "Margins are acceptable but there is room for improvement." : "Margins are below optimal levels."),
-      farewell: false,
-    };
-
-  if (/balance sheet|total assets|assets/.test(q))
-    return {
-      text: `Total assets are valued at ${sar(d.totalAssets)}, with total equity of ${sar(d.totalEquity)} and total liabilities of ${sar(d.totalLiab)}. ` +
-        `Current ratio is ${d.currentRatio.toFixed(2)}, ${d.currentRatio >= 1.5 ? "indicating strong short-term liquidity." : d.currentRatio >= 1 ? "which is acceptable." : "which is below one — a liquidity concern."}`,
-      farewell: false,
-    };
-
-  if (/equity|shareholders|capital/.test(q))
-    return {
-      text: `Total equity stands at ${sar(d.totalEquity)}. Debt to equity ratio is ${d.debtToEquity.toFixed(2)}. ` +
-        (d.debtToEquity <= 1 ? "The company maintains a conservative capital structure." : "Leverage is moderate. I recommend monitoring debt levels."),
-      farewell: false,
-    };
-
-  if (/liabilit|debt/.test(q))
-    return {
-      text: `Total liabilities are ${sar(d.totalLiab)}. Debt to equity ratio is ${d.debtToEquity.toFixed(2)}. ` +
-        (d.debtToEquity <= 1.5 ? "Debt levels are within acceptable parameters." : "Leverage is elevated. Shall I flag this for review?"),
-      farewell: false,
-    };
-
-  if (/cash flow|operating cash/.test(q))
-    return {
-      text: `Operating cash flow is ${sar(d.operatingCF)}. Investing activities show ${sar(d.investingCF)}, and financing activities ${sar(d.financingCF)}. ` +
-        (d.operatingCF > 0 ? "The business is generating positive operating cash flow — a healthy sign." : "Operating cash flow is negative. This requires attention, sir."),
-      farewell: false,
-    };
-
-  if (/cash|liquid/.test(q))
-    return {
-      text: `Cash and cash equivalents stand at ${sar(d.cashBs)}. Current ratio is ${d.currentRatio.toFixed(2)}. ` +
-        (d.currentRatio >= 1.5 ? "Liquidity position is strong." : "Liquidity is adequate but should be monitored."),
-      farewell: false,
-    };
-
-  if (/tax|zakat|vat/.test(q))
-    return {
-      text: `Total tax obligations for this period amount to ${sar(d.taxTotal)}, covering Zakat, VAT, and withholding tax. ` +
-        (d.taxTotal > 0 ? "All provisions are in order." : "No current tax obligations flagged."),
-      farewell: false,
-    };
-
-  if (/export|report|download|excel/.test(q)) {
-    d.onExport?.();
-    return { text: "Certainly, sir. Generating the full financial report now. Five sheets, colour-coded by category. The file will download momentarily.", farewell: false };
+  /* ── CONCERN / RISK — "should I be worried?", "any red flags?", "any issues?" ── */
+  if (/worried|concern|risk|red flag|issue|problem|warn|alert|danger|bad/.test(q)) {
+    const flags: string[] = [];
+    if (d.netProfit < 0)        flags.push(`net loss of ${sar(Math.abs(d.netProfit))}`);
+    if (d.operatingCF < 0)      flags.push(`negative operating cash flow of ${sar(Math.abs(d.operatingCF))}`);
+    if (d.currentRatio < 1)     flags.push(`current ratio below one at ${d.currentRatio.toFixed(2)}`);
+    if (d.gpMargin < 15)        flags.push(`very low gross margin of ${pct(d.gpMargin)}`);
+    if (d.debtToEquity > 2)     flags.push(`high debt-to-equity of ${d.debtToEquity.toFixed(2)}`);
+    if (d.cashBs < 0)           flags.push("negative cash balance on the balance sheet");
+    if (flags.length === 0)
+      return say(`No red flags detected for ${d.period}. All key indicators — profitability, liquidity, and cash flow — are within healthy ranges. You may proceed with confidence, sir.`);
+    return say(`I have identified ${flags.length} concern${flags.length > 1 ? "s" : ""} requiring your attention: ${flags.join("; ")}. I recommend an immediate review of these items.`);
   }
 
-  if (/summary|overview|status|how are we|financial/.test(q))
-    return {
-      text: `Financial summary for ${d.company}, period ending ${d.period}. ` +
-        `Revenue: ${sar(d.revenue)}. Net profit: ${sar(d.netProfit)} at ${pct(d.netMargin)} margin. ` +
-        `Total assets: ${sar(d.totalAssets)}. Cash: ${sar(d.cashBs)}. Operating cash flow: ${sar(d.operatingCF)}. ` +
-        (d.netProfit > 0 && d.operatingCF > 0 ? "All primary indicators are positive, sir." : "There are some areas requiring attention."),
-      farewell: false,
-    };
+  /* ── OVERALL HEALTH — "how are we doing?", "give me an update" ── */
+  if (/how are we|how.s (the )?company|overall|update|health|performance|doing|going/.test(q)) {
+    const score = [d.netProfit > 0, d.operatingCF > 0, d.currentRatio >= 1, d.gpMargin >= 20, d.debtToEquity <= 2].filter(Boolean).length;
+    const grade = score >= 5 ? "excellent" : score >= 3 ? "stable" : "under pressure";
+    return say(`${d.company} is ${grade} for the period ending ${d.period}. ` +
+      `Revenue is ${sar(d.revenue)} with a net margin of ${pct(d.netMargin)}. ` +
+      `Operating cash flow is ${sar(d.operatingCF)} and current ratio stands at ${d.currentRatio.toFixed(2)}. ` +
+      (score >= 4 ? "The fundamentals are solid, sir." : score >= 3 ? "There are areas worth monitoring." : "I recommend a detailed review of costs and cash position."));
+  }
 
-  if (/ratio|current ratio/.test(q))
-    return {
-      text: `Current ratio is ${d.currentRatio.toFixed(2)}. Debt to equity ratio is ${d.debtToEquity.toFixed(2)}. ` +
-        (d.currentRatio >= 1.5 ? "Financial ratios are healthy." : "Some ratios warrant monitoring."),
-      farewell: false,
-    };
+  /* ── REVENUE / SALES ── */
+  if (/revenue|sales|turnover|income|top.?line/.test(q))
+    return say(`Revenue for ${d.period} is ${sar(d.revenue)}. ` +
+      `After cost of goods sold, gross profit is ${sar(d.grossProfit)} — a gross margin of ${pct(d.gpMargin)}. ` +
+      (d.gpMargin >= 35 ? "Margins are strong." : d.gpMargin >= 20 ? "Margins are acceptable." : "Margins are thin — cost of goods sold should be reviewed."));
 
-  if (/help|what can you/.test(q))
-    return { text: "I can brief you on revenue, profit, cash flow, balance sheet, liabilities, tax, ratios, and generate the full financial report. Just ask.", farewell: false };
+  /* ── PROFITABILITY — "are we making money?", "profit?" ── */
+  if (/profit|making money|bottom.?line|net income|earning/.test(q)) {
+    if (d.netProfit > 0)
+      return say(`The company is profitable. Net profit after tax is ${sar(d.netProfit)}, a net margin of ${pct(d.netMargin)}. ` +
+        (d.netMargin >= 15 ? "That is a very healthy margin, sir." : d.netMargin >= 8 ? "Margin is reasonable." : "Margin is slim — watch operating expenses closely."));
+    return say(`The company is currently at a loss. Net loss is ${sar(Math.abs(d.netProfit))}. ` +
+      `Gross profit of ${sar(d.grossProfit)} is being consumed by operating and overhead costs. Immediate cost review is advised.`);
+  }
 
-  return {
-    text: `I didn't quite catch that, sir. Could you rephrase? I can help with revenue, profit, cash flow, balance sheet, or a full financial summary.`,
-    farewell: false,
-  };
+  /* ── GROSS MARGIN / COST OF GOODS ── */
+  if (/gross (margin|profit)|cost of (goods|sales)|cogs/.test(q))
+    return say(`Gross profit is ${sar(d.grossProfit)}, representing a gross margin of ${pct(d.gpMargin)}. ` +
+      (d.gpMargin >= 35 ? "This is excellent — the company retains a strong share of every riyal earned." :
+       d.gpMargin >= 20 ? "This is healthy, though there may be room to negotiate better input costs." :
+       "This is below the 20% threshold. The cost of goods sold is too high relative to revenue — pricing or procurement needs attention."));
+
+  /* ── CASH POSITION ── */
+  if (/cash position|how much cash|cash on hand|available cash/.test(q))
+    return say(`Cash and equivalents on the balance sheet total ${sar(d.cashBs)}. ` +
+      `Operating activities generated ${sar(d.operatingCF)} in cash this period. ` +
+      (d.operatingCF > 0 && d.cashBs > 0 ? "The business is self-funding — a positive sign." :
+       d.cashBs < 0 ? "The cash balance is negative, which is a liquidity concern." :
+       "Cash is adequate but the operating trend should be watched closely."));
+
+  /* ── CASH FLOW ── */
+  if (/cash.?flow|operating.?cash|investing|financing/.test(q))
+    return say(`Cash flow breakdown for ${d.period}: ` +
+      `Operating ${sar(d.operatingCF)}, Investing ${sar(d.investingCF)}, Financing ${sar(d.financingCF)}. ` +
+      (d.operatingCF > 0 ? "Core operations are cash-generative. " : "Operations are consuming cash — review working capital. ") +
+      (d.investingCF < 0 ? "Investment outflows suggest active capital expenditure." : "Minimal investing activity this period."));
+
+  /* ── LIQUIDITY — "can we pay our bills?", "short term obligations" ── */
+  if (/liquid|pay.*(bill|debt|obligation)|short.?term|current ratio|can we pay/.test(q))
+    return say(`Liquidity check: current ratio is ${d.currentRatio.toFixed(2)} and cash stands at ${sar(d.cashBs)}. ` +
+      (d.currentRatio >= 2 ? "The company can comfortably meet all short-term obligations, sir." :
+       d.currentRatio >= 1.2 ? "Short-term obligations are covered, with a reasonable buffer." :
+       d.currentRatio >= 1 ? "Current assets just cover current liabilities — the buffer is thin." :
+       "Current ratio is below 1.0. The company may struggle to meet short-term obligations. This needs urgent attention."));
+
+  /* ── BALANCE SHEET / ASSETS ── */
+  if (/balance.?sheet|total asset|asset|net worth/.test(q))
+    return say(`Balance sheet as at ${d.period}: Total assets ${sar(d.totalAssets)}, Total liabilities ${sar(d.totalLiab)}, Equity ${sar(d.totalEquity)}. ` +
+      `Asset-to-equity ratio implies ${d.debtToEquity <= 1 ? "a conservatively financed company." : d.debtToEquity <= 2 ? "moderate leverage." : "high reliance on debt financing."}`);
+
+  /* ── DEBT / LIABILITIES ── */
+  if (/debt|liabilit|borrow|owe|leverage/.test(q))
+    return say(`Total liabilities are ${sar(d.totalLiab)} against equity of ${sar(d.totalEquity)}, giving a debt-to-equity ratio of ${d.debtToEquity.toFixed(2)}. ` +
+      (d.debtToEquity <= 0.5 ? "The company is very lightly leveraged — conservative and low-risk." :
+       d.debtToEquity <= 1.5 ? "Leverage is moderate and manageable." :
+       d.debtToEquity <= 2.5 ? "Leverage is elevated. Monitor debt servicing capacity." :
+       "Leverage is high. Debt reduction should be prioritised, sir."));
+
+  /* ── EQUITY / SHAREHOLDERS ── */
+  if (/equity|shareholder|owner|capital structure/.test(q))
+    return say(`Shareholder equity stands at ${sar(d.totalEquity)}, funded by ${sar(d.totalAssets)} in total assets. ` +
+      `Debt-to-equity is ${d.debtToEquity.toFixed(2)}. ` +
+      (d.netProfit > 0 ? `Net profit of ${sar(d.netProfit)} is adding to retained earnings this period.` :
+       `The current net loss is eroding the equity base — this trend must be reversed.`));
+
+  /* ── TAX / ZAKAT / VAT ── */
+  if (/tax|zakat|vat|withholding/.test(q)) {
+    const effectiveTaxRate = d.revenue > 0 ? (d.taxTotal / d.revenue * 100) : 0;
+    return say(`Total tax and zakat obligations for ${d.period} amount to ${sar(d.taxTotal)}. ` +
+      `This represents an effective rate of ${effectiveTaxRate.toFixed(1)}% of revenue. ` +
+      (d.taxTotal > 0 ? "All provisions are accounted for in the financial statements." : "No tax obligations are flagged for this period."));
+  }
+
+  /* ── WHAT SHOULD WE FOCUS ON / PRIORITIES ── */
+  if (/focus|priorit|improve|action|recommend|next step|what should/.test(q)) {
+    const actions: string[] = [];
+    if (d.netProfit < 0)       actions.push("reduce operating costs to restore profitability");
+    if (d.gpMargin < 20)       actions.push("renegotiate procurement to improve gross margin above 20%");
+    if (d.operatingCF < 0)     actions.push("address working capital — collections or payables cycle");
+    if (d.currentRatio < 1.2)  actions.push("strengthen short-term liquidity");
+    if (d.debtToEquity > 2)    actions.push("reduce debt exposure");
+    if (actions.length === 0)
+      return say(`The company is performing well. Focus areas for continued growth: sustaining the ${pct(d.gpMargin)} gross margin, growing revenue while controlling fixed costs, and maintaining the ${d.currentRatio.toFixed(2)} current ratio.`);
+    return say(`Based on the current dashboard, I recommend the following priorities: ${actions.map((a, i) => `${i + 1}. ${a}`).join("; ")}.`);
+  }
+
+  /* ── EXPENSES / COSTS ── */
+  if (/expense|cost|overhead|opex|spending/.test(q)) {
+    const opex = d.revenue - d.grossProfit;
+    const opexRatio = d.revenue > 0 ? (opex / d.revenue * 100) : 0;
+    return say(`Cost of goods sold consumes ${pct(100 - d.gpMargin)} of revenue, leaving a gross margin of ${pct(d.gpMargin)}. ` +
+      `After gross profit of ${sar(d.grossProfit)}, operating and overhead expenses reduce this to a net profit of ${sar(d.netProfit)}. ` +
+      (d.netMargin < d.gpMargin / 2 ? "The gap between gross and net margin is wide — overhead costs are significant." : "The cost structure appears balanced."));
+  }
+
+  /* ── RATIOS ── */
+  if (/ratio|metric|kpi|indicator/.test(q))
+    return say(`Key ratios for ${d.period}: Current ratio ${d.currentRatio.toFixed(2)} (${d.currentRatio >= 1.5 ? "healthy" : d.currentRatio >= 1 ? "adequate" : "critical"}), ` +
+      `Debt-to-equity ${d.debtToEquity.toFixed(2)} (${d.debtToEquity <= 1 ? "conservative" : d.debtToEquity <= 2 ? "moderate" : "elevated"}), ` +
+      `Gross margin ${pct(d.gpMargin)} (${d.gpMargin >= 35 ? "strong" : d.gpMargin >= 20 ? "acceptable" : "weak"}), ` +
+      `Net margin ${pct(d.netMargin)} (${d.netMargin >= 15 ? "excellent" : d.netMargin >= 5 ? "fair" : d.netProfit >= 0 ? "thin" : "loss-making"}).`);
+
+  /* ── SUMMARY ── */
+  if (/summary|overview|brief|snapshot|tell me everything/.test(q))
+    return say(`${d.company} — ${d.period} snapshot. ` +
+      `Revenue ${sar(d.revenue)}, Gross profit ${sar(d.grossProfit)} at ${pct(d.gpMargin)} margin, ` +
+      `Net ${d.netProfit >= 0 ? "profit" : "loss"} ${sar(Math.abs(d.netProfit))} at ${pct(Math.abs(d.netMargin))} margin. ` +
+      `Cash ${sar(d.cashBs)}, Operating CF ${sar(d.operatingCF)}. ` +
+      `Assets ${sar(d.totalAssets)}, Equity ${sar(d.totalEquity)}, D/E ${d.debtToEquity.toFixed(2)}. ` +
+      (d.netProfit > 0 && d.operatingCF > 0 ? "All primary indicators are positive." : "Some indicators require attention."));
+
+  /* ── EXPORT ── */
+  if (/export|report|download|excel|file/.test(q)) {
+    d.onExport?.();
+    return say("Generating the full financial report now — five sheets, colour-coded. The file will download momentarily.");
+  }
+
+  /* ── HELP ── */
+  if (/help|what can you|what do you know|capabilities/.test(q))
+    return say("I can answer questions about revenue, profitability, cash flow, balance sheet, liquidity, debt, tax, key ratios, risks, and priorities. I can also export the full Excel report. Just ask naturally.");
+
+  return say("I didn't catch that clearly. Try asking about revenue, profit, cash flow, risks, or say 'give me a summary'.");
 }
 
 /* ── SpeechRecognition shim ──────────────────────────────────────────────  */
@@ -745,12 +802,12 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
               {/* quick command buttons */}
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6 }}>
                 {([
-                  ["Revenue",        "How is the revenue going?"],
-                  ["Are we profit?", "Are we in profit?"],
-                  ["Cash Flow",      "How is the cash flow?"],
-                  ["Balance Sheet",  "Show the balance sheet"],
-                  ["Summary",        "Give me a full financial summary"],
-                  ["Export Report",  "Export the report"],
+                  ["How are we doing?",    "How is the company doing overall?"],
+                  ["Any red flags?",       "Should I be worried about anything?"],
+                  ["Are we profitable?",   "Are we making money?"],
+                  ["Cash position",        "What is our cash position?"],
+                  ["What to focus on?",    "What should we focus on to improve?"],
+                  ["Export Report",        "Export the report"],
                 ] as [string,string][]).map(([label, cmd]) => (
                   <button key={label}
                     onClick={() => { setTranscript(cmd); handleInput(cmd); }}
