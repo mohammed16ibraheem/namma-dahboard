@@ -591,7 +591,7 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
     setPhase("processing");
     const { text: reply, farewell } = jarvisReply(text, dataRef.current);
     setResponse(reply);
-    speak(reply, !farewell);
+    speak(reply, false);
   }, [speak]);
 
   /* ── init once ───────────────────────────────────────────────────────── */
@@ -650,7 +650,7 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
       setPhase("speaking");
       const intro = openingBriefing(dataRef.current);
       setResponse(intro);
-      setTimeout(() => speak(intro, true), 350);
+      setTimeout(() => speak(intro, false), 350);
     } else {
       openRef.current = false;
       synthRef.current?.cancel();
@@ -681,7 +681,7 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
     phase === "speaking"   ? "DIAMOND STAR A.I. SPEAKING..." :
     phase === "listening"  ? "LISTENING — SPEAK NOW" :
     phase === "processing" ? "PROCESSING..." :
-                             "PRESS MIC TO SPEAK";
+                             "TAP ANIMATION TO SPEAK";
 
   const statusColor =
     phase === "listening"  ? "#00ff88" :
@@ -722,53 +722,27 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
               </button>
             </div>
 
-            {/* particle area — black background, full width, no clip */}
-            <div ref={containerRef} style={{ width:"100%", height:260, background:"#000", display:"block" }} />
+            {/* particle area — click to start/stop listening */}
+            <div
+              ref={containerRef}
+              onClick={() => phase !== "speaking" && phase !== "processing" && toggleMic()}
+              style={{
+                width:"100%", height:260, background:"#000", display:"block",
+                cursor: phase === "speaking" || phase === "processing" ? "default" : "pointer",
+              }}
+            />
 
             {/* status */}
             <div className={phase !== "idle" ? "j-blink" : ""}
               style={{
                 textAlign:"center", fontSize:10, letterSpacing:"0.2em", padding:"8px 0 4px",
-                color: phase==="listening" ? "#e8603c" : phase==="speaking" ? "#c84b8f" : phase==="processing" ? "#ffb74d" : "#333",
+                color: phase==="listening" ? "#e8603c" : phase==="speaking" ? "#c84b8f" : phase==="processing" ? "#ffb74d" : "#444",
               }}>
               {statusLabel}
             </div>
 
-            {/* mic toggle + quick buttons */}
+            {/* quick command buttons */}
             <div className="px-4 pb-4 space-y-3">
-
-              {/* mic button */}
-              <div style={{ display:"flex", justifyContent:"center", padding:"4px 0" }}>
-                <button onClick={toggleMic}
-                  style={{
-                    width:52, height:52, borderRadius:"50%", display:"flex",
-                    alignItems:"center", justifyContent:"center", cursor:"pointer",
-                    background: phase === "listening" ? "#1a1a1a" : "#111",
-                    border: `1.5px solid ${phase === "listening" ? "#e8603c" : phase === "speaking" ? "#c84b8f" : "#444"}`,
-                    boxShadow: phase === "listening" ? "0 0 20px #e8603caa" : phase === "speaking" ? "0 0 16px #c84b8f88" : "none",
-                    transition:"all .2s",
-                  }}>
-                  {phase === "listening" ? (
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <rect x="2" y="2" width="12" height="12" rx="2" fill="#e8603c"/>
-                    </svg>
-                  ) : phase === "speaking" ? (
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <circle cx="10" cy="10" r="2.5" fill="#c84b8f"/>
-                      <path d="M6.5 7.5a4.5 4.5 0 0 0 0 5" stroke="#c84b8f" strokeWidth="1.3" strokeLinecap="round"/>
-                      <path d="M13.5 7.5a4.5 4.5 0 0 1 0 5" stroke="#c84b8f" strokeWidth="1.3" strokeLinecap="round"/>
-                    </svg>
-                  ) : (
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <rect x="7" y="1" width="6" height="9" rx="3" fill="#777"/>
-                      <path d="M4 9a6 6 0 0 0 12 0" stroke="#666" strokeWidth="1.4" strokeLinecap="round"/>
-                      <line x1="10" y1="15" x2="10" y2="18" stroke="#555" strokeWidth="1.4" strokeLinecap="round"/>
-                      <line x1="7" y1="18" x2="13" y2="18" stroke="#555" strokeWidth="1.4" strokeLinecap="round"/>
-                    </svg>
-                  )}
-                </button>
-              </div>
-
               {/* quick command buttons */}
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6 }}>
                 {([
