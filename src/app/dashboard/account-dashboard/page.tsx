@@ -120,6 +120,7 @@ export default function AccountDashboardPage() {
   const [mounted, setMounted]       = useState(false);
   const [ytdMode, setYtdMode]       = useState(false);
   const [ytdEndIdx, setYtdEndIdx]   = useState(-1);  // -1 = last available month
+  const [collapsedTb, setCollapsedTb] = useState<Set<string>>(new Set());
 
   useEffect(() => setMounted(true), []);
 
@@ -182,6 +183,34 @@ export default function AccountDashboardPage() {
   // Old format stores in bs[] with value=closing. Support both.
   const tbIsNew   = (tbP?.rows?.length ?? 0) > 0;
   const tbRows    = tbIsNew ? (tbP?.rows ?? []) : (tbP?.bs ?? []);
+
+  // Collapse all TB sections whenever TB data changes
+  useEffect(() => {
+    setCollapsedTb(new Set(tbRows.filter(r => r.type === "section").map(r => r.label)));
+  }, [tbRows]);
+
+  const toggleTbSection = (label: string) => setCollapsedTb(prev => {
+    const next = new Set(prev); if (next.has(label)) next.delete(label); else next.add(label); return next;
+  });
+
+  // Tree-collapse: hide everything deeper than a collapsed section
+  const visibleTbRows = useMemo(() => {
+    let hiddenDepth: number | null = null;
+    return tbRows.filter(row => {
+      const d = row.indent ?? 0;
+      if (row.type === "section") {
+        if (hiddenDepth !== null && d <= hiddenDepth) hiddenDepth = null;
+        if (hiddenDepth !== null) return false;
+        if (collapsedTb.has(row.label)) hiddenDepth = d;
+        return true;
+      }
+      if (row.type === "total") {
+        if (hiddenDepth !== null && d <= hiddenDepth) hiddenDepth = null;
+        return hiddenDepth === null;
+      }
+      return hiddenDepth === null;
+    });
+  }, [tbRows, collapsedTb]);
 
   /* ── YTD computation ──────────────────────────────────────────────────── */
   // Monthly columns from P&L (index 0 = "Total", 1+ = individual months)
@@ -1179,18 +1208,26 @@ export default function AccountDashboardPage() {
                             </tr>
                           </thead>
                           <tbody>
-                            {tbRows.map((row, i) => {
+                            {visibleTbRows.map((row, i) => {
                               const vals = (row as {values?:(number|null)[]}).values;
+                              const indentPx = (row.indent ?? 0) * 12;
+                              const isCollapsed = row.type === "section" && collapsedTb.has(row.label);
                               if (row.type === "section") return (
-                                <tr key={i} style={{ background: "#eef2f9" }}>
-                                  <td colSpan={tbIsNew ? 5 : 2} className="px-4 py-1.5 font-bold text-[10px] uppercase tracking-wider" style={{ color: BRAND }}>
-                                    {row.label}
+                                <tr key={i}
+                                  onClick={() => toggleTbSection(row.label)}
+                                  style={{ background: "#eef2f9", borderTop: "1px solid #d1dcea", cursor: "pointer" }}
+                                  className="hover:bg-blue-50/50 transition-colors select-none">
+                                  <td colSpan={tbIsNew ? 5 : 2} className="px-4 py-1.5 font-bold text-[10px] uppercase tracking-wider" style={{ color: BRAND, paddingLeft: `${indentPx + 16}px` }}>
+                                    <div className="flex items-center gap-1.5">
+                                      <ChevronRight size={11} style={{ transform: isCollapsed ? "rotate(0deg)" : "rotate(90deg)", transition: "transform 0.15s", color: BRAND, opacity: 0.7, flexShrink: 0 }} />
+                                      {row.label}
+                                    </div>
                                   </td>
                                 </tr>
                               );
                               if (row.type === "total") return (
                                 <tr key={i} style={{ background: "#f0f4fa", borderTop: "1px solid #d1dcea" }}>
-                                  <td className="px-4 py-1.5 font-bold text-[11px] sticky left-0 bg-[#f0f4fa]" style={{ color: BRAND, paddingLeft: `${(row.indent??0)*12+16}px` }}>
+                                  <td className="px-4 py-1.5 font-bold text-[11px] sticky left-0 bg-[#f0f4fa]" style={{ color: BRAND, paddingLeft: `${indentPx + 16}px` }}>
                                     {row.label}
                                   </td>
                                   {tbIsNew && vals ? (
@@ -1207,7 +1244,7 @@ export default function AccountDashboardPage() {
                               return (
                                 <tr key={i} style={{ background: i%2===0?"#fff":"#fafbfc" }}
                                   className="hover:bg-blue-50/30 transition-colors">
-                                  <td className="px-4 py-1.5 text-gray-600 sticky left-0" style={{ background:"inherit", paddingLeft:`${(row.indent??0)*12+12}px` }}>
+                                  <td className="px-4 py-1.5 text-gray-600 sticky left-0" style={{ background:"inherit", paddingLeft:`${indentPx + 12}px` }}>
                                     {row.label}
                                   </td>
                                   {tbIsNew && vals ? (

@@ -746,6 +746,7 @@ const PAGE_SIZE = 60;
 function MultiColTable({ rows: rawRows, title, columns }: { rows: ReportRow[]; title: string; columns: string[] }) {
   const [search, setSearch] = React.useState("");
   const [page, setPage]     = React.useState(0);
+  const [collapsed, setCollapsed] = React.useState<Set<string>>(new Set());
 
   // Add section totals at render time if parser didn't already include them
   const rows = useMemo(
@@ -753,11 +754,33 @@ function MultiColTable({ rows: rawRows, title, columns }: { rows: ReportRow[]; t
     [rawRows, columns.length]
   );
 
+  // ALL section labels are collapsible (any indent level)
+  const allSectionLabels = useMemo(
+    () => new Set(rows.filter(r => r.type === "section").map(r => r.label)),
+    [rows]
+  );
+
+  // Default: ALL sections start collapsed — user clicks to expand
+  React.useEffect(() => {
+    setCollapsed(new Set(rows.filter(r => r.type === "section").map(r => r.label)));
+  }, [rows]);
+
+  const toggleSection = (label: string) => {
+    setCollapsed(prev => {
+      const next = new Set(prev);
+      if (next.has(label)) next.delete(label); else next.add(label);
+      return next;
+    });
+  };
+
+  const allCollapsed = allSectionLabels.size > 0 && collapsed.size >= allSectionLabels.size;
+
   const lq = search.toLowerCase().trim();
   const isBig = rows.length > PAGE_SIZE;
 
-  const filtered = useMemo(() => {
-    if (!lq) return rows;
+  // Search mode: show matching lines (ignores collapse)
+  const searchFiltered = useMemo(() => {
+    if (!lq) return [];
     const out: ReportRow[] = [];
     let lastSection: ReportRow | null = null;
     for (const row of rows) {
@@ -771,8 +794,33 @@ function MultiColTable({ rows: rawRows, title, columns }: { rows: ReportRow[]; t
     return out;
   }, [rows, lq]);
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const visible    = lq ? filtered : filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  // Tree-collapse: when a section at indent=N is collapsed, hide everything with
+  // indent>N until a section/total at indent≤N brings us back out.
+  const visibleRows = useMemo(() => {
+    if (lq) return searchFiltered;
+    const out: ReportRow[] = [];
+    let hiddenDepth: number | null = null;
+    for (const row of rows) {
+      const d = row.indent ?? 0;
+      if (row.type === "section") {
+        if (hiddenDepth !== null && d <= hiddenDepth) hiddenDepth = null;
+        if (hiddenDepth !== null) continue;
+        out.push(row);
+        if (collapsed.has(row.label)) hiddenDepth = d;
+      } else if (row.type === "total") {
+        if (hiddenDepth !== null && d <= hiddenDepth) hiddenDepth = null;
+        if (hiddenDepth !== null) continue;
+        out.push(row);
+      } else {
+        if (hiddenDepth !== null) continue;
+        out.push(row);
+      }
+    }
+    return out;
+  }, [rows, lq, collapsed, searchFiltered]);
+
+  const totalPages = Math.ceil(visibleRows.length / PAGE_SIZE);
+  const visible    = lq ? searchFiltered : visibleRows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   React.useEffect(() => setPage(0), [lq]);
 
@@ -782,8 +830,17 @@ function MultiColTable({ rows: rawRows, title, columns }: { rows: ReportRow[]; t
       <div className="px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-white flex items-center justify-between"
         style={{ background: BRAND }}>
         <span>{title}</span>
-        <span className="text-white/60 font-normal normal-case text-[10px]">
-          {filtered.filter(r => r.type === "line").length} accounts{isBig && !lq ? ` · page ${page + 1}/${totalPages}` : ""}
+        <span className="flex items-center gap-3">
+          <span className="text-white/60 font-normal normal-case text-[10px]">
+            {rows.filter(r => r.type === "line").length} accounts{isBig && !lq ? ` · page ${page + 1}/${totalPages}` : ""}
+          </span>
+          {allSectionLabels.size > 0 && (
+            <button
+              onClick={() => setCollapsed(allCollapsed ? new Set() : new Set(allSectionLabels))}
+              className="text-white/70 hover:text-white text-[10px] font-semibold normal-case transition-colors px-2 py-0.5 rounded border border-white/20 hover:border-white/50">
+              {allCollapsed ? "Expand all" : "Collapse all"}
+            </button>
+          )}
         </span>
       </div>
 
@@ -827,13 +884,24 @@ function MultiColTable({ rows: rawRows, title, columns }: { rows: ReportRow[]; t
             {visible.map((row, i) => {
               const vals = row.values ?? [row.value];
               const indentPx = INDENT_PX[Math.min(row.indent ?? 0, INDENT_PX.length - 1)];
+              const isRowCollapsed = row.type === "section" && collapsed.has(row.label);
 
               if (row.type === "section") return (
-                <tr key={i} style={{ background: indentPx === 0 ? "#EEF2F9" : "#F5F7FC", borderTop: indentPx === 0 ? "1px solid #d1dcea" : "none" }}>
+                <tr key={i}
+                  onClick={() => toggleSection(row.label)}
+                  style={{
+                    background: indentPx === 0 ? "#EEF2F9" : "#F5F7FC",
+                    borderTop: "1px solid #d1dcea",
+                    cursor: "pointer",
+                  }}>
                   <td colSpan={columns.length + 1}
-                    className="py-2 font-bold uppercase text-[10px] tracking-widest"
+                    className="py-2 font-bold uppercase text-[10px] tracking-widest select-none hover:bg-blue-50/40 transition-colors"
                     style={{ paddingLeft: `${20 + indentPx}px`, color: BRAND }}>
-                    {row.label}
+                    <div className="flex items-center gap-1.5">
+                      <ChevronRight size={12} className="flex-shrink-0 transition-transform duration-150"
+                        style={{ transform: isRowCollapsed ? "rotate(0deg)" : "rotate(90deg)", color: BRAND, opacity: 0.7 }} />
+                      {row.label}
+                    </div>
                   </td>
                 </tr>
               );
@@ -881,7 +949,7 @@ function MultiColTable({ rows: rawRows, title, columns }: { rows: ReportRow[]; t
             ← Previous
           </button>
           <span className="text-[11px] text-gray-400">
-            {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)} of {filtered.length}
+            {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, visibleRows.length)} of {visibleRows.length}
           </span>
           <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
             className="text-[11px] px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 disabled:opacity-30 hover:bg-white transition-colors">
@@ -896,6 +964,7 @@ function MultiColTable({ rows: rawRows, title, columns }: { rows: ReportRow[]; t
 function SingleColTable({ rows: rawRows, title }: { rows: (BsRow | CfRow | ReportRow)[]; title: string }) {
   const [search, setSearch] = React.useState("");
   const [page,   setPage]   = React.useState(0);
+  const [collapsed, setCollapsed] = React.useState<Set<string>>(new Set());
 
   // Add section totals at render time if data doesn't already include them
   const rows = useMemo(
@@ -903,16 +972,38 @@ function SingleColTable({ rows: rawRows, title }: { rows: (BsRow | CfRow | Repor
     [rawRows]
   );
 
+  // ALL section labels are collapsible (any indent level)
+  const allSectionLabels = useMemo(
+    () => new Set(rows.filter(r => r.type === "section").map(r => r.label)),
+    [rows]
+  );
+
+  // Default: ALL sections start collapsed — user clicks to expand
+  React.useEffect(() => {
+    setCollapsed(new Set(rows.filter(r => r.type === "section").map(r => r.label)));
+  }, [rows]);
+
+  const toggleSection = (label: string) => {
+    setCollapsed(prev => {
+      const next = new Set(prev);
+      if (next.has(label)) next.delete(label); else next.add(label);
+      return next;
+    });
+  };
+
+  const allCollapsed = allSectionLabels.size > 0 && collapsed.size >= allSectionLabels.size;
+
   const lq = search.toLowerCase().trim();
-  // When searching: include section headers of matching lines for context
-  const filtered = React.useMemo(() => {
-    if (!lq) return rows;
+  const isBig = rows.length > PAGE_SIZE;
+
+  // Search mode: show matching lines (ignores collapse)
+  const searchFiltered = React.useMemo(() => {
+    if (!lq) return [];
     const out: typeof rows = [];
     let lastSection: typeof rows[0] | null = null;
     for (const row of rows) {
       if (row.type === "section") { lastSection = row; continue; }
-      if (row.label.toLowerCase().includes(lq) ||
-          String(row.value ?? "").includes(lq)) {
+      if (row.label.toLowerCase().includes(lq) || String(row.value ?? "").includes(lq)) {
         if (lastSection && !out.includes(lastSection)) out.push(lastSection);
         out.push(row);
       }
@@ -920,11 +1011,34 @@ function SingleColTable({ rows: rawRows, title }: { rows: (BsRow | CfRow | Repor
     return out;
   }, [rows, lq]);
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const visible    = lq ? filtered : filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-  const isBig      = rows.length > PAGE_SIZE;
+  // Tree-collapse: when a section at indent=N is collapsed, hide everything with
+  // indent>N until a section/total at indent≤N brings us back out.
+  const visibleRows = useMemo(() => {
+    if (lq) return searchFiltered;
+    const out: typeof rows = [];
+    let hiddenDepth: number | null = null;
+    for (const row of rows) {
+      const d = row.indent ?? 0;
+      if (row.type === "section") {
+        if (hiddenDepth !== null && d <= hiddenDepth) hiddenDepth = null;
+        if (hiddenDepth !== null) continue;
+        out.push(row);
+        if (collapsed.has(row.label)) hiddenDepth = d;
+      } else if (row.type === "total") {
+        if (hiddenDepth !== null && d <= hiddenDepth) hiddenDepth = null;
+        if (hiddenDepth !== null) continue;
+        out.push(row);
+      } else {
+        if (hiddenDepth !== null) continue;
+        out.push(row);
+      }
+    }
+    return out;
+  }, [rows, lq, collapsed, searchFiltered]);
 
-  // reset page when search changes
+  const totalPages = Math.ceil(visibleRows.length / PAGE_SIZE);
+  const visible    = lq ? searchFiltered : visibleRows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
   React.useEffect(() => setPage(0), [lq]);
 
   return (
@@ -935,8 +1049,15 @@ function SingleColTable({ rows: rawRows, title }: { rows: (BsRow | CfRow | Repor
         <span>{title}</span>
         <span className="flex items-center gap-3">
           <span className="text-white/60 font-normal normal-case text-[10px]">
-            {filtered.length} rows{isBig && !lq ? ` · page ${page + 1}/${totalPages}` : ""}
+            {rows.filter(r => r.type === "line").length} rows{isBig && !lq ? ` · page ${page + 1}/${totalPages}` : ""}
           </span>
+          {allSectionLabels.size > 0 && (
+            <button
+              onClick={() => setCollapsed(allCollapsed ? new Set() : new Set(allSectionLabels))}
+              className="text-white/70 hover:text-white text-[10px] font-semibold normal-case transition-colors px-2 py-0.5 rounded border border-white/20 hover:border-white/50">
+              {allCollapsed ? "Expand all" : "Collapse all"}
+            </button>
+          )}
           <span>SAR</span>
         </span>
       </div>
@@ -965,19 +1086,25 @@ function SingleColTable({ rows: rawRows, title }: { rows: (BsRow | CfRow | Repor
           <div className="py-10 text-center text-sm text-gray-400">No matching accounts</div>
         )}
         {visible.map((row, i) => {
-          const indentPx = INDENT_PX[Math.min(row.indent ?? 0, INDENT_PX.length - 1)];
-          const isNeg    = (row.value ?? 0) < 0;
+          const indentPx     = INDENT_PX[Math.min(row.indent ?? 0, INDENT_PX.length - 1)];
+          const isNeg        = (row.value ?? 0) < 0;
+          const isRowCollapsed = row.type === "section" && collapsed.has(row.label);
 
           if (row.type === "section") return (
             <div key={i}
-              className="py-2 text-[11px] font-bold uppercase tracking-widest flex items-center justify-between"
+              onClick={() => toggleSection(row.label)}
+              className="py-2 text-[11px] font-bold uppercase tracking-widest flex items-center justify-between select-none cursor-pointer hover:bg-blue-50/40 transition-colors"
               style={{
                 paddingLeft: `${20 + indentPx}px`, paddingRight: "20px",
                 color: BRAND,
                 background: indentPx === 0 ? "#EEF2F9" : "#F5F7FC",
-                borderTop: indentPx === 0 ? "1px solid #d1dcea" : "none",
+                borderTop: "1px solid #d1dcea",
               }}>
-              <span>{row.label}</span>
+              <span className="flex items-center gap-1.5">
+                <ChevronRight size={12} className="flex-shrink-0 transition-transform duration-150"
+                  style={{ transform: isRowCollapsed ? "rotate(0deg)" : "rotate(90deg)", color: BRAND, opacity: 0.7 }} />
+                {row.label}
+              </span>
               {row.value != null && row.value !== 0 && (
                 <span className="font-bold font-mono tabular-nums" style={{ color: isNeg ? "#ef4444" : BRAND }}>
                   {fmt(row.value)}
@@ -1032,7 +1159,7 @@ function SingleColTable({ rows: rawRows, title }: { rows: (BsRow | CfRow | Repor
             ← Previous
           </button>
           <span className="text-[11px] text-gray-400">
-            {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)} of {filtered.length}
+            {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, visibleRows.length)} of {visibleRows.length}
           </span>
           <button
             onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
