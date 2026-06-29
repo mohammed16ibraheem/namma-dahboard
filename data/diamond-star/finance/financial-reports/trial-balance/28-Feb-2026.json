@@ -1,0 +1,4100 @@
+{
+  "reportType": "trial-balance",
+  "period": "28-Feb-2026",
+  "company": "diamond-star",
+  "uploadedAt": "2026-06-29T08:07:04.611Z",
+  "bs": [],
+  "cf": [],
+  "rows": [
+    {
+      "label": "FCA   CONTROL A/Cs",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "JEC-001   Journal Entries Control A/C",
+      "type": "line",
+      "indent": 1,
+      "value": 0,
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "Total  CONTROL A/Cs",
+      "type": "total",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "10   Cash & Cash Equivallants",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "100   Petty Cash",
+      "type": "section",
+      "indent": 1,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "0100-01   Petty Cash-Accounts",
+      "type": "line",
+      "indent": 2,
+      "value": 127066.04000000007,
+      "values": [
+        42081.98,
+        1076830.55,
+        991846.49,
+        84984.06000000006,
+        127066.04000000007
+      ]
+    },
+    {
+      "label": "0100-02   Petty Cash-Expenses",
+      "type": "line",
+      "indent": 2,
+      "value": 0,
+      "values": [
+        -3570,
+        54720.36,
+        51150.36,
+        3570,
+        0
+      ]
+    },
+    {
+      "label": "0100-03   Petty Cash - Material",
+      "type": "line",
+      "indent": 2,
+      "value": 0,
+      "values": [
+        -578020.5,
+        937129.4,
+        359108.9,
+        578020.5,
+        0
+      ]
+    },
+    {
+      "label": "0100-08   Cash In Hand-2024",
+      "type": "line",
+      "indent": 2,
+      "value": 200,
+      "values": [
+        0,
+        3345,
+        3145,
+        200,
+        200
+      ]
+    },
+    {
+      "label": "Total  Petty Cash",
+      "type": "total",
+      "indent": 1,
+      "value": 127266.04000000007,
+      "values": [
+        -539508.52,
+        2072025.31,
+        1405250.75,
+        666774.56,
+        127266.04000000007
+      ]
+    },
+    {
+      "label": "102   Bank",
+      "type": "section",
+      "indent": 1,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "0102-09   Riyad Bank-136425689994 (DSA)",
+      "type": "line",
+      "indent": 2,
+      "value": 12833.12000000001,
+      "values": [
+        20467.86,
+        1899389.44,
+        1907024.18,
+        -7634.739999999991,
+        12833.12000000001
+      ]
+    },
+    {
+      "label": "0102-10   AL RAJHI BANK-45300-001-0006080453175",
+      "type": "line",
+      "indent": 2,
+      "value": 100,
+      "values": [
+        0,
+        100,
+        0,
+        100,
+        100
+      ]
+    },
+    {
+      "label": "Total  Bank",
+      "type": "total",
+      "indent": 1,
+      "value": 12933.12000000001,
+      "values": [
+        20467.86,
+        1899489.44,
+        1907024.18,
+        -7534.739999999991,
+        12933.12000000001
+      ]
+    },
+    {
+      "label": "Total  Cash & Cash Equivallants",
+      "type": "total",
+      "indent": 0,
+      "value": 140199.1600000001,
+      "values": [
+        -519040.66000000003,
+        3971514.75,
+        3312274.9299999997,
+        659239.8200000001,
+        140199.1600000001
+      ]
+    },
+    {
+      "label": "101   Cash In Collection",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "0101-01   Cash In Collection",
+      "type": "line",
+      "indent": 1,
+      "value": 0,
+      "values": [
+        615852.55,
+        460978,
+        1076830.55,
+        -615852.55,
+        0
+      ]
+    },
+    {
+      "label": "Total  Cash In Collection",
+      "type": "total",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        615852.55,
+        460978,
+        1076830.55,
+        -615852.55,
+        0
+      ]
+    },
+    {
+      "label": "400   Accounts Receivables",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "0400-140   SAM Advance Co For Industry",
+      "type": "line",
+      "indent": 1,
+      "value": 7656,
+      "values": [
+        24656,
+        0,
+        17000,
+        -17000,
+        7656
+      ]
+    },
+    {
+      "label": "0400-138   United Gulf Factory For Plastics",
+      "type": "line",
+      "indent": 1,
+      "value": 0,
+      "values": [
+        0,
+        24840,
+        24840,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "0400-137   Hamed Ateeq Raziq Al-Harbi Environmental Services Est.",
+      "type": "line",
+      "indent": 1,
+      "value": -0.34000000000009095,
+      "values": [
+        -0.44,
+        3190.1,
+        3190,
+        0.09999999999990905,
+        -0.34000000000009095
+      ]
+    },
+    {
+      "label": "0400-02   AL JAZEERA MODEL PLASTIC FACTORY",
+      "type": "line",
+      "indent": 1,
+      "value": 3496,
+      "values": [
+        0,
+        5756,
+        2260,
+        3496,
+        3496
+      ]
+    },
+    {
+      "label": "0605-03   Saudi Steel Reinforcements Ltd.",
+      "type": "line",
+      "indent": 1,
+      "value": 1998.98,
+      "values": [
+        0,
+        1998.98,
+        0,
+        1998.98,
+        1998.98
+      ]
+    },
+    {
+      "label": "0400-10   MUHAMMAD NASIR SANOSI BAGHDADI PLASTIC FACTORY",
+      "type": "line",
+      "indent": 1,
+      "value": 5207.1,
+      "values": [
+        9499,
+        5237.1,
+        9529,
+        -4291.9,
+        5207.1
+      ]
+    },
+    {
+      "label": "0400-13   Rafeeq Bilal Plastic Pvt Ltd",
+      "type": "line",
+      "indent": 1,
+      "value": 5179.95,
+      "values": [
+        2925.2,
+        8864.75,
+        6610,
+        2254.75,
+        5179.95
+      ]
+    },
+    {
+      "label": "0400-15   SAPAPCO",
+      "type": "line",
+      "indent": 1,
+      "value": 11690.200000000003,
+      "values": [
+        5685.6,
+        23886.08,
+        17881.48,
+        6004.600000000002,
+        11690.200000000003
+      ]
+    },
+    {
+      "label": "0400-17   STAR PLASTIC TRADING COMPANY",
+      "type": "line",
+      "indent": 1,
+      "value": 76674.3,
+      "values": [
+        124246.8,
+        27427.5,
+        75000,
+        -47572.5,
+        76674.3
+      ]
+    },
+    {
+      "label": "0400-20   Zomorrodah Factory Plastic Industries",
+      "type": "line",
+      "indent": 1,
+      "value": 13086.31,
+      "values": [
+        0,
+        13086.31,
+        0,
+        13086.31,
+        13086.31
+      ]
+    },
+    {
+      "label": "0400-25   Various Customers",
+      "type": "line",
+      "indent": 1,
+      "value": -6880,
+      "values": [
+        -2040,
+        0,
+        4840,
+        -4840,
+        -6880
+      ]
+    },
+    {
+      "label": "0400-27   NESMA PLASTIC FACTORY",
+      "type": "line",
+      "indent": 1,
+      "value": 634.9499999999998,
+      "values": [
+        0,
+        5981.95,
+        5347,
+        634.9499999999998,
+        634.9499999999998
+      ]
+    },
+    {
+      "label": "0400-36   SAAD SALIM QAHTANI FACTORY",
+      "type": "line",
+      "indent": 1,
+      "value": 16.869999999995343,
+      "values": [
+        49737.5,
+        57500,
+        107220.63,
+        -49720.630000000005,
+        16.869999999995343
+      ]
+    },
+    {
+      "label": "0400-40   Sama Bahrania Industrial Factory Co",
+      "type": "line",
+      "indent": 1,
+      "value": 5890.58,
+      "values": [
+        0,
+        5890.58,
+        0,
+        5890.58,
+        5890.58
+      ]
+    },
+    {
+      "label": "0400-41   Al Ibiraturia Al Hamra Plastic Trading LLC",
+      "type": "line",
+      "indent": 1,
+      "value": 251780.95,
+      "values": [
+        0,
+        251780.95,
+        0,
+        251780.95,
+        251780.95
+      ]
+    },
+    {
+      "label": "0400-45   Elite Bright Company For Plastic",
+      "type": "line",
+      "indent": 1,
+      "value": 655.5,
+      "values": [
+        0,
+        655.5,
+        0,
+        655.5,
+        655.5
+      ]
+    },
+    {
+      "label": "0400-46   NAMA ADVANCED MODERN TRADING CO.",
+      "type": "line",
+      "indent": 1,
+      "value": 26263.120000000006,
+      "values": [
+        45652.12,
+        26263.13,
+        45652.13,
+        -19388.999999999996,
+        26263.120000000006
+      ]
+    },
+    {
+      "label": "0400-51   Awad Mohammed Al-Qahtani Plastic Factory",
+      "type": "line",
+      "indent": 1,
+      "value": 29979.5,
+      "values": [
+        28491.1,
+        59979.4,
+        58491,
+        1488.4000000000015,
+        29979.5
+      ]
+    },
+    {
+      "label": "0400-54   Ahmed Abdul Aziz Badran Factory Co For Plastic And Paper",
+      "type": "line",
+      "indent": 1,
+      "value": 481.75,
+      "values": [
+        0,
+        481.75,
+        0,
+        481.75,
+        481.75
+      ]
+    },
+    {
+      "label": "0400-53   Green City International Trading Co.-Recivable",
+      "type": "line",
+      "indent": 1,
+      "value": 338574.94,
+      "values": [
+        185633.45,
+        152941.49,
+        0,
+        152941.49,
+        338574.94
+      ]
+    },
+    {
+      "label": "0400-57   SAMA MAKKAH PLASTIC FACTORY",
+      "type": "line",
+      "indent": 1,
+      "value": 1.7999999999992724,
+      "values": [
+        32071.8,
+        22218,
+        54288,
+        -32070,
+        1.7999999999992724
+      ]
+    },
+    {
+      "label": "0400-58   AZZA ALI AL ZUBAIDI EST.",
+      "type": "line",
+      "indent": 1,
+      "value": -0.3499999999995998,
+      "values": [
+        0.34,
+        6268.31,
+        6269,
+        -0.6899999999995998,
+        -0.3499999999995998
+      ]
+    },
+    {
+      "label": "0400-60   AL ROMANA MODERN PLASTIC FACTORY COMPANY",
+      "type": "line",
+      "indent": 1,
+      "value": 0.75,
+      "values": [
+        0,
+        128138.75,
+        128138,
+        0.75,
+        0.75
+      ]
+    },
+    {
+      "label": "0400-61   WADI AL KHADRA'A FACTORY COMPANY FOR INDUSTRY",
+      "type": "line",
+      "indent": 1,
+      "value": 17014.160000000003,
+      "values": [
+        14052.65,
+        36230.51,
+        33269,
+        2961.510000000002,
+        17014.160000000003
+      ]
+    },
+    {
+      "label": "0400-69   DCI Plus Foundation",
+      "type": "line",
+      "indent": 1,
+      "value": 0,
+      "values": [
+        0,
+        15824,
+        15824,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "0400-75   MUHAMMAD JUWAIBER AL THABAITI PLASTIC FACTORY",
+      "type": "line",
+      "indent": 1,
+      "value": 7289.4,
+      "values": [
+        0,
+        13289.4,
+        6000,
+        7289.4,
+        7289.4
+      ]
+    },
+    {
+      "label": "0400-76   Aknan Specialized For Industry Co.",
+      "type": "line",
+      "indent": 1,
+      "value": 4473.85,
+      "values": [
+        4473.85,
+        0,
+        0,
+        0,
+        4473.85
+      ]
+    },
+    {
+      "label": "0400-78   Pharmaceutical Solution Industry Ltd.",
+      "type": "line",
+      "indent": 1,
+      "value": 105822.41,
+      "values": [
+        24170.93,
+        85676.48,
+        4025,
+        81651.48,
+        105822.41
+      ]
+    },
+    {
+      "label": "0400-87   Pan Gulf International Trading Co.(PGI)",
+      "type": "line",
+      "indent": 1,
+      "value": 68601.02,
+      "values": [
+        163490.59,
+        121383.39,
+        216272.96,
+        -94889.56999999999,
+        68601.02
+      ]
+    },
+    {
+      "label": "0400-100   SAUDI NATIONAL PLASTIC FACTORY FOR INDUSTRY",
+      "type": "line",
+      "indent": 1,
+      "value": 0.6799999999998363,
+      "values": [
+        2955,
+        0,
+        2954.32,
+        -2954.32,
+        0.6799999999998363
+      ]
+    },
+    {
+      "label": "0400-102   LADAIN SHORAN FOR MANUFACTURING CO.",
+      "type": "line",
+      "indent": 1,
+      "value": 116004.69999999998,
+      "values": [
+        66083.16,
+        435666.54,
+        385745,
+        49921.53999999998,
+        116004.69999999998
+      ]
+    },
+    {
+      "label": "0400-103   Arabian Plastic Developed Co",
+      "type": "line",
+      "indent": 1,
+      "value": 23240.2,
+      "values": [
+        33575.4,
+        16560,
+        26895.2,
+        -10335.2,
+        23240.2
+      ]
+    },
+    {
+      "label": "0400-108   Ladain Al Mustaqbal For Industry",
+      "type": "line",
+      "indent": 1,
+      "value": 19140.230000000003,
+      "values": [
+        12004,
+        42136.23,
+        35000,
+        7136.230000000003,
+        19140.230000000003
+      ]
+    },
+    {
+      "label": "0400-111   AL HAMRA FACTORY FOR PLASTIC",
+      "type": "line",
+      "indent": 1,
+      "value": 90884.87,
+      "values": [
+        77701.01,
+        88183.86,
+        75000,
+        13183.86,
+        90884.87
+      ]
+    },
+    {
+      "label": "0400-117   UMAIR SIDDIQUE TRADING Co.",
+      "type": "line",
+      "indent": 1,
+      "value": 7232.93,
+      "values": [
+        0,
+        7232.93,
+        0,
+        7232.93,
+        7232.93
+      ]
+    },
+    {
+      "label": "0400-118   SAUDI SAMETEX SOLE PROPRIETORSHIP COMPANY",
+      "type": "line",
+      "indent": 1,
+      "value": 45641.08,
+      "values": [
+        4525.83,
+        64343.65,
+        23228.4,
+        41115.25,
+        45641.08
+      ]
+    },
+    {
+      "label": "0400-121   AL SADARA FOR INDUSTRY COMPANY",
+      "type": "line",
+      "indent": 1,
+      "value": 5774.65,
+      "values": [
+        0,
+        5774.65,
+        0,
+        5774.65,
+        5774.65
+      ]
+    },
+    {
+      "label": "0400-119   Diamond Star Arabia Waste Recycling",
+      "type": "line",
+      "indent": 1,
+      "value": 14572.069999999998,
+      "values": [
+        -951.2,
+        17868.94,
+        2345.67,
+        15523.269999999999,
+        14572.069999999998
+      ]
+    },
+    {
+      "label": "0400-136   Abdullah Salem Ahmed Basalama T. Est",
+      "type": "line",
+      "indent": 1,
+      "value": 0.10000000000009096,
+      "values": [
+        0.2,
+        1179.9,
+        1180,
+        -0.09999999999990905,
+        0.10000000000009096
+      ]
+    },
+    {
+      "label": "0400-134   Nufud Water Factory Co",
+      "type": "line",
+      "indent": 1,
+      "value": 0,
+      "values": [
+        0,
+        1012,
+        1012,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "0400-130   Al Sultan Model Plastic Factory",
+      "type": "line",
+      "indent": 1,
+      "value": 0.5,
+      "values": [
+        32460.3,
+        23078.2,
+        55538,
+        -32459.8,
+        0.5
+      ]
+    },
+    {
+      "label": "0400-127   Al-Yaqeen Advanced Trading Co.Receivable",
+      "type": "line",
+      "indent": 1,
+      "value": 1028.1000000000001,
+      "values": [
+        917.7,
+        110.4,
+        0,
+        110.4,
+        1028.1000000000001
+      ]
+    },
+    {
+      "label": "3200-310   Tadwir Al-Jazirah Trading Company LLC.",
+      "type": "line",
+      "indent": 1,
+      "value": -7057.989999999998,
+      "values": [
+        34296,
+        51379.21,
+        92733.2,
+        -41353.99,
+        -7057.989999999998
+      ]
+    },
+    {
+      "label": "0400-141   ALSAUDI ALWATANI ALMUTAFAWIQ LILBILASTIK FACTORY MFG EST.",
+      "type": "line",
+      "indent": 1,
+      "value": 7375.5,
+      "values": [
+        27657.5,
+        53503.75,
+        73785.75,
+        -20282,
+        7375.5
+      ]
+    },
+    {
+      "label": "0400-143   Home Need Supplies Manufacturing Company",
+      "type": "line",
+      "indent": 1,
+      "value": 9257.5,
+      "values": [
+        0,
+        59943.75,
+        50686.25,
+        9257.5,
+        9257.5
+      ]
+    },
+    {
+      "label": "Total  Accounts Receivables",
+      "type": "total",
+      "indent": 0,
+      "value": 1308684.82,
+      "values": [
+        1003971.3900000001,
+        1972764.4199999997,
+        1668050.9899999998,
+        304713.43,
+        1308684.82
+      ]
+    },
+    {
+      "label": "490   VAT",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "VI-001   Vat Input Account",
+      "type": "line",
+      "indent": 1,
+      "value": 0.010000000009313226,
+      "values": [
+        0,
+        202879.64,
+        202879.63,
+        0.010000000009313226,
+        0.010000000009313226
+      ]
+    },
+    {
+      "label": "VO-002   Vat Output Account",
+      "type": "line",
+      "indent": 1,
+      "value": 0,
+      "values": [
+        0,
+        185526.34,
+        185526.34,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "VOA2-003   Net Vat Refundable / Payable.",
+      "type": "line",
+      "indent": 1,
+      "value": 17353.290000000008,
+      "values": [
+        -141500.87,
+        159260.85,
+        406.69,
+        158854.16,
+        17353.290000000008
+      ]
+    },
+    {
+      "label": "VAD-006   Vat Advance Account",
+      "type": "line",
+      "indent": 1,
+      "value": 172.64999999999986,
+      "values": [
+        1713.48,
+        13.05,
+        1553.88,
+        -1540.8300000000002,
+        172.64999999999986
+      ]
+    },
+    {
+      "label": "Total  VAT",
+      "type": "total",
+      "indent": 0,
+      "value": 17525.95000000002,
+      "values": [
+        -139787.38999999998,
+        547679.88,
+        390366.54,
+        157313.34000000003,
+        17525.95000000002
+      ]
+    },
+    {
+      "label": "601   Prepaid Expenses",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "0601-01   Prepaid-Rent Factory",
+      "type": "line",
+      "indent": 1,
+      "value": 68051.05,
+      "values": [
+        -12546,
+        93143.05,
+        12546,
+        80597.05,
+        68051.05
+      ]
+    },
+    {
+      "label": "0601-02   Prepaid-Medical Insurance",
+      "type": "line",
+      "indent": 1,
+      "value": 186025.46,
+      "values": [
+        186025.46,
+        0,
+        0,
+        0,
+        186025.46
+      ]
+    },
+    {
+      "label": "0601-14   Prepaid Vehicle Insurance-Wataniya Insurance",
+      "type": "line",
+      "indent": 1,
+      "value": 9858.070000000002,
+      "values": [
+        0,
+        10843.87,
+        985.8,
+        9858.070000000002,
+        9858.070000000002
+      ]
+    },
+    {
+      "label": "0601-18   Prepaid Bupa Medical - Exp",
+      "type": "line",
+      "indent": 1,
+      "value": -31004.22,
+      "values": [
+        -15502.11,
+        0,
+        15502.11,
+        -15502.11,
+        -31004.22
+      ]
+    },
+    {
+      "label": "0601-20   Prepaid MWAN License Fee",
+      "type": "line",
+      "indent": 1,
+      "value": -4735.63,
+      "values": [
+        -2700.46,
+        0,
+        2035.17,
+        -2035.17,
+        -4735.63
+      ]
+    },
+    {
+      "label": "Total  Prepaid Expenses",
+      "type": "total",
+      "indent": 0,
+      "value": 228194.73,
+      "values": [
+        155276.88999999998,
+        103986.92,
+        31069.08,
+        72917.84000000001,
+        228194.73
+      ]
+    },
+    {
+      "label": "602   Staff Advances",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "0602-042   Ashraf Ghazali ID-233",
+      "type": "line",
+      "indent": 1,
+      "value": 2465,
+      "values": [
+        0,
+        3000,
+        535,
+        2465,
+        2465
+      ]
+    },
+    {
+      "label": "0602-001   Usman Tanwar",
+      "type": "line",
+      "indent": 1,
+      "value": 124996.54,
+      "values": [
+        0,
+        124996.54,
+        0,
+        124996.54,
+        124996.54
+      ]
+    },
+    {
+      "label": "0602-004   Mohammed Omer Tanwer",
+      "type": "line",
+      "indent": 1,
+      "value": 104098.21,
+      "values": [
+        0,
+        104098.21,
+        0,
+        104098.21,
+        104098.21
+      ]
+    },
+    {
+      "label": "0602-046   Abdul Kalam Patan ID#259",
+      "type": "line",
+      "indent": 1,
+      "value": 0,
+      "values": [
+        0,
+        7185,
+        7185,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "0602-045   Abdul Alim ID#531",
+      "type": "line",
+      "indent": 1,
+      "value": 0,
+      "values": [
+        0,
+        6290,
+        6290,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "0602-016   Fakhruddin Qasmi - ID # 160",
+      "type": "line",
+      "indent": 1,
+      "value": 6200,
+      "values": [
+        6200,
+        0,
+        0,
+        0,
+        6200
+      ]
+    },
+    {
+      "label": "0602-035   Moinuddin Panwar ID# 174",
+      "type": "line",
+      "indent": 1,
+      "value": 9300,
+      "values": [
+        0,
+        9300,
+        0,
+        9300,
+        9300
+      ]
+    },
+    {
+      "label": "0602-027   Hossam Al-Bishri # 222",
+      "type": "line",
+      "indent": 1,
+      "value": 81540.33,
+      "values": [
+        0,
+        81540.33,
+        0,
+        81540.33,
+        81540.33
+      ]
+    },
+    {
+      "label": "0602-037   Sikandar Yusuf ID-2005",
+      "type": "line",
+      "indent": 1,
+      "value": 600,
+      "values": [
+        300,
+        300,
+        0,
+        300,
+        600
+      ]
+    },
+    {
+      "label": "0602-041   SADAB AHMAD (ID 2009)",
+      "type": "line",
+      "indent": 1,
+      "value": 600,
+      "values": [
+        300,
+        300,
+        0,
+        300,
+        600
+      ]
+    },
+    {
+      "label": "0602-040   SHAMIM UDDIN (ID # 2007)",
+      "type": "line",
+      "indent": 1,
+      "value": 600,
+      "values": [
+        300,
+        300,
+        0,
+        300,
+        600
+      ]
+    },
+    {
+      "label": "0602-039   AKSHAY NIKANTH (ID # 2007)",
+      "type": "line",
+      "indent": 1,
+      "value": 300,
+      "values": [
+        300,
+        0,
+        0,
+        0,
+        300
+      ]
+    },
+    {
+      "label": "0602-038   ALTAF SIDDIQUE (ID # 2006)",
+      "type": "line",
+      "indent": 1,
+      "value": 600,
+      "values": [
+        300,
+        300,
+        0,
+        300,
+        600
+      ]
+    },
+    {
+      "label": "Total  Staff Advances",
+      "type": "total",
+      "indent": 0,
+      "value": 331300.08,
+      "values": [
+        7700,
+        337610.08,
+        14010,
+        323600.08,
+        331300.08
+      ]
+    },
+    {
+      "label": "604   Supplier Advance",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "0604-18   Chess International Trading Company B.V.",
+      "type": "line",
+      "indent": 1,
+      "value": 154069.01,
+      "values": [
+        0,
+        154069.01,
+        0,
+        154069.01,
+        154069.01
+      ]
+    },
+    {
+      "label": "0604-02   Gulf Packaging System - Advance To Supplier",
+      "type": "line",
+      "indent": 1,
+      "value": 73444.9,
+      "values": [
+        7956.25,
+        65488.65,
+        0,
+        65488.65,
+        73444.9
+      ]
+    },
+    {
+      "label": "0604-17   FAM Recycling Fzco",
+      "type": "line",
+      "indent": 1,
+      "value": 257525,
+      "values": [
+        0,
+        257525,
+        0,
+        257525,
+        257525
+      ]
+    },
+    {
+      "label": "0604-16   ABSM For Safey Devises",
+      "type": "line",
+      "indent": 1,
+      "value": 0,
+      "values": [
+        0,
+        2000,
+        2000,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "0604-09   Saudi Can Co - Advance To Supplier",
+      "type": "line",
+      "indent": 1,
+      "value": 7439.29,
+      "values": [
+        0,
+        7439.29,
+        0,
+        7439.29,
+        7439.29
+      ]
+    },
+    {
+      "label": "0604-12   Pharmaceutical Solution Industry. Ltd",
+      "type": "line",
+      "indent": 1,
+      "value": 650000,
+      "values": [
+        0,
+        650000,
+        0,
+        650000,
+        650000
+      ]
+    },
+    {
+      "label": "Total  Supplier Advance",
+      "type": "total",
+      "indent": 0,
+      "value": 1142478.2,
+      "values": [
+        7956.25,
+        1136521.95,
+        2000,
+        1134521.95,
+        1142478.2
+      ]
+    },
+    {
+      "label": "0700   Stocks",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "0700-01   Raw Matetrail Inventory",
+      "type": "line",
+      "indent": 1,
+      "value": 478560.98,
+      "values": [
+        470091.4,
+        701501.58,
+        693032,
+        8469.579999999958,
+        478560.98
+      ]
+    },
+    {
+      "label": "0700-02   Finished Goods Inventory",
+      "type": "line",
+      "indent": 1,
+      "value": -424321.25,
+      "values": [
+        -424337.4,
+        622696.06,
+        622679.91,
+        16.150000000023283,
+        -424321.25
+      ]
+    },
+    {
+      "label": "0700-03   Work In Process",
+      "type": "line",
+      "indent": 1,
+      "value": 0,
+      "values": [
+        0,
+        622696.06,
+        622696.06,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "Total  Stocks",
+      "type": "total",
+      "indent": 0,
+      "value": 54239.72999999998,
+      "values": [
+        45754,
+        1946893.7000000002,
+        1938407.9700000002,
+        8485.729999999981,
+        54239.72999999998
+      ]
+    },
+    {
+      "label": "2000   FA-Costs",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "2000-01   Plants & Machinery",
+      "type": "line",
+      "indent": 1,
+      "value": 747534.5,
+      "values": [
+        0,
+        747534.5,
+        0,
+        747534.5,
+        747534.5
+      ]
+    },
+    {
+      "label": "2000-03   Office Equipments",
+      "type": "line",
+      "indent": 1,
+      "value": 2850,
+      "values": [
+        0,
+        2850,
+        0,
+        2850,
+        2850
+      ]
+    },
+    {
+      "label": "2000-08   Lease Hold Improvements.",
+      "type": "line",
+      "indent": 1,
+      "value": 10500,
+      "values": [
+        0,
+        10500,
+        0,
+        10500,
+        10500
+      ]
+    },
+    {
+      "label": "Total  FA-Costs",
+      "type": "total",
+      "indent": 0,
+      "value": 760884.5,
+      "values": [
+        0,
+        760884.5,
+        0,
+        760884.5,
+        760884.5
+      ]
+    },
+    {
+      "label": "2001   Acc Depreciation",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "2001-02   Acc Dep-Plant & Machinery",
+      "type": "line",
+      "indent": 1,
+      "value": -20975.73,
+      "values": [
+        -11021.32,
+        0,
+        9954.41,
+        -9954.41,
+        -20975.73
+      ]
+    },
+    {
+      "label": "2001-03   Acc Dep-Store Equipments",
+      "type": "line",
+      "indent": 1,
+      "value": -1679.65,
+      "values": [
+        -856.77,
+        0,
+        822.88,
+        -822.88,
+        -1679.65
+      ]
+    },
+    {
+      "label": "2001-08   Acc Dep- Lease Hold Improvment",
+      "type": "line",
+      "indent": 1,
+      "value": -200.51,
+      "values": [
+        -55.44,
+        0,
+        145.07,
+        -145.07,
+        -200.51
+      ]
+    },
+    {
+      "label": "2001-04   Acc Dep-Office Equipments",
+      "type": "line",
+      "indent": 1,
+      "value": -160.91,
+      "values": [
+        -84.56,
+        0,
+        76.35,
+        -76.35,
+        -160.91
+      ]
+    },
+    {
+      "label": "2001-05   Acc Dep-Vehicles",
+      "type": "line",
+      "indent": 1,
+      "value": -9003.25,
+      "values": [
+        -4730.68,
+        0,
+        4272.57,
+        -4272.57,
+        -9003.25
+      ]
+    },
+    {
+      "label": "2001-06   Acc.Dep-Furniture & Fixtures",
+      "type": "line",
+      "indent": 1,
+      "value": -903.91,
+      "values": [
+        -474.89,
+        0,
+        429.02,
+        -429.02,
+        -903.91
+      ]
+    },
+    {
+      "label": "2001-07   Acc.Dep-Computers",
+      "type": "line",
+      "indent": 1,
+      "value": -103.32,
+      "values": [
+        -54.55,
+        0,
+        48.77,
+        -48.77,
+        -103.32
+      ]
+    },
+    {
+      "label": "Total  Acc Depreciation",
+      "type": "total",
+      "indent": 0,
+      "value": -33027.28,
+      "values": [
+        -17278.21,
+        0,
+        15749.07,
+        -15749.07,
+        -33027.28
+      ]
+    },
+    {
+      "label": "3200   Trade Suppliers (Accounts Payable)",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "3200-311   First Saudi Company",
+      "type": "line",
+      "indent": 1,
+      "value": 862.5,
+      "values": [
+        25875,
+        0,
+        25012.5,
+        -25012.5,
+        862.5
+      ]
+    },
+    {
+      "label": "3200-007   Ahmed Mohammed Saleh Baeshen & Co",
+      "type": "line",
+      "indent": 1,
+      "value": -13650.38,
+      "values": [
+        0,
+        0,
+        13650.38,
+        -13650.38,
+        -13650.38
+      ]
+    },
+    {
+      "label": "3200-023   Fast Arrow Operation & Maintenance",
+      "type": "line",
+      "indent": 1,
+      "value": -415.5,
+      "values": [
+        0,
+        0,
+        415.5,
+        -415.5,
+        -415.5
+      ]
+    },
+    {
+      "label": "3200-038   Middle East Plastic Industries",
+      "type": "line",
+      "indent": 1,
+      "value": -1000,
+      "values": [
+        -12038.2,
+        11038.2,
+        0,
+        11038.2,
+        -1000
+      ]
+    },
+    {
+      "label": "3200-059   Nama Advanced Modern Trading Co - Supplier",
+      "type": "line",
+      "indent": 1,
+      "value": 4337.729999999996,
+      "values": [
+        -38425.48,
+        45652.13,
+        2888.92,
+        42763.21,
+        4337.729999999996
+      ]
+    },
+    {
+      "label": "3200-063   Nasr Packaging & Printing",
+      "type": "line",
+      "indent": 1,
+      "value": -16470.379999999997,
+      "values": [
+        0,
+        667.58,
+        17137.96,
+        -16470.379999999997,
+        -16470.379999999997
+      ]
+    },
+    {
+      "label": "3200-086   Small Vendors",
+      "type": "line",
+      "indent": 1,
+      "value": 0,
+      "values": [
+        0,
+        109631,
+        109631,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "3200-095   Namma Al Enjaz Factory For Industry - Purchase",
+      "type": "line",
+      "indent": 1,
+      "value": -1393740.33,
+      "values": [
+        -534075.65,
+        0,
+        859664.68,
+        -859664.68,
+        -1393740.33
+      ]
+    },
+    {
+      "label": "3200-114   AL JAZEERA MODEL PLASTIC FACTORY.",
+      "type": "line",
+      "indent": 1,
+      "value": 0.25,
+      "values": [
+        0.25,
+        2950,
+        2950,
+        0,
+        0.25
+      ]
+    },
+    {
+      "label": "3200-120   Saudi Plastic Factory",
+      "type": "line",
+      "indent": 1,
+      "value": 0,
+      "values": [
+        0,
+        4491.9,
+        4491.9,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "3200-147   Mahmood Saeed Beverage Ind.Co.Ltd",
+      "type": "line",
+      "indent": 1,
+      "value": -1640,
+      "values": [
+        0,
+        0,
+        1640,
+        -1640,
+        -1640
+      ]
+    },
+    {
+      "label": "3200-151   Arabian Plastic Developed Co - Supplier",
+      "type": "line",
+      "indent": 1,
+      "value": 0,
+      "values": [
+        0,
+        1895.2,
+        1895.2,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "3200-313   Bakriya Wire Steel Industries Co. Ltd",
+      "type": "line",
+      "indent": 1,
+      "value": -18179.2,
+      "values": [
+        0,
+        0,
+        18179.2,
+        -18179.2,
+        -18179.2
+      ]
+    },
+    {
+      "label": "3200-175   Sleep High Co.",
+      "type": "line",
+      "indent": 1,
+      "value": 0,
+      "values": [
+        -3082,
+        3082,
+        0,
+        3082,
+        0
+      ]
+    },
+    {
+      "label": "3200-183   Al Yaqeen Advance Trading Est.",
+      "type": "line",
+      "indent": 1,
+      "value": -32678.4,
+      "values": [
+        0,
+        0,
+        32678.4,
+        -32678.4,
+        -32678.4
+      ]
+    },
+    {
+      "label": "3200-184   Pharmaceutical Solutions Industry Ltd - Supp",
+      "type": "line",
+      "indent": 1,
+      "value": -667834.39,
+      "values": [
+        0,
+        72000,
+        739834.39,
+        -667834.39,
+        -667834.39
+      ]
+    },
+    {
+      "label": "3200-185   Bafarat Industrial Group L.L.C",
+      "type": "line",
+      "indent": 1,
+      "value": -24199.46,
+      "values": [
+        0,
+        19676.9,
+        43876.36,
+        -24199.46,
+        -24199.46
+      ]
+    },
+    {
+      "label": "3200-188   Saudi Can Closures Company",
+      "type": "line",
+      "indent": 1,
+      "value": 10000,
+      "values": [
+        10000,
+        0,
+        0,
+        0,
+        10000
+      ]
+    },
+    {
+      "label": "3200-193   Jamjoom Pharmaceuticals Co.",
+      "type": "line",
+      "indent": 1,
+      "value": -187995.2,
+      "values": [
+        0,
+        0,
+        187995.2,
+        -187995.2,
+        -187995.2
+      ]
+    },
+    {
+      "label": "3200-218   Naqaa Solutions Est For Environmental Services",
+      "type": "line",
+      "indent": 1,
+      "value": -301.38,
+      "values": [
+        0,
+        0,
+        301.38,
+        -301.38,
+        -301.38
+      ]
+    },
+    {
+      "label": "3200-221   Anas Ahmed Hashim Sobeeh Establishment",
+      "type": "line",
+      "indent": 1,
+      "value": -0.2999999999992724,
+      "values": [
+        0,
+        16028.7,
+        16029,
+        -0.2999999999992724,
+        -0.2999999999992724
+      ]
+    },
+    {
+      "label": "3200-224   Riaz Ali Muhammad",
+      "type": "line",
+      "indent": 1,
+      "value": 50285.66,
+      "values": [
+        0,
+        50285.66,
+        0,
+        50285.66,
+        50285.66
+      ]
+    },
+    {
+      "label": "3200-225   Ladain Shoran For Manufacturing Co (supplier)",
+      "type": "line",
+      "indent": 1,
+      "value": 0,
+      "values": [
+        0,
+        6670,
+        6670,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "3200-227   Zomorrodah Factory Plastic Industries",
+      "type": "line",
+      "indent": 1,
+      "value": -13085.93,
+      "values": [
+        0,
+        0,
+        13085.93,
+        -13085.93,
+        -13085.93
+      ]
+    },
+    {
+      "label": "3200-233   Scottish Chemical Indsutries",
+      "type": "line",
+      "indent": 1,
+      "value": -50285.66,
+      "values": [
+        0,
+        0,
+        50285.66,
+        -50285.66,
+        -50285.66
+      ]
+    },
+    {
+      "label": "3200-235   Danube FoodStuff And Luxry Company",
+      "type": "line",
+      "indent": 1,
+      "value": -90,
+      "values": [
+        0,
+        0,
+        90,
+        -90,
+        -90
+      ]
+    },
+    {
+      "label": "3200-246   Naseej International Trading Company",
+      "type": "line",
+      "indent": 1,
+      "value": -7039.15,
+      "values": [
+        0,
+        0,
+        7039.15,
+        -7039.15,
+        -7039.15
+      ]
+    },
+    {
+      "label": "3200-261   ADVANCED PHARMACEUTICAL INDUSTRIES CO.LTD.",
+      "type": "line",
+      "indent": 1,
+      "value": -9447.25,
+      "values": [
+        0,
+        0,
+        9447.25,
+        -9447.25,
+        -9447.25
+      ]
+    },
+    {
+      "label": "3200-270   RAKAYIZ AL TADWIR EST. FOR TRADING",
+      "type": "line",
+      "indent": 1,
+      "value": -0.599999999999909,
+      "values": [
+        0,
+        2599.3,
+        2599.9,
+        -0.599999999999909,
+        -0.599999999999909
+      ]
+    },
+    {
+      "label": "3200-278   Tanami Al Raida Trading Co",
+      "type": "line",
+      "indent": 1,
+      "value": -481309.19,
+      "values": [
+        0,
+        0,
+        481309.19,
+        -481309.19,
+        -481309.19
+      ]
+    },
+    {
+      "label": "3200-288   PURCHASE CONTROL A/C",
+      "type": "line",
+      "indent": 1,
+      "value": 281410.43,
+      "values": [
+        -406387.16,
+        1338253.26,
+        650455.67,
+        687797.59,
+        281410.43
+      ]
+    },
+    {
+      "label": "3200-293   PRESONA - Supplier",
+      "type": "line",
+      "indent": 1,
+      "value": 20945.27,
+      "values": [
+        0,
+        20945.27,
+        0,
+        20945.27,
+        20945.27
+      ]
+    },
+    {
+      "label": "3200-295   Mohammed Naser Al Hammadi Contracting",
+      "type": "line",
+      "indent": 1,
+      "value": -89152.02,
+      "values": [
+        0,
+        0,
+        89152.02,
+        -89152.02,
+        -89152.02
+      ]
+    },
+    {
+      "label": "3200-296   TA Logistics",
+      "type": "line",
+      "indent": 1,
+      "value": -8735,
+      "values": [
+        0,
+        0,
+        8735,
+        -8735,
+        -8735
+      ]
+    },
+    {
+      "label": "3200-299   RIMS INTERNATIONAL FZCO",
+      "type": "line",
+      "indent": 1,
+      "value": -71000,
+      "values": [
+        0,
+        0,
+        71000,
+        -71000,
+        -71000
+      ]
+    },
+    {
+      "label": "3200-305   Kianat Rose Trading Company Ltd",
+      "type": "line",
+      "indent": 1,
+      "value": -374265.46,
+      "values": [
+        0,
+        0,
+        374265.46,
+        -374265.46,
+        -374265.46
+      ]
+    },
+    {
+      "label": "3200-307   Al Faisal Plastic Factory Co",
+      "type": "line",
+      "indent": 1,
+      "value": 0,
+      "values": [
+        0,
+        2053,
+        2053,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "3200-312   SABREEN WAN EST. For Scrap",
+      "type": "line",
+      "indent": 1,
+      "value": -254055.93,
+      "values": [
+        -254055.93,
+        0,
+        0,
+        0,
+        -254055.93
+      ]
+    },
+    {
+      "label": "3200-309   Major Vendor",
+      "type": "line",
+      "indent": 1,
+      "value": -199956.09999999998,
+      "values": [
+        220918.2,
+        0,
+        420874.3,
+        -420874.3,
+        -199956.09999999998
+      ]
+    },
+    {
+      "label": "Total  Trade Suppliers (Accounts Payable)",
+      "type": "total",
+      "indent": 0,
+      "value": -3548685.37,
+      "values": [
+        -991270.97,
+        1707920.1,
+        4265334.5,
+        -2557414.4,
+        -3548685.37
+      ]
+    },
+    {
+      "label": "3201   Expenses Payable",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "3201-01   Accrued Expenses",
+      "type": "line",
+      "indent": 1,
+      "value": -77949.25,
+      "values": [
+        -101671,
+        161751.36,
+        138029.61,
+        23721.75,
+        -77949.25
+      ]
+    },
+    {
+      "label": "3201-02   Micro Solution",
+      "type": "line",
+      "indent": 1,
+      "value": -5525.75,
+      "values": [
+        0,
+        0,
+        5525.75,
+        -5525.75,
+        -5525.75
+      ]
+    },
+    {
+      "label": "3201-06   Trans Overseas Est",
+      "type": "line",
+      "indent": 1,
+      "value": -24857.94,
+      "values": [
+        0,
+        0,
+        24857.94,
+        -24857.94,
+        -24857.94
+      ]
+    },
+    {
+      "label": "Total  Expenses Payable",
+      "type": "total",
+      "indent": 0,
+      "value": -108332.94,
+      "values": [
+        -101671,
+        161751.36,
+        168413.3,
+        -6661.939999999999,
+        -108332.94
+      ]
+    },
+    {
+      "label": "3260   Others Payables",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "3270-12   Technical Zone Est For Maintenance",
+      "type": "line",
+      "indent": 1,
+      "value": -12872.64,
+      "values": [
+        10127.36,
+        0,
+        23000,
+        -23000,
+        -12872.64
+      ]
+    },
+    {
+      "label": "3260-05   Kites Equipmdent Rental Company LLC",
+      "type": "line",
+      "indent": 1,
+      "value": 500000,
+      "values": [
+        0,
+        500000,
+        0,
+        500000,
+        500000
+      ]
+    },
+    {
+      "label": "Total  Others Payables",
+      "type": "total",
+      "indent": 0,
+      "value": 487127.36,
+      "values": [
+        10127.36,
+        500000,
+        23000,
+        477000,
+        487127.36
+      ]
+    },
+    {
+      "label": "3270   Inter-Company",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "3270-01   Inter-Company - Al Yaqeen",
+      "type": "line",
+      "indent": 1,
+      "value": -186025.46,
+      "values": [
+        -186025.46,
+        0,
+        0,
+        0,
+        -186025.46
+      ]
+    },
+    {
+      "label": "3270-03   Namma Al Enjas (2026)",
+      "type": "line",
+      "indent": 1,
+      "value": 460352.64999999997,
+      "values": [
+        35121.67,
+        559916.32,
+        134685.34,
+        425230.98,
+        460352.64999999997
+      ]
+    },
+    {
+      "label": "3270-04   Inter-Company -Green City International Trading Co",
+      "type": "line",
+      "indent": 1,
+      "value": -328971.27999999997,
+      "values": [
+        0,
+        214946.57,
+        543917.85,
+        -328971.27999999997,
+        -328971.27999999997
+      ]
+    },
+    {
+      "label": "3270-09   Abu Rayhan Perfume Factory",
+      "type": "line",
+      "indent": 1,
+      "value": 10092.91,
+      "values": [
+        1075.25,
+        9017.66,
+        0,
+        9017.66,
+        10092.91
+      ]
+    },
+    {
+      "label": "0400-86   Al-Yaqeen Advanced Trading Co.",
+      "type": "line",
+      "indent": 1,
+      "value": 529075.4,
+      "values": [
+        719321.33,
+        879145.5,
+        1069391.43,
+        -190245.92999999993,
+        529075.4
+      ]
+    },
+    {
+      "label": "3200-148   Green City International Trading Co - Supplier",
+      "type": "line",
+      "indent": 1,
+      "value": -497649.85,
+      "values": [
+        -476905,
+        0,
+        20744.85,
+        -20744.85,
+        -497649.85
+      ]
+    },
+    {
+      "label": "Total  Inter-Company",
+      "type": "total",
+      "indent": 0,
+      "value": -13125.630000000005,
+      "values": [
+        92587.79000000004,
+        1663026.0499999998,
+        1768739.47,
+        -105713.41999999993,
+        -13125.630000000005
+      ]
+    },
+    {
+      "label": "3520   Fees Payable",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "3520-04   Audit Fee Payable",
+      "type": "line",
+      "indent": 1,
+      "value": -96200,
+      "values": [
+        0,
+        0,
+        96200,
+        -96200,
+        -96200
+      ]
+    },
+    {
+      "label": "Total  Fees Payable",
+      "type": "total",
+      "indent": 0,
+      "value": -96200,
+      "values": [
+        0,
+        0,
+        96200,
+        -96200,
+        -96200
+      ]
+    },
+    {
+      "label": "3560   Provisions",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "3560-01   Provision For LFA",
+      "type": "line",
+      "indent": 1,
+      "value": -71927.32,
+      "values": [
+        0,
+        6800,
+        78727.32,
+        -71927.32,
+        -71927.32
+      ]
+    },
+    {
+      "label": "3560-02   Provision For Vacation Pay",
+      "type": "line",
+      "indent": 1,
+      "value": -66849.41999999998,
+      "values": [
+        -10615.82,
+        14288.91,
+        70522.51,
+        -56233.59999999999,
+        -66849.41999999998
+      ]
+    },
+    {
+      "label": "Total  Provisions",
+      "type": "total",
+      "indent": 0,
+      "value": -138776.74,
+      "values": [
+        -10615.82,
+        21088.91,
+        149249.83000000002,
+        -128160.92,
+        -138776.74
+      ]
+    },
+    {
+      "label": "3540   Gratuity Payable",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "3540-01   Provision For End Of Service",
+      "type": "line",
+      "indent": 1,
+      "value": -330785.9,
+      "values": [
+        -26306.24,
+        19317.24,
+        323796.9,
+        -304479.66000000003,
+        -330785.9
+      ]
+    },
+    {
+      "label": "Total  Gratuity Payable",
+      "type": "total",
+      "indent": 0,
+      "value": -330785.9,
+      "values": [
+        -26306.24,
+        19317.24,
+        323796.9,
+        -304479.66000000003,
+        -330785.9
+      ]
+    },
+    {
+      "label": "4910   Drawing",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "4910-01   Owner's Current A/c",
+      "type": "line",
+      "indent": 1,
+      "value": -137642.63,
+      "values": [
+        -4253.22,
+        518.29,
+        133907.7,
+        -133389.41,
+        -137642.63
+      ]
+    },
+    {
+      "label": "4910-02   Retained Earning-Prior Years",
+      "type": "line",
+      "indent": 1,
+      "value": -29823.07,
+      "values": [
+        -29823.07,
+        0,
+        0,
+        0,
+        -29823.07
+      ]
+    },
+    {
+      "label": "Total  Drawing",
+      "type": "total",
+      "indent": 0,
+      "value": -167465.7,
+      "values": [
+        -34076.29,
+        518.29,
+        133907.7,
+        -133389.41,
+        -167465.7
+      ]
+    },
+    {
+      "label": "5000   Revenue",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "5000-02   Local Sales",
+      "type": "line",
+      "indent": 1,
+      "value": -2374871.75,
+      "values": [
+        -1379782.25,
+        0,
+        995089.5,
+        -995089.5,
+        -2374871.75
+      ]
+    },
+    {
+      "label": "5000-03   Other Income",
+      "type": "line",
+      "indent": 1,
+      "value": -461593.52,
+      "values": [
+        -219840.73,
+        0,
+        241752.79,
+        -241752.79,
+        -461593.52
+      ]
+    },
+    {
+      "label": "Total  Revenue",
+      "type": "total",
+      "indent": 0,
+      "value": -2836465.27,
+      "values": [
+        -1599622.98,
+        0,
+        1236842.29,
+        -1236842.29,
+        -2836465.27
+      ]
+    },
+    {
+      "label": "9000   Cost Of Sales",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "6006-05   Other Consumables",
+      "type": "line",
+      "indent": 1,
+      "value": 2249,
+      "values": [
+        0,
+        2249,
+        0,
+        2249,
+        2249
+      ]
+    },
+    {
+      "label": "6012-03   Loading & Un-loading Exp",
+      "type": "line",
+      "indent": 1,
+      "value": 50,
+      "values": [
+        0,
+        50,
+        0,
+        50,
+        50
+      ]
+    },
+    {
+      "label": "6012-04   Transportation Exp",
+      "type": "line",
+      "indent": 1,
+      "value": 8777,
+      "values": [
+        2850,
+        5927,
+        0,
+        5927,
+        8777
+      ]
+    },
+    {
+      "label": "6012-07   Material Packing Exp",
+      "type": "line",
+      "indent": 1,
+      "value": 29588,
+      "values": [
+        7780,
+        21808,
+        0,
+        21808,
+        29588
+      ]
+    },
+    {
+      "label": "9000-01   Cost Of Sales",
+      "type": "line",
+      "indent": 1,
+      "value": 1843376.41,
+      "values": [
+        1178895.91,
+        664480.5,
+        0,
+        664480.5,
+        1843376.41
+      ]
+    },
+    {
+      "label": "9000-02   Material Wastage",
+      "type": "line",
+      "indent": 1,
+      "value": 11414.51,
+      "values": [
+        5509.74,
+        28534.68,
+        22629.91,
+        5904.77,
+        11414.51
+      ]
+    },
+    {
+      "label": "9000-07   Bailing & Shredding Service Charges",
+      "type": "line",
+      "indent": 1,
+      "value": -156292.15,
+      "values": [
+        -156292.15,
+        0,
+        0,
+        0,
+        -156292.15
+      ]
+    },
+    {
+      "label": "Total  Cost Of Sales",
+      "type": "total",
+      "indent": 0,
+      "value": 1739162.77,
+      "values": [
+        1038743.4999999999,
+        723049.18,
+        22629.91,
+        700419.27,
+        1739162.77
+      ]
+    },
+    {
+      "label": "6000   Cost Of Employment",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "6000-01   Salaries & Wages",
+      "type": "line",
+      "indent": 1,
+      "value": 267251,
+      "values": [
+        130758,
+        141493,
+        5000,
+        136493,
+        267251
+      ]
+    },
+    {
+      "label": "6000-05   Overtime",
+      "type": "line",
+      "indent": 1,
+      "value": 21444,
+      "values": [
+        10134,
+        11310,
+        0,
+        11310,
+        21444
+      ]
+    },
+    {
+      "label": "6000-06   GOSSI Payments",
+      "type": "line",
+      "indent": 1,
+      "value": 32675.160000000003,
+      "values": [
+        15894.58,
+        17451.58,
+        671,
+        16780.58,
+        32675.160000000003
+      ]
+    },
+    {
+      "label": "6000-07   Medical Exp",
+      "type": "line",
+      "indent": 1,
+      "value": 16,
+      "values": [
+        0,
+        16,
+        0,
+        16,
+        16
+      ]
+    },
+    {
+      "label": "6000-08   LFA Expenses",
+      "type": "line",
+      "indent": 1,
+      "value": 12426.58,
+      "values": [
+        5988.16,
+        12426.58,
+        5988.16,
+        6438.42,
+        12426.58
+      ]
+    },
+    {
+      "label": "6000-09   Vacation Pay Exp",
+      "type": "line",
+      "indent": 1,
+      "value": 11082.5,
+      "values": [
+        4627.66,
+        8848.59,
+        2393.75,
+        6454.84,
+        11082.5
+      ]
+    },
+    {
+      "label": "6000-10   Gratuity Exp",
+      "type": "line",
+      "indent": 1,
+      "value": 14903,
+      "values": [
+        26306.24,
+        7914,
+        19317.24,
+        -11403.240000000002,
+        14903
+      ]
+    },
+    {
+      "label": "6000-13   Uniform & Safety Supplies",
+      "type": "line",
+      "indent": 1,
+      "value": 1672.74,
+      "values": [
+        30.45,
+        1642.29,
+        0,
+        1642.29,
+        1672.74
+      ]
+    },
+    {
+      "label": "6000-15   Casual Labour Salaries",
+      "type": "line",
+      "indent": 1,
+      "value": 41787,
+      "values": [
+        23537,
+        41787,
+        23537,
+        18250,
+        41787
+      ]
+    },
+    {
+      "label": "6000-18   Employees Work Permit Exp",
+      "type": "line",
+      "indent": 1,
+      "value": 9325,
+      "values": [
+        275,
+        9050,
+        0,
+        9050,
+        9325
+      ]
+    },
+    {
+      "label": "6000-19   Employees Exit & Re-entry Exp",
+      "type": "line",
+      "indent": 1,
+      "value": 1300,
+      "values": [
+        200,
+        1100,
+        0,
+        1100,
+        1300
+      ]
+    },
+    {
+      "label": "6000-23   Employees Iqama Renewal Exp",
+      "type": "line",
+      "indent": 1,
+      "value": 19515,
+      "values": [
+        4038,
+        15477,
+        0,
+        15477,
+        19515
+      ]
+    },
+    {
+      "label": "Total  Cost Of Employment",
+      "type": "total",
+      "indent": 0,
+      "value": 433397.98000000004,
+      "values": [
+        221789.09,
+        268516.04000000004,
+        56907.15,
+        211608.89000000004,
+        433397.98000000004
+      ]
+    },
+    {
+      "label": "6003   Rent & Rates",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "6003-05   RENTAL CONTAINER EXP",
+      "type": "line",
+      "indent": 1,
+      "value": 5892.6,
+      "values": [
+        5892.6,
+        0,
+        0,
+        0,
+        5892.6
+      ]
+    },
+    {
+      "label": "6003-01   Factory Rent",
+      "type": "line",
+      "indent": 1,
+      "value": 25092,
+      "values": [
+        12546,
+        12546,
+        0,
+        12546,
+        25092
+      ]
+    },
+    {
+      "label": "6003-03   Forklift Rent",
+      "type": "line",
+      "indent": 1,
+      "value": 600,
+      "values": [
+        600,
+        0,
+        0,
+        0,
+        600
+      ]
+    },
+    {
+      "label": "Total  Rent & Rates",
+      "type": "total",
+      "indent": 0,
+      "value": 31584.6,
+      "values": [
+        19038.6,
+        12546,
+        0,
+        12546,
+        31584.6
+      ]
+    },
+    {
+      "label": "6005   Depreciation Exp",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "6005-02   Dep Exp-Plant & Machinery",
+      "type": "line",
+      "indent": 1,
+      "value": 20975.73,
+      "values": [
+        11021.32,
+        9954.41,
+        0,
+        9954.41,
+        20975.73
+      ]
+    },
+    {
+      "label": "6005-04   Dep Exp-Office Equipments",
+      "type": "line",
+      "indent": 1,
+      "value": 160.91,
+      "values": [
+        84.56,
+        76.35,
+        0,
+        76.35,
+        160.91
+      ]
+    },
+    {
+      "label": "6005-05   Dep Exp-Vehicles",
+      "type": "line",
+      "indent": 1,
+      "value": 9003.25,
+      "values": [
+        4730.68,
+        4272.57,
+        0,
+        4272.57,
+        9003.25
+      ]
+    },
+    {
+      "label": "6005-06   Dep Exp-Furniture & Fixtures",
+      "type": "line",
+      "indent": 1,
+      "value": 903.91,
+      "values": [
+        474.89,
+        429.02,
+        0,
+        429.02,
+        903.91
+      ]
+    },
+    {
+      "label": "6005-11   Dep Exp-Lease Hold Improvments",
+      "type": "line",
+      "indent": 1,
+      "value": 200.51,
+      "values": [
+        55.44,
+        145.07,
+        0,
+        145.07,
+        200.51
+      ]
+    },
+    {
+      "label": "6005-07   Dep Exp-Computers",
+      "type": "line",
+      "indent": 1,
+      "value": 103.32,
+      "values": [
+        54.55,
+        48.77,
+        0,
+        48.77,
+        103.32
+      ]
+    },
+    {
+      "label": "6005-09   Dep Exp-Store Equipments",
+      "type": "line",
+      "indent": 1,
+      "value": 1679.65,
+      "values": [
+        856.77,
+        822.88,
+        0,
+        822.88,
+        1679.65
+      ]
+    },
+    {
+      "label": "Total  Depreciation Exp",
+      "type": "total",
+      "indent": 0,
+      "value": 33027.28,
+      "values": [
+        17278.21,
+        15749.07,
+        0,
+        15749.07,
+        33027.28
+      ]
+    },
+    {
+      "label": "6006   Repairs & Maintenance",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "6006-01   R & M- Building",
+      "type": "line",
+      "indent": 1,
+      "value": 161.97,
+      "values": [
+        161.97,
+        0,
+        0,
+        0,
+        161.97
+      ]
+    },
+    {
+      "label": "6006-02   R & M-Plant & Machinery",
+      "type": "line",
+      "indent": 1,
+      "value": 2767.78,
+      "values": [
+        677,
+        2090.78,
+        0,
+        2090.78,
+        2767.78
+      ]
+    },
+    {
+      "label": "6006-03   R & M-Fork Lifts & Other Equipments",
+      "type": "line",
+      "indent": 1,
+      "value": 710.9,
+      "values": [
+        363,
+        347.9,
+        0,
+        347.9,
+        710.9
+      ]
+    },
+    {
+      "label": "6006-07   R & M-Office Equipment",
+      "type": "line",
+      "indent": 1,
+      "value": 2004.83,
+      "values": [
+        1979.83,
+        25,
+        0,
+        25,
+        2004.83
+      ]
+    },
+    {
+      "label": "6006-08   R & M-Machine MIT # 6 (DSA-MICO-02)",
+      "type": "line",
+      "indent": 1,
+      "value": 930,
+      "values": [
+        930,
+        0,
+        0,
+        0,
+        930
+      ]
+    },
+    {
+      "label": "6006-09   R & M Electrical - Exp",
+      "type": "line",
+      "indent": 1,
+      "value": 280,
+      "values": [
+        246,
+        34,
+        0,
+        34,
+        280
+      ]
+    },
+    {
+      "label": "6006-10   R & M YEI Machine # 07 (DSA-YEI-01)",
+      "type": "line",
+      "indent": 1,
+      "value": 6645.64,
+      "values": [
+        3407.86,
+        3237.78,
+        0,
+        3237.78,
+        6645.64
+      ]
+    },
+    {
+      "label": "6006-26   R & M-Forklift Toyota",
+      "type": "line",
+      "indent": 1,
+      "value": 4204.110000000001,
+      "values": [
+        3024.11,
+        1180,
+        0,
+        1180,
+        4204.110000000001
+      ]
+    },
+    {
+      "label": "6002-29   R & M Mico -DSA/MICO/05",
+      "type": "line",
+      "indent": 1,
+      "value": 311.27,
+      "values": [
+        311.27,
+        0,
+        0,
+        0,
+        311.27
+      ]
+    },
+    {
+      "label": "6006-15   R & M Nissan Forklift UNI CAREER Y1F2 (DSA-UF)-2",
+      "type": "line",
+      "indent": 1,
+      "value": 2015,
+      "values": [
+        1770,
+        245,
+        0,
+        245,
+        2015
+      ]
+    },
+    {
+      "label": "6006-28   R & M- EPS Hot Melting Compress M-400",
+      "type": "line",
+      "indent": 1,
+      "value": 400,
+      "values": [
+        0,
+        400,
+        0,
+        400,
+        400
+      ]
+    },
+    {
+      "label": "6006-24   R&M Mico MIT#5 (DSA-MICO-04)",
+      "type": "line",
+      "indent": 1,
+      "value": 530,
+      "values": [
+        0,
+        530,
+        0,
+        530,
+        530
+      ]
+    },
+    {
+      "label": "6006-25   R & M Coreshredder",
+      "type": "line",
+      "indent": 1,
+      "value": 1200,
+      "values": [
+        0,
+        1200,
+        0,
+        1200,
+        1200
+      ]
+    },
+    {
+      "label": "6006-27   R & M - Weighbridge",
+      "type": "line",
+      "indent": 1,
+      "value": 2000,
+      "values": [
+        2000,
+        0,
+        0,
+        0,
+        2000
+      ]
+    },
+    {
+      "label": "6006-23   R & M - PRESONA MACHINE",
+      "type": "line",
+      "indent": 1,
+      "value": 5505,
+      "values": [
+        15,
+        5490,
+        0,
+        5490,
+        5505
+      ]
+    },
+    {
+      "label": "6006-21   R & M MICO MIT # 4 (DSA-MICO-03)",
+      "type": "line",
+      "indent": 1,
+      "value": 1146.52,
+      "values": [
+        0,
+        1146.52,
+        0,
+        1146.52,
+        1146.52
+      ]
+    },
+    {
+      "label": "Total  Repairs & Maintenance",
+      "type": "total",
+      "indent": 0,
+      "value": 30813.02,
+      "values": [
+        14886.04,
+        15926.980000000001,
+        0,
+        15926.980000000001,
+        30813.02
+      ]
+    },
+    {
+      "label": "6007   Repair & Maint-Vehicles",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "6007-02   R & M Isuzu EVS-0321",
+      "type": "line",
+      "indent": 1,
+      "value": 120,
+      "values": [
+        120,
+        0,
+        0,
+        0,
+        120
+      ]
+    },
+    {
+      "label": "6007-06   R & M -Staff Related Vehicle",
+      "type": "line",
+      "indent": 1,
+      "value": 2849,
+      "values": [
+        1417,
+        1432,
+        0,
+        1432,
+        2849
+      ]
+    },
+    {
+      "label": "6007-08   R & M -4677-GEA",
+      "type": "line",
+      "indent": 1,
+      "value": 20,
+      "values": [
+        0,
+        20,
+        0,
+        20,
+        20
+      ]
+    },
+    {
+      "label": "6007-09   R & M -6486 TLA",
+      "type": "line",
+      "indent": 1,
+      "value": 1135.04,
+      "values": [
+        620,
+        515.04,
+        0,
+        515.04,
+        1135.04
+      ]
+    },
+    {
+      "label": "6007-32   R & M Veh & Machinery Service Charge",
+      "type": "line",
+      "indent": 1,
+      "value": 26045.9,
+      "values": [
+        13968.61,
+        12077.29,
+        0,
+        12077.29,
+        26045.9
+      ]
+    },
+    {
+      "label": "6007-13   R & M -9054-RJD",
+      "type": "line",
+      "indent": 1,
+      "value": 655.4100000000001,
+      "values": [
+        581.44,
+        73.97,
+        0,
+        73.97,
+        655.4100000000001
+      ]
+    },
+    {
+      "label": "6007-14   R & M Exp-V-2634",
+      "type": "line",
+      "indent": 1,
+      "value": 160,
+      "values": [
+        130,
+        30,
+        0,
+        30,
+        160
+      ]
+    },
+    {
+      "label": "Total  Repair & Maint-Vehicles",
+      "type": "total",
+      "indent": 0,
+      "value": 30985.350000000002,
+      "values": [
+        16837.05,
+        14148.300000000001,
+        0,
+        14148.300000000001,
+        30985.350000000002
+      ]
+    },
+    {
+      "label": "6008   Gasoline Expenses",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "6008-01   Fuel Exp",
+      "type": "line",
+      "indent": 1,
+      "value": 333,
+      "values": [
+        0,
+        333,
+        0,
+        333,
+        333
+      ]
+    },
+    {
+      "label": "6008-02   Fuel - Generators & ForkLifts",
+      "type": "line",
+      "indent": 1,
+      "value": 5397.389999999999,
+      "values": [
+        2776.52,
+        2620.87,
+        0,
+        2620.87,
+        5397.389999999999
+      ]
+    },
+    {
+      "label": "6008-04   Fuel Exp-V-4677 GEA",
+      "type": "line",
+      "indent": 1,
+      "value": 939.28,
+      "values": [
+        509.6,
+        429.68,
+        0,
+        429.68,
+        939.28
+      ]
+    },
+    {
+      "label": "6008-06   Fuel Exp EVS-0321",
+      "type": "line",
+      "indent": 1,
+      "value": 1047.12,
+      "values": [
+        501.74,
+        545.38,
+        0,
+        545.38,
+        1047.12
+      ]
+    },
+    {
+      "label": "6008-09   Fuel Exp-V-9054 RJD",
+      "type": "line",
+      "indent": 1,
+      "value": 757.56,
+      "values": [
+        347.96,
+        409.6,
+        0,
+        409.6,
+        757.56
+      ]
+    },
+    {
+      "label": "6008-42   Fuel Exp (V#4508 ) Rajesh",
+      "type": "line",
+      "indent": 1,
+      "value": 428.69,
+      "values": [
+        173.91,
+        254.78,
+        0,
+        254.78,
+        428.69
+      ]
+    },
+    {
+      "label": "6008-11   Fuel Exp-V-2634",
+      "type": "line",
+      "indent": 1,
+      "value": 1046,
+      "values": [
+        518.26,
+        527.74,
+        0,
+        527.74,
+        1046
+      ]
+    },
+    {
+      "label": "6008-13   Fuel Exp TLA - 6486",
+      "type": "line",
+      "indent": 1,
+      "value": 2472.99,
+      "values": [
+        1300.03,
+        1172.96,
+        0,
+        1172.96,
+        2472.99
+      ]
+    },
+    {
+      "label": "6008-19   Fuel V#6942",
+      "type": "line",
+      "indent": 1,
+      "value": 317.03,
+      "values": [
+        0,
+        317.03,
+        0,
+        317.03,
+        317.03
+      ]
+    },
+    {
+      "label": "6008-23   Fuel V#7797",
+      "type": "line",
+      "indent": 1,
+      "value": 521.74,
+      "values": [
+        260.87,
+        260.87,
+        0,
+        260.87,
+        521.74
+      ]
+    },
+    {
+      "label": "6008-35   Hydraulic & Engine Oil",
+      "type": "line",
+      "indent": 1,
+      "value": 1665,
+      "values": [
+        0,
+        1665,
+        0,
+        1665,
+        1665
+      ]
+    },
+    {
+      "label": "6008-41   Fuel Exp - EVB - 2317",
+      "type": "line",
+      "indent": 1,
+      "value": 868.19,
+      "values": [
+        434.26,
+        433.93,
+        0,
+        433.93,
+        868.19
+      ]
+    },
+    {
+      "label": "Total  Gasoline Expenses",
+      "type": "total",
+      "indent": 0,
+      "value": 15793.99,
+      "values": [
+        6823.15,
+        8970.84,
+        0,
+        8970.84,
+        15793.99
+      ]
+    },
+    {
+      "label": "6009   Insurance",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "6009-01   Insurance-Vehicle Exp",
+      "type": "line",
+      "indent": 1,
+      "value": 985.8,
+      "values": [
+        0,
+        985.8,
+        0,
+        985.8,
+        985.8
+      ]
+    },
+    {
+      "label": "6009-02   Insurance-Medical Exp",
+      "type": "line",
+      "indent": 1,
+      "value": 31004.22,
+      "values": [
+        15502.11,
+        15502.11,
+        0,
+        15502.11,
+        31004.22
+      ]
+    },
+    {
+      "label": "Total  Insurance",
+      "type": "total",
+      "indent": 0,
+      "value": 31990.02,
+      "values": [
+        15502.11,
+        16487.91,
+        0,
+        16487.91,
+        31990.02
+      ]
+    },
+    {
+      "label": "6012   Other G & A Expenses",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "6012-23   Group Common Expenses",
+      "type": "line",
+      "indent": 1,
+      "value": 177998.05,
+      "values": [
+        51510.11,
+        126487.94,
+        0,
+        126487.94,
+        177998.05
+      ]
+    },
+    {
+      "label": "6012-24   PGI Expenses Recoved",
+      "type": "line",
+      "indent": 1,
+      "value": 113589.18,
+      "values": [
+        12389,
+        101200.18,
+        0,
+        101200.18,
+        113589.18
+      ]
+    },
+    {
+      "label": "6012-02   Office Supplies",
+      "type": "line",
+      "indent": 1,
+      "value": 959.22,
+      "values": [
+        561.83,
+        397.39,
+        0,
+        397.39,
+        959.22
+      ]
+    },
+    {
+      "label": "6012-19   Taxi/Bus Fair",
+      "type": "line",
+      "indent": 1,
+      "value": 85,
+      "values": [
+        0,
+        85,
+        0,
+        85,
+        85
+      ]
+    },
+    {
+      "label": "6012-09   Incentive Exp",
+      "type": "line",
+      "indent": 1,
+      "value": 2070,
+      "values": [
+        2070,
+        0,
+        0,
+        0,
+        2070
+      ]
+    },
+    {
+      "label": "6012-17   Traffic Fines",
+      "type": "line",
+      "indent": 1,
+      "value": 375,
+      "values": [
+        0,
+        375,
+        0,
+        375,
+        375
+      ]
+    },
+    {
+      "label": "6012-22   Parking Charges",
+      "type": "line",
+      "indent": 1,
+      "value": 22,
+      "values": [
+        0,
+        22,
+        0,
+        22,
+        22
+      ]
+    },
+    {
+      "label": "6012-01   Printing & Stationery",
+      "type": "line",
+      "indent": 1,
+      "value": 3243.83,
+      "values": [
+        26,
+        3217.83,
+        0,
+        3217.83,
+        3243.83
+      ]
+    },
+    {
+      "label": "Total  Other G & A Expenses",
+      "type": "total",
+      "indent": 0,
+      "value": 298342.27999999997,
+      "values": [
+        66556.94,
+        231785.34,
+        0,
+        231785.34,
+        298342.27999999997
+      ]
+    },
+    {
+      "label": "6025   Fees & Subscription",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "6025-12   Mwan Export License Fee",
+      "type": "line",
+      "indent": 1,
+      "value": 4735.63,
+      "values": [
+        2700.46,
+        2035.17,
+        0,
+        2035.17,
+        4735.63
+      ]
+    },
+    {
+      "label": "6025-06   Chamber Of Commerce Fee Exp",
+      "type": "line",
+      "indent": 1,
+      "value": 6552.74,
+      "values": [
+        6552.74,
+        0,
+        0,
+        0,
+        6552.74
+      ]
+    },
+    {
+      "label": "6025-07   Fines & Penalities",
+      "type": "line",
+      "indent": 1,
+      "value": 12000,
+      "values": [
+        0,
+        12000,
+        0,
+        12000,
+        12000
+      ]
+    },
+    {
+      "label": "6025-14   Muqeem Points Recharge",
+      "type": "line",
+      "indent": 1,
+      "value": 3484.05,
+      "values": [
+        0,
+        3484.05,
+        0,
+        3484.05,
+        3484.05
+      ]
+    },
+    {
+      "label": "6025-09   C-R License Fee",
+      "type": "line",
+      "indent": 1,
+      "value": 2200,
+      "values": [
+        1000,
+        1200,
+        0,
+        1200,
+        2200
+      ]
+    },
+    {
+      "label": "6025-05   Subscription Fee",
+      "type": "line",
+      "indent": 1,
+      "value": 4048.25,
+      "values": [
+        1800,
+        2248.25,
+        0,
+        2248.25,
+        4048.25
+      ]
+    },
+    {
+      "label": "Total  Fees & Subscription",
+      "type": "total",
+      "indent": 0,
+      "value": 33020.67,
+      "values": [
+        12053.2,
+        20967.47,
+        0,
+        20967.47,
+        33020.67
+      ]
+    },
+    {
+      "label": "6023   Utilities",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "6023-01   Electricity For Off & Factory",
+      "type": "line",
+      "indent": 1,
+      "value": 107704.2,
+      "values": [
+        64000,
+        107704.2,
+        64000,
+        43704.2,
+        107704.2
+      ]
+    },
+    {
+      "label": "6023-02   Telephone Charges",
+      "type": "line",
+      "indent": 1,
+      "value": 500,
+      "values": [
+        0,
+        500,
+        0,
+        500,
+        500
+      ]
+    },
+    {
+      "label": "6023-03   Gas & Oxygen For Factory",
+      "type": "line",
+      "indent": 1,
+      "value": 342.7,
+      "values": [
+        286.7,
+        56,
+        0,
+        56,
+        342.7
+      ]
+    },
+    {
+      "label": "6023-04   Water For Office And Factory",
+      "type": "line",
+      "indent": 1,
+      "value": 7197.59,
+      "values": [
+        3646.78,
+        6550.81,
+        3000,
+        3550.8100000000004,
+        7197.59
+      ]
+    },
+    {
+      "label": "6023-05   Mobile Recharges Exp",
+      "type": "line",
+      "indent": 1,
+      "value": 2751.27,
+      "values": [
+        2611.27,
+        140,
+        0,
+        140,
+        2751.27
+      ]
+    },
+    {
+      "label": "Total  Utilities",
+      "type": "total",
+      "indent": 0,
+      "value": 118495.76,
+      "values": [
+        70544.75,
+        114951.01,
+        67000,
+        47951.009999999995,
+        118495.76
+      ]
+    },
+    {
+      "label": "6026   Travelling Expenses",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "6026-04   Air Ticket & Railway Ticket Exp",
+      "type": "line",
+      "indent": 1,
+      "value": 4688,
+      "values": [
+        0,
+        4688,
+        0,
+        4688,
+        4688
+      ]
+    },
+    {
+      "label": "Total  Travelling Expenses",
+      "type": "total",
+      "indent": 0,
+      "value": 4688,
+      "values": [
+        0,
+        4688,
+        0,
+        4688,
+        4688
+      ]
+    },
+    {
+      "label": "7000   Others Income & Losses",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "7000-06   Round-off Difference",
+      "type": "line",
+      "indent": 1,
+      "value": 4.59,
+      "values": [
+        4.52,
+        4.04,
+        3.97,
+        0.06999999999999984,
+        4.59
+      ]
+    },
+    {
+      "label": "7000-07   Non-Claimable Vat",
+      "type": "line",
+      "indent": 1,
+      "value": 406.69,
+      "values": [
+        0,
+        406.69,
+        0,
+        406.69,
+        406.69
+      ]
+    },
+    {
+      "label": "Total  Others Income & Losses",
+      "type": "total",
+      "indent": 0,
+      "value": 411.28,
+      "values": [
+        4.52,
+        410.73,
+        3.97,
+        406.76,
+        411.28
+      ]
+    },
+    {
+      "label": "7500   Financial Charges-FC",
+      "type": "section",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "label": "7500-01   Bank Charges",
+      "type": "line",
+      "indent": 1,
+      "value": 517.3,
+      "values": [
+        386.17,
+        131.13,
+        0,
+        131.13,
+        517.3
+      ]
+    },
+    {
+      "label": "Total",
+      "type": "line",
+      "indent": 0,
+      "value": 1.2096279533579946e-9,
+      "values": [
+        2.305000634805765e-10,
+        16760784.149999997,
+        16760784.15,
+        3.234958967368584e-10,
+        1.2096279533579946e-9
+      ]
+    },
+    {
+      "label": "Total  Financial Charges-FC",
+      "type": "total",
+      "indent": 0,
+      "value": 517.3000000012096,
+      "values": [
+        386.1700000002305,
+        16760915.279999997,
+        16760784.15,
+        131.1300000003235,
+        517.3000000012096
+      ]
+    }
+  ],
+  "columns": [
+    "Opening Balance",
+    "Debits",
+    "Credits",
+    "Net Change",
+    "Closing Balance"
+  ],
+  "fileName": "DSA-TBs-Jan-May-2026"
+}

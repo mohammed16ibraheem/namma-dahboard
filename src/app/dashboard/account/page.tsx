@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ChevronRight, LogOut, Upload, FileSpreadsheet,
   Trash2, CalendarDays, Info, TrendingUp,
-  ArrowDownUp, Receipt, FileBarChart, Landmark,
+  ArrowDownUp, Receipt, FileBarChart, Landmark, Scale,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import CompanySelector from "@/components/company-selector";
@@ -25,6 +25,15 @@ const REPORT_TYPES = [
     color: BRAND,
     border: BRAND,
     iconBg: "#EEF2F9",
+  },
+  {
+    key: "trial-balance"      as ReportType,
+    label: "Trial Balance",
+    description: "Upload and view trial balance reports",
+    Icon: Scale,
+    color: "#0F766E",
+    border: "#0F766E",
+    iconBg: "#F0FDFA",
   },
   {
     key: "profit-loss"        as ReportType,
@@ -77,12 +86,54 @@ function todayStr() {
   return `${String(d.getDate()).padStart(2,"0")}-${MONTHS[d.getMonth()]}-${d.getFullYear()}`;
 }
 
+// Parse text dates like "31-May-2025", "31 May 2025", "31/May/2025", "31-May-25"
+const MONTH_MAP_TXT: Record<string, string> = {
+  jan:"Jan",feb:"Feb",mar:"Mar",apr:"Apr",may:"May",jun:"Jun",
+  jul:"Jul",aug:"Aug",sep:"Sep",oct:"Oct",nov:"Nov",dec:"Dec"
+};
+function parseTextDate(text: string): string | null {
+  const m = String(text).match(/(\d{1,2})[-\/\s]([A-Za-z]{3,9})[-\/\s](\d{2,4})/);
+  if (m) {
+    const mon = MONTH_MAP_TXT[m[2].slice(0,3).toLowerCase()];
+    if (!mon) return null;
+    const yr = m[3].length === 2 ? `20${m[3]}` : m[3];
+    return `${String(m[1]).padStart(2,"0")}-${mon}-${yr}`;
+  }
+  return null;
+}
+
+// Extract a date string from any cell value (serial OR text, handles multi-line cells and DD-MM-YYYY)
+function cellToDate(cell: unknown): string | null {
+  if (typeof cell === "number" && cell > 40000 && cell < 55000) {
+    try { return excelDateToStr(cell); } catch {}
+  }
+  if (typeof cell === "string") {
+    // Try text-month format first: "31-May-2025"
+    for (const part of cell.split(/[\r\n]+/)) {
+      const d = parseTextDate(part.trim());
+      if (d) return d;
+    }
+    // Try numeric DD-MM-YYYY format (e.g. "Trial Balance 01-01-2026 To 31-05-2026")
+    // Return the LAST date found so "X To 31-05-2026" picks up the period END date
+    const numDates: string[] = [];
+    const re = /(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/g;
+    let m;
+    while ((m = re.exec(cell)) !== null) {
+      const dd = parseInt(m[1]), mo = parseInt(m[2]), yr = m[3];
+      if (dd >= 1 && dd <= 31 && mo >= 1 && mo <= 12) {
+        numDates.push(`${String(dd).padStart(2,"0")}-${MONTHS[mo-1]}-${yr}`);
+      }
+    }
+    if (numDates.length) return numDates[numDates.length - 1];
+  }
+  return null;
+}
+
 function findFirstDateSerial(rows: unknown[][], maxRow = 8): string {
   for (let i = 0; i < Math.min(maxRow, rows.length); i++) {
     for (const cell of rows[i] as (string | number)[]) {
-      if (typeof cell === "number" && cell > 40000 && cell < 55000) {
-        try { return excelDateToStr(cell); } catch {}
-      }
+      const d = cellToDate(cell);
+      if (d) return d;
     }
   }
   return "";
@@ -95,10 +146,15 @@ function parseRawLabel(raw: string): { label: string; indent: number; type: "sec
   const upper  = label.toUpperCase();
   let type: "section" | "line" | "total";
   if (
-    upper.startsWith("TOTAL") || upper.startsWith("GROSS PROFIT") ||
+    upper.startsWith("TOTAL") ||
+    upper.startsWith("GROSS PROFIT") || upper.startsWith("GROSSS PROFIT") ||
     upper.startsWith("NET PROFIT") || upper.startsWith("NET INCOME") ||
-    upper.startsWith("NET LOSS") || upper === "CLOSING CASH AND BANK" ||
-    upper.startsWith("TOTAL EXPENSES") || upper.startsWith("TOTAL INCOME")
+    upper.startsWith("NET LOSS") || upper.startsWith("NET CASH") ||
+    upper.startsWith("NET CHANGE IN CASH") ||
+    upper === "CLOSING CASH AND BANK" || upper.startsWith("CLOSING CASH") ||
+    upper.startsWith("TOTAL EXPENSES") || upper.startsWith("TOTAL INCOME") ||
+    upper.startsWith("CASH FROM OPERATIONS") || upper.startsWith("CASH FROM INVESTING") ||
+    upper.startsWith("CASH FROM FINANCING")
   ) {
     type = "total";
   } else if (spaces <= 1) {
@@ -106,9 +162,21 @@ function parseRawLabel(raw: string): { label: string; indent: number; type: "sec
   } else {
     type = "line";
   }
-  // indent: 0=section, 1=4-space item, 2=8-space item
   const indent = spaces <= 1 ? 0 : Math.floor((spaces - 1) / 4);
   return { label, indent, type };
+}
+
+/** Returns true if this sheet looks like a trial balance — prevents it being parsed as P&L/CF. */
+function isLikelyTrialBalance(rows: unknown[][]): boolean {
+  for (let ri = 0; ri < Math.min(8, rows.length); ri++) {
+    const text = (rows[ri] as unknown[]).map(c => String(c ?? "").toLowerCase()).join(" ");
+    if (
+      text.includes("closing balance") ||
+      (text.includes("opening balance") && text.includes("debit")) ||
+      (text.includes("debits") && text.includes("credits"))
+    ) return true;
+  }
+  return false;
 }
 
 /**
@@ -236,6 +304,261 @@ function parseBalanceSheet(rows: unknown[][], company: string): PeriodFile[] {
 }
 
 /**
+ * Parses a Trial Balance sheet with columns:
+ *   Code | Account | Opening Balance | Debits | Credits | Net Change | Closing Balance | Account Group
+ * Returns PeriodFile[] with rows[] + columns[] for multi-column display.
+ * Automatically inserts "Total — <Section>" rows after each section group.
+ */
+function parseTBReport(rows: unknown[][], company: string): PeriodFile[] {
+  // 1. Find header row containing "Opening Balance" and "Debits"
+  let headerIdx = -1, codeCol = -1, labelCol = -1;
+  let openingCol = -1, debitsCol = -1, creditsCol = -1, netChangeCol = -1, closingCol = -1;
+
+  for (let ri = 0; ri < Math.min(8, rows.length); ri++) {
+    const cells = (rows[ri] as (string | number)[]).map(c => String(c ?? "").toLowerCase().trim());
+    const find = (...terms: string[]) => {
+      for (const t of terms) {
+        const i = cells.indexOf(t);
+        if (i >= 0) return i;
+      }
+      return -1;
+    };
+    const ob = find("opening balance", "opening");
+    const db = find("debits", "debit");
+    const cl = find("closing balance", "closing");
+    if (ob >= 0 && db >= 0 && cl >= 0) {
+      openingCol  = ob;
+      debitsCol   = db;
+      creditsCol  = find("credits", "credit");
+      netChangeCol= find("net change", "movement", "change");
+      closingCol  = cl;
+      labelCol    = find("account", "account name", "accounts", "description");
+      codeCol     = find("code", "acc code", "account code");
+      if (labelCol < 0) labelCol = ob - 1;
+      if (codeCol < 0)  codeCol  = labelCol - 1;
+      headerIdx = ri;
+      break;
+    }
+  }
+  if (headerIdx < 0 || closingCol < 0) return [];
+
+  // 2. Detect period from title rows
+  let period = todayStr();
+  for (let ri = 0; ri < Math.min(4, rows.length); ri++) {
+    for (const cell of rows[ri] as unknown[]) {
+      const d = cellToDate(cell);
+      if (d && d !== todayStr()) { period = d; break; }
+    }
+    if (period !== todayStr()) break;
+  }
+
+  // 3. Parse each data row
+  const toNum = (v: unknown): number | null => {
+    if (typeof v === "number") return isFinite(v) ? v : null;
+    const n = parseFloat(String(v ?? ""));
+    return isFinite(n) ? n : null;
+  };
+
+  type RawTB = {
+    code: string; label: string; indent: number; isSection: boolean;
+    opening: number | null; debits: number | null; credits: number | null;
+    netChange: number | null; closing: number | null;
+  };
+
+  const parsed: RawTB[] = [];
+  for (let ri = headerIdx + 1; ri < rows.length; ri++) {
+    const row = rows[ri] as (string | number)[];
+    const rawLabel = String(row[labelCol] ?? "");
+    if (!rawLabel.trim()) continue;
+
+    const code    = String(row[codeCol] ?? "").trim();
+    const spaces  = rawLabel.length - rawLabel.trimStart().length;
+    const label   = rawLabel.trim();
+    const opening = toNum(row[openingCol]);
+    const debits  = toNum(row[debitsCol]);
+    const credits = creditsCol >= 0 ? toNum(row[creditsCol]) : null;
+    const nc      = netChangeCol >= 0 ? toNum(row[netChangeCol]) : null;
+    const closing = toNum(row[closingCol]);
+    const hasData = opening !== null || debits !== null || credits !== null || closing !== null;
+    // Sections: no numeric data, or only zeros with large indented code pattern
+    const isSection = !hasData || (debits === 0 && credits === 0 && closing === 0 && opening === 0 && spaces < 4);
+
+    parsed.push({ code, label, indent: Math.min(Math.floor(spaces / 4), 3), isSection, opening, debits, credits, netChange: nc, closing });
+  }
+  if (!parsed.length) return [];
+
+  // 4. Build ReportRow[] with section totals
+  type SectionEntry = {
+    label: string; indent: number;
+    totals: [number|null, number|null, number|null, number|null, number|null];
+  };
+  const stack: SectionEntry[] = [];
+  const reportRows: ReportRow[] = [];
+
+  const nullAdd = (a: number|null, b: number|null) =>
+    a === null && b === null ? null : (a ?? 0) + (b ?? 0);
+
+  const flushSection = (sec: SectionEntry) => {
+    const [op, db, cr, nc, cl] = sec.totals;
+    if (db !== null || cr !== null || cl !== null) {
+      reportRows.push({
+        label: `Total  ${sec.label}`,
+        type: "total",
+        indent: sec.indent,
+        value: cl,
+        values: [op, db, cr, nc, cl],
+      });
+    }
+  };
+
+  for (let i = 0; i < parsed.length; i++) {
+    const row = parsed[i];
+    // Close any open sections at same or higher indent level
+    while (stack.length > 0 && stack[stack.length - 1].indent >= row.indent && row.isSection) {
+      flushSection(stack.pop()!);
+    }
+
+    const displayLabel = row.code ? `${row.code}   ${row.label}` : row.label;
+
+    if (row.isSection) {
+      reportRows.push({ label: displayLabel, type: "section", indent: row.indent, value: null, values: [null,null,null,null,null] });
+      stack.push({ label: row.label, indent: row.indent, totals: [null,null,null,null,null] });
+    } else {
+      reportRows.push({
+        label: displayLabel,
+        type: "line",
+        indent: row.indent,
+        value: row.closing,
+        values: [row.opening, row.debits, row.credits, row.netChange, row.closing],
+      });
+      // Accumulate into ALL open parent sections
+      for (const sec of stack) {
+        sec.totals[0] = nullAdd(sec.totals[0], row.opening);
+        sec.totals[1] = nullAdd(sec.totals[1], row.debits);
+        sec.totals[2] = nullAdd(sec.totals[2], row.credits);
+        sec.totals[3] = nullAdd(sec.totals[3], row.netChange);
+        sec.totals[4] = nullAdd(sec.totals[4], row.closing);
+      }
+    }
+  }
+  // Flush remaining open sections
+  while (stack.length) flushSection(stack.pop()!);
+
+  return [{
+    reportType: "trial-balance",
+    period,
+    company,
+    uploadedAt: new Date().toISOString(),
+    bs: [],
+    cf: [],
+    rows: reportRows,
+    columns: ["Opening Balance", "Debits", "Credits", "Net Change", "Closing Balance"],
+  }];
+}
+
+/**
+ * Parses a sheet that has Balance Sheet on the LEFT and Cash Flow on the RIGHT.
+ * Handles text dates like "31-May-2025" / "31-Dec-2025".
+ * Returns { bsPeriods, cfPeriods } — caller saves each to its own report type.
+ */
+function parseBsCfSideBySide(rows: unknown[][], company: string): { bsPeriods: PeriodFile[]; cfPeriods: PeriodFile[] } {
+  const empty = { bsPeriods: [], cfPeriods: [] };
+
+  // Step 1: find CF start column (scan first 5 rows for "cash flow" / "operating activities")
+  let cfLabelCol = -1;
+  for (let ri = 0; ri < Math.min(5, rows.length); ri++) {
+    const row = rows[ri] as (string | number)[];
+    for (let ci = 4; ci < row.length; ci++) {
+      const v = String(row[ci] ?? "").toLowerCase().trim();
+      if (v.includes("cash flow") || v.includes("operating activities")) {
+        cfLabelCol = ci; break;
+      }
+    }
+    if (cfLabelCol >= 0) break;
+  }
+  if (cfLabelCol < 0) return empty;
+
+  // Step 2: scan header rows (first 8) to collect column → date mappings
+  type ColDate = { col: number; date: string };
+  const allColDates: ColDate[] = [];
+  let headerRowIdx = -1;
+
+  for (let ri = 0; ri < Math.min(8, rows.length); ri++) {
+    const row = rows[ri] as (string | number)[];
+    const found: ColDate[] = [];
+    for (let ci = 0; ci < row.length; ci++) {
+      const d = cellToDate(row[ci]);
+      if (d) found.push({ col: ci, date: d });
+    }
+    if (found.length >= 1) { allColDates.push(...found); headerRowIdx = ri; break; }
+  }
+  if (!allColDates.length) return empty;
+
+  const bsColDates = allColDates.filter(d => d.col < cfLabelCol);
+  const cfColDates = allColDates.filter(d => d.col > cfLabelCol);
+  if (!bsColDates.length) return empty;
+
+  const bsLabelCol = 1; // col B
+  const dataStart  = headerRowIdx >= 0 ? headerRowIdx + 1 : 5;
+  const now        = new Date().toISOString();
+
+  const bsData: BsRow[][] = bsColDates.map(() => []);
+  const cfData: CfRow[][] = cfColDates.map(() => []);
+
+  for (let ri = dataStart; ri < rows.length; ri++) {
+    const row = rows[ri] as (string | number | null)[];
+
+    const bsRaw = String(row[bsLabelCol] ?? "");
+    if (bsRaw.trim()) {
+      const { label, indent, type } = parseRawLabel(bsRaw);
+      bsColDates.forEach(({ col }, pi) => {
+        const v = row[col];
+        const n = (v !== "" && v !== null && v !== undefined) ? (typeof v === "number" ? v : parseFloat(String(v))) : null;
+        const val = (n !== null && Number.isFinite(n)) ? n : null;
+        const eff: "section"|"line"|"total" = (type === "section" && val !== null) ? "line" : type;
+        bsData[pi].push({ label, indent, value: val, type: eff });
+      });
+    }
+
+    if (cfLabelCol >= 0) {
+      const cfRaw = String(row[cfLabelCol] ?? "");
+      if (cfRaw.trim()) {
+        const { label, indent, type } = parseRawLabel(cfRaw);
+        cfColDates.forEach(({ col }, pi) => {
+          const v = row[col];
+          const n = (v !== "" && v !== null && v !== undefined) ? (typeof v === "number" ? v : parseFloat(String(v))) : null;
+          const val = (n !== null && Number.isFinite(n)) ? n : null;
+          const eff: "section"|"line"|"total" = (type === "section" && val !== null) ? "line" : type;
+          cfData[pi].push({ label, indent, value: val, type: eff });
+        });
+      }
+    }
+  }
+
+  // Add section totals if not already present in the Excel data
+  const bsWithTotals = bsData.map(arr => arr.some(r=>r.type==="total") ? arr : addSingleSectionTotals(arr) as BsRow[]);
+  const cfWithTotals = cfData.map(arr => arr.some(r=>r.type==="total") ? arr : addSingleSectionTotals(arr) as CfRow[]);
+
+  const bsPeriods: PeriodFile[] = bsColDates
+    .map(({ date }, pi) => bsWithTotals[pi].length
+      ? { reportType: "balance-sheet" as ReportType, period: date, company, uploadedAt: now,
+          bs: bsWithTotals[pi], cf: cfColDates[pi] ? cfWithTotals[pi] : [] }
+      : null)
+    .filter(Boolean) as PeriodFile[];
+
+  const cfPeriods: PeriodFile[] = cfColDates
+    .map(({ date }, pi) => cfWithTotals[pi].length
+      ? { reportType: "cash-flow" as ReportType, period: date, company, uploadedAt: now,
+          bs: [], cf: [],
+          rows: cfWithTotals[pi].map(r => ({ label: r.label, indent: r.indent, value: r.value, values: [r.value], type: r.type })),
+          columns: ["Total"] }
+      : null)
+    .filter(Boolean) as PeriodFile[];
+
+  return { bsPeriods, cfPeriods };
+}
+
+/**
  * Generic parser for P&L, Cash Flow, Executive Summary, Tax Report.
  * Auto-detects label col (leading whitespace), value col (first YTD numeric),
  * and ALL column headers (Total, Jan, Feb … or date serials).
@@ -282,12 +605,25 @@ function parseGenericReport(rows: unknown[][], company: string, reportType: Repo
     if (raw.trim().length > 2 && raw !== raw.trimStart()) { dataStart = i; break; }
   }
 
+  // Detect code column: check header row for "Code" in the column before labelCol
+  let codeCol = -1;
+  if (labelCol > 0) {
+    for (let ri = 0; ri < Math.min(8, rows.length); ri++) {
+      const v = String((rows[ri] as unknown[])[labelCol - 1] ?? "").toLowerCase().trim();
+      if (v === "code" || v === "acc code" || v === "account code") { codeCol = labelCol - 1; break; }
+    }
+  }
+
   const dataRows: ReportRow[] = [];
   rows.slice(dataStart).forEach(r => {
     const row = r as (string | number | null | undefined)[];
     const raw = String(row[labelCol] ?? "");
     if (!raw.trim() || /^\d+(\.\d+)?$/.test(raw.trim())) return;
     const { label, indent, type } = parseRawLabel(raw);
+
+    // Include account code in label if present
+    const code = codeCol >= 0 ? String(row[codeCol] ?? "").trim() : "";
+    const displayLabel = code && !/^(total|sub|grand)/i.test(label.trim()) ? `${code}   ${label}` : label;
 
     // Collect all column values
     const values: (number | null)[] = [];
@@ -303,17 +639,79 @@ function parseGenericReport(rows: unknown[][], company: string, reportType: Repo
 
     // Primary value = first column (Total / YTD)
     const value = values[0] ?? null;
-    // If parseRawLabel said "section" but this row has real values, treat as line
     const effectiveType = (type === "section" && values.some(v => v !== null)) ? "line" : type;
-    dataRows.push({ label, indent, value, values, type: effectiveType });
+    dataRows.push({ label: displayLabel, indent, value, values, type: effectiveType });
   });
 
   if (!dataRows.length) return [];
+
+  // Insert section totals if the Excel doesn't already have them
+  const hasTotals = dataRows.some(r => r.type === "total");
+  const finalRows = hasTotals ? dataRows : addMultiSectionTotals(dataRows, numCols);
+
   return [{
     reportType, period, company,
     uploadedAt: new Date().toISOString(),
-    bs: [], cf: [], rows: dataRows, columns,
+    bs: [], cf: [], rows: finalRows, columns,
   }];
+}
+
+// ─── Section-total helpers ────────────────────────────────────────────────────
+
+/** Insert "Total — X" rows after each section group (multi-column rows). */
+function addMultiSectionTotals(rows: ReportRow[], nCols: number): ReportRow[] {
+  if (!rows.length) return rows;
+  type SE = { label: string; indent: number; sums: (number|null)[] };
+  const stack: SE[] = [];
+  const result: ReportRow[] = [];
+  const na = (a: number|null, b: number|null) => a===null&&b===null?null:(a??0)+(b??0);
+
+  for (const row of rows) {
+    if (row.type === "section") {
+      while (stack.length && stack[stack.length-1].indent >= (row.indent??0)) {
+        const t = stack.pop()!;
+        if (t.sums.some(s=>s!==null))
+          result.push({ label:`Total  ${t.label}`, type:"total", indent:t.indent, value:t.sums[0], values:t.sums });
+      }
+    }
+    result.push(row);
+    if (row.type === "section") stack.push({ label:row.label, indent:row.indent??0, sums:new Array(nCols).fill(null) });
+    else if (row.type === "line" && row.values) {
+      for (const s of stack)
+        for (let j=0;j<nCols;j++) { const v=row.values[j]; if(v!==null&&v!==undefined) s.sums[j]=na(s.sums[j],v); }
+    }
+  }
+  while (stack.length) {
+    const t = stack.pop()!;
+    if (t.sums.some(s=>s!==null))
+      result.push({ label:`Total  ${t.label}`, type:"total", indent:t.indent, value:t.sums[0], values:t.sums });
+  }
+  return result;
+}
+
+/** Insert "Total — X" rows after each section group (single-value rows). */
+function addSingleSectionTotals(rows: (BsRow|CfRow|ReportRow)[]): (BsRow|CfRow|ReportRow)[] {
+  if (!rows.length) return rows;
+  type SE = { label:string; indent:number; sum:number|null };
+  const stack: SE[] = [];
+  const result: (BsRow|CfRow|ReportRow)[] = [];
+
+  for (const row of rows) {
+    if (row.type === "section") {
+      while (stack.length && stack[stack.length-1].indent >= (row.indent??0)) {
+        const t = stack.pop()!;
+        if (t.sum !== null) result.push({ label:`Total  ${t.label}`, type:"total", indent:t.indent, value:t.sum });
+      }
+    }
+    result.push(row);
+    if (row.type === "section") stack.push({ label:row.label, indent:row.indent??0, sum:null });
+    else if (row.type === "line" && row.value !== null) for (const s of stack) s.sum=(s.sum??0)+row.value;
+  }
+  while (stack.length) {
+    const t = stack.pop()!;
+    if (t.sum !== null) result.push({ label:`Total  ${t.label}`, type:"total", indent:t.indent, value:t.sum });
+  }
+  return result;
 }
 
 // ─── Table display ───────────────────────────────────────────────────────────
@@ -334,141 +732,316 @@ function ReportTable({
 }) {
   const isMulti = columns && columns.length > 1;
 
-  /* ── Multi-column table (P&L style with months) ── */
+  /* ── Multi-column table (P&L / Trial Balance) ── */
   if (isMulti) {
-    return (
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-white"
-          style={{ background: BRAND }}>{title}</div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-[12px] border-collapse" style={{ minWidth: `${200 + columns.length * 110}px` }}>
-            <thead>
-              <tr style={{ background: "#EEF2F9", borderBottom: `2px solid ${BRAND}` }}>
-                <th className="text-left py-2.5 px-5 font-bold sticky left-0 bg-[#EEF2F9] z-10"
-                  style={{ color: BRAND, minWidth: "220px" }}>Account</th>
-                {columns.map((col, ci) => (
-                  <th key={ci} className="text-right py-2.5 px-3 font-bold whitespace-nowrap"
-                    style={{ color: ci === 0 ? BRAND : "#374151", minWidth: "100px" }}>
-                    {col}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, i) => {
-                const vals = (row as ReportRow).values ?? [row.value];
-                const indentPx = INDENT_PX[Math.min(row.indent ?? 0, INDENT_PX.length - 1)];
-
-                if (row.type === "section") return (
-                  <tr key={i} style={{ background: indentPx === 0 ? "#EEF2F9" : "#F5F7FC", borderTop: indentPx === 0 ? "1px solid #d1dcea" : "none" }}>
-                    <td colSpan={columns.length + 1}
-                      className="py-2 font-bold uppercase text-[10px] tracking-widest"
-                      style={{ paddingLeft: `${20 + indentPx}px`, color: BRAND }}>
-                      {row.label}
-                    </td>
-                  </tr>
-                );
-
-                if (row.type === "total") return (
-                  <tr key={i} style={{ background: "#f9fafb", borderTop: "2px solid #e5e7eb", borderBottom: "1px solid #e5e7eb" }}>
-                    <td className="py-2 font-bold text-gray-800 sticky left-0 bg-[#f9fafb]"
-                      style={{ paddingLeft: `${20 + indentPx}px` }}>
-                      {row.label}
-                    </td>
-                    {vals.map((v, vi) => (
-                      <td key={vi} className="text-right py-2 px-3 font-bold font-mono tabular-nums"
-                        style={{ color: (v ?? 0) < 0 ? "#ef4444" : vi === 0 ? BRAND : "#111827" }}>
-                        {fmt(v)}
-                      </td>
-                    ))}
-                  </tr>
-                );
-
-                return (
-                  <tr key={i} className="border-b border-gray-50 hover:bg-blue-50/30 transition-colors">
-                    <td className="py-1.5 text-gray-600 sticky left-0 bg-white hover:bg-blue-50/30"
-                      style={{ paddingLeft: `${20 + indentPx}px` }}>
-                      {row.label}
-                    </td>
-                    {vals.map((v, vi) => (
-                      <td key={vi} className="text-right py-1.5 px-3 font-mono tabular-nums text-[11px]"
-                        style={{ color: (v ?? 0) < 0 ? "#ef4444" : (v ?? 0) === 0 ? "#d1d5db" : vi === 0 ? "#111827" : "#374151" }}>
-                        {fmt(v)}
-                      </td>
-                    ))}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
+    return <MultiColTable rows={rows as ReportRow[]} title={title} columns={columns} />;
   }
 
   /* ── Single-column table (Balance Sheet, Trial Balance) ── */
+  return <SingleColTable rows={rows} title={title} />;
+}
+
+const PAGE_SIZE = 60;
+
+function MultiColTable({ rows: rawRows, title, columns }: { rows: ReportRow[]; title: string; columns: string[] }) {
+  const [search, setSearch] = React.useState("");
+  const [page, setPage]     = React.useState(0);
+
+  // Add section totals at render time if parser didn't already include them
+  const rows = useMemo(
+    () => rawRows.some(r=>r.type==="total") ? rawRows : addMultiSectionTotals(rawRows, columns.length),
+    [rawRows, columns.length]
+  );
+
+  const lq = search.toLowerCase().trim();
+  const isBig = rows.length > PAGE_SIZE;
+
+  const filtered = useMemo(() => {
+    if (!lq) return rows;
+    const out: ReportRow[] = [];
+    let lastSection: ReportRow | null = null;
+    for (const row of rows) {
+      if (row.type === "section")  { lastSection = row; continue; }
+      if (row.type === "total")    { continue; }
+      if (row.label.toLowerCase().includes(lq)) {
+        if (lastSection && !out.includes(lastSection)) out.push(lastSection);
+        out.push(row);
+      }
+    }
+    return out;
+  }, [rows, lq]);
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const visible    = lq ? filtered : filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  React.useEffect(() => setPage(0), [lq]);
+
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      {/* Header */}
       <div className="px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-white flex items-center justify-between"
         style={{ background: BRAND }}>
-        <span>{title}</span><span>SAR</span>
+        <span>{title}</span>
+        <span className="text-white/60 font-normal normal-case text-[10px]">
+          {filtered.filter(r => r.type === "line").length} accounts{isBig && !lq ? ` · page ${page + 1}/${totalPages}` : ""}
+        </span>
       </div>
-      {rows.map((row, i) => {
-        const indentPx = INDENT_PX[Math.min(row.indent ?? 0, INDENT_PX.length - 1)];
-        const isNeg    = (row.value ?? 0) < 0;
 
-        if (row.type === "section") return (
-          <div key={i}
-            className="py-2 text-[11px] font-bold uppercase tracking-widest flex items-center justify-between"
-            style={{
-              paddingLeft: `${20 + indentPx}px`, paddingRight: "20px",
-              color: BRAND,
-              background: indentPx === 0 ? "#EEF2F9" : "#F5F7FC",
-              borderTop: indentPx === 0 ? "1px solid #d1dcea" : "none",
-            }}>
-            <span>{row.label}</span>
-            {row.value != null && row.value !== 0 && (
-              <span className="font-bold font-mono tabular-nums" style={{ color: isNeg ? "#ef4444" : BRAND }}>
-                {fmt(row.value)}
-              </span>
+      {/* Search */}
+      {isBig && (
+        <div className="px-4 py-2 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
+          <Info size={13} className="text-gray-400 flex-shrink-0" />
+          <input
+            type="text"
+            placeholder="Search accounts or codes…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="flex-1 text-[12px] bg-transparent outline-none text-gray-700 placeholder-gray-400"
+          />
+          {search && (
+            <button onClick={() => setSearch("")}
+              className="text-gray-400 hover:text-gray-600 text-[11px] px-1.5">✕</button>
+          )}
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-[12px] border-collapse" style={{ minWidth: `${240 + columns.length * 120}px` }}>
+          <thead>
+            <tr style={{ background: "#EEF2F9", borderBottom: `2px solid ${BRAND}` }}>
+              <th className="text-left py-2.5 px-5 font-bold sticky left-0 bg-[#EEF2F9] z-10"
+                style={{ color: BRAND, minWidth: "260px" }}>Account</th>
+              {columns.map((col, ci) => (
+                <th key={ci} className="text-right py-2.5 px-3 font-bold whitespace-nowrap"
+                  style={{ color: BRAND, minWidth: "110px" }}>
+                  {col}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {visible.length === 0 && (
+              <tr><td colSpan={columns.length + 1} className="py-10 text-center text-sm text-gray-400">No matching accounts</td></tr>
             )}
-          </div>
-        );
+            {visible.map((row, i) => {
+              const vals = row.values ?? [row.value];
+              const indentPx = INDENT_PX[Math.min(row.indent ?? 0, INDENT_PX.length - 1)];
 
-        if (row.type === "total") {
-          const isKeyTotal =
-            row.label.toUpperCase().startsWith("TOTAL ASSETS") ||
-            row.label.toUpperCase().startsWith("TOTAL EQUITY") ||
-            row.label === "Closing Cash and Bank";
-          return (
-            <div key={i} className="flex items-center py-2.5 text-[12px]"
+              if (row.type === "section") return (
+                <tr key={i} style={{ background: indentPx === 0 ? "#EEF2F9" : "#F5F7FC", borderTop: indentPx === 0 ? "1px solid #d1dcea" : "none" }}>
+                  <td colSpan={columns.length + 1}
+                    className="py-2 font-bold uppercase text-[10px] tracking-widest"
+                    style={{ paddingLeft: `${20 + indentPx}px`, color: BRAND }}>
+                    {row.label}
+                  </td>
+                </tr>
+              );
+
+              if (row.type === "total") return (
+                <tr key={i} style={{ background: "#f0f4fa", borderTop: "2px solid #d1dcea", borderBottom: "2px solid #d1dcea" }}>
+                  <td className="py-2.5 font-bold text-gray-700 sticky left-0 bg-[#f0f4fa]"
+                    style={{ paddingLeft: `${20 + indentPx}px`, color: BRAND, fontSize: "11px" }}>
+                    {row.label}
+                  </td>
+                  {vals.map((v, vi) => (
+                    <td key={vi} className="text-right py-2.5 px-3 font-bold font-mono tabular-nums text-[11px]"
+                      style={{ color: (v ?? 0) < 0 ? "#ef4444" : BRAND }}>
+                      {fmt(v)}
+                    </td>
+                  ))}
+                </tr>
+              );
+
+              return (
+                <tr key={i} className="border-b border-gray-50 hover:bg-blue-50/30 transition-colors"
+                  style={{ background: i % 2 === 0 ? "#fff" : "#fafbfc" }}>
+                  <td className="py-1.5 text-gray-600 sticky left-0 hover:bg-blue-50/30"
+                    style={{ paddingLeft: `${20 + indentPx}px`, background: "inherit" }}>
+                    {row.label}
+                  </td>
+                  {vals.map((v, vi) => (
+                    <td key={vi} className="text-right py-1.5 px-3 font-mono tabular-nums text-[11px]"
+                      style={{ color: (v ?? 0) < 0 ? "#ef4444" : (v ?? 0) === 0 ? "#d1d5db" : "#374151" }}>
+                      {fmt(v)}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      {isBig && !lq && totalPages > 1 && (
+        <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50">
+          <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
+            className="text-[11px] px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 disabled:opacity-30 hover:bg-white transition-colors">
+            ← Previous
+          </button>
+          <span className="text-[11px] text-gray-400">
+            {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)} of {filtered.length}
+          </span>
+          <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
+            className="text-[11px] px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 disabled:opacity-30 hover:bg-white transition-colors">
+            Next →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SingleColTable({ rows: rawRows, title }: { rows: (BsRow | CfRow | ReportRow)[]; title: string }) {
+  const [search, setSearch] = React.useState("");
+  const [page,   setPage]   = React.useState(0);
+
+  // Add section totals at render time if data doesn't already include them
+  const rows = useMemo(
+    () => rawRows.some(r=>r.type==="total") ? rawRows : addSingleSectionTotals(rawRows),
+    [rawRows]
+  );
+
+  const lq = search.toLowerCase().trim();
+  // When searching: include section headers of matching lines for context
+  const filtered = React.useMemo(() => {
+    if (!lq) return rows;
+    const out: typeof rows = [];
+    let lastSection: typeof rows[0] | null = null;
+    for (const row of rows) {
+      if (row.type === "section") { lastSection = row; continue; }
+      if (row.label.toLowerCase().includes(lq) ||
+          String(row.value ?? "").includes(lq)) {
+        if (lastSection && !out.includes(lastSection)) out.push(lastSection);
+        out.push(row);
+      }
+    }
+    return out;
+  }, [rows, lq]);
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const visible    = lq ? filtered : filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const isBig      = rows.length > PAGE_SIZE;
+
+  // reset page when search changes
+  React.useEffect(() => setPage(0), [lq]);
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      {/* Header */}
+      <div className="px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-white flex items-center justify-between"
+        style={{ background: BRAND }}>
+        <span>{title}</span>
+        <span className="flex items-center gap-3">
+          <span className="text-white/60 font-normal normal-case text-[10px]">
+            {filtered.length} rows{isBig && !lq ? ` · page ${page + 1}/${totalPages}` : ""}
+          </span>
+          <span>SAR</span>
+        </span>
+      </div>
+
+      {/* Search bar — only shown when table is large */}
+      {isBig && (
+        <div className="px-4 py-2 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
+          <Info size={13} className="text-gray-400 flex-shrink-0" />
+          <input
+            type="text"
+            placeholder="Search accounts…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="flex-1 text-[12px] bg-transparent outline-none text-gray-700 placeholder-gray-400"
+          />
+          {search && (
+            <button onClick={() => setSearch("")}
+              className="text-gray-400 hover:text-gray-600 text-[11px] px-1.5">✕</button>
+          )}
+        </div>
+      )}
+
+      {/* Rows */}
+      <div>
+        {visible.length === 0 && (
+          <div className="py-10 text-center text-sm text-gray-400">No matching accounts</div>
+        )}
+        {visible.map((row, i) => {
+          const indentPx = INDENT_PX[Math.min(row.indent ?? 0, INDENT_PX.length - 1)];
+          const isNeg    = (row.value ?? 0) < 0;
+
+          if (row.type === "section") return (
+            <div key={i}
+              className="py-2 text-[11px] font-bold uppercase tracking-widest flex items-center justify-between"
               style={{
                 paddingLeft: `${20 + indentPx}px`, paddingRight: "20px",
-                background: isKeyTotal ? "#EEF2F9" : "#f9fafb",
-                borderTop: "1px solid #e5e7eb",
-                borderBottom: isKeyTotal ? `2px double ${BRAND}` : "1px solid #e5e7eb",
+                color: BRAND,
+                background: indentPx === 0 ? "#EEF2F9" : "#F5F7FC",
+                borderTop: indentPx === 0 ? "1px solid #d1dcea" : "none",
               }}>
-              <span className="flex-1 font-bold" style={{ color: isKeyTotal ? BRAND : "#374151" }}>{row.label}</span>
-              <span className="font-bold font-mono tabular-nums"
-                style={{ color: isNeg ? "#ef4444" : isKeyTotal ? BRAND : "#111827" }}>
+              <span>{row.label}</span>
+              {row.value != null && row.value !== 0 && (
+                <span className="font-bold font-mono tabular-nums" style={{ color: isNeg ? "#ef4444" : BRAND }}>
+                  {fmt(row.value)}
+                </span>
+              )}
+            </div>
+          );
+
+          if (row.type === "total") {
+            const isKeyTotal =
+              row.label.toUpperCase().startsWith("TOTAL ASSETS") ||
+              row.label.toUpperCase().startsWith("TOTAL EQUITY") ||
+              row.label === "Closing Cash and Bank";
+            return (
+              <div key={i} className="flex items-center py-2.5 text-[12px]"
+                style={{
+                  paddingLeft: `${20 + indentPx}px`, paddingRight: "20px",
+                  background: isKeyTotal ? "#EEF2F9" : "#f9fafb",
+                  borderTop: "1px solid #e5e7eb",
+                  borderBottom: isKeyTotal ? `2px double ${BRAND}` : "1px solid #e5e7eb",
+                }}>
+                <span className="flex-1 font-bold" style={{ color: isKeyTotal ? BRAND : "#374151" }}>{row.label}</span>
+                <span className="font-bold font-mono tabular-nums"
+                  style={{ color: isNeg ? "#ef4444" : isKeyTotal ? BRAND : "#111827" }}>
+                  {fmt(row.value)}
+                </span>
+              </div>
+            );
+          }
+
+          return (
+            <div key={i}
+              className="flex items-center py-1.5 border-b border-gray-50 hover:bg-blue-50/30 transition-colors text-[12px]"
+              style={{ paddingLeft: `${20 + indentPx}px`, paddingRight: "20px", background: i % 2 === 0 ? "#fff" : "#fafbfc" }}>
+              <span className="flex-1 text-gray-600">{row.label}</span>
+              <span className="font-mono tabular-nums text-[11px]"
+                style={{ color: isNeg ? "#ef4444" : (row.value ?? 0) === 0 ? "#d1d5db" : "#374151" }}>
                 {fmt(row.value)}
               </span>
             </div>
           );
-        }
+        })}
+      </div>
 
-        return (
-          <div key={i}
-            className="flex items-center py-1.5 border-b border-gray-50 hover:bg-blue-50/30 transition-colors text-[12px]"
-            style={{ paddingLeft: `${20 + indentPx}px`, paddingRight: "20px" }}>
-            <span className="flex-1 text-gray-600">{row.label}</span>
-            <span className="font-mono tabular-nums text-[11px]"
-              style={{ color: isNeg ? "#ef4444" : (row.value ?? 0) === 0 ? "#d1d5db" : "#374151" }}>
-              {fmt(row.value)}
-            </span>
-          </div>
-        );
-      })}
+      {/* Pagination — only when not searching and table is large */}
+      {isBig && !lq && totalPages > 1 && (
+        <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50">
+          <button
+            onClick={() => setPage(p => Math.max(0, p - 1))}
+            disabled={page === 0}
+            className="text-[11px] px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 disabled:opacity-30 hover:bg-white transition-colors">
+            ← Previous
+          </button>
+          <span className="text-[11px] text-gray-400">
+            {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)} of {filtered.length}
+          </span>
+          <button
+            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+            disabled={page >= totalPages - 1}
+            className="text-[11px] px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 disabled:opacity-30 hover:bg-white transition-colors">
+            Next →
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -509,39 +1082,85 @@ function ReportTypeView({
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
-        const wb   = XLSX.read(e.target?.result, { type: "array" });
-        const ws   = wb.Sheets[wb.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: "" });
+        const wb       = XLSX.read(e.target?.result, { type: "array" });
+        const fileName = file.name.replace(/\.[^.]+$/, "");
 
-        const parsed: PeriodFile[] =
-          key === "balance-sheet"
-            ? parseBalanceSheet(rows, company)
-            : parseGenericReport(rows, company, key);
+        // Collect periods across ALL sheets and ALL detected report types
+        const byType: Partial<Record<ReportType, PeriodFile[]>> = {};
+        const add = (type: ReportType, items: PeriodFile[]) => {
+          if (!byType[type]) byType[type] = [];
+          byType[type]!.push(...items);
+        };
 
-        // Attach original filename to every parsed period
-        const fileName = file.name.replace(/\.[^.]+$/, ""); // strip extension
-        parsed.forEach(p => { p.fileName = fileName; });
+        for (const sheetName of wb.SheetNames) {
+          const ws   = wb.Sheets[sheetName];
+          const rows = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: "" });
 
-        if (!parsed.length) { setUploadMsg("No data found in this file."); setUploading(false); return; }
-
-        let saved = 0;
-        for (const p of parsed) {
-          const res = await fetch("/api/account", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(p),
-          });
-          if (res.ok) saved++;
+          // Try side-by-side BS+CF layout first (handles "bs and cf" style sheets)
+          const bsCf = parseBsCfSideBySide(rows, company);
+          if (bsCf.bsPeriods.length || bsCf.cfPeriods.length) {
+            add("balance-sheet", bsCf.bsPeriods);
+            add("cash-flow",     bsCf.cfPeriods);
+          } else if (key === "trial-balance") {
+            const tbParsed = parseTBReport(rows, company);
+            if (tbParsed.length) add("trial-balance", tbParsed);
+            else add("trial-balance", parseBalanceSheet(rows, company)); // fallback
+          } else if (key === "balance-sheet") {
+            add(key, parseBalanceSheet(rows, company));
+          } else if (!isLikelyTrialBalance(rows)) {
+            // Other types: never try to parse a trial balance as P&L / CF / etc.
+            add(key, parseGenericReport(rows, company, key));
+          }
         }
-        const fd = new FormData();
-        fd.append("file", file);
-        fd.append("company", company);
-        await fetch("/api/account/upload", { method: "POST", body: fd });
 
-        setUploadMsg(`✓ ${saved} period${saved>1?"s":""} saved`);
+        // Dedup within each type by period
+        for (const type of Object.keys(byType) as ReportType[]) {
+          const seen = new Set<string>();
+          byType[type] = byType[type]!.filter(p => {
+            if (seen.has(p.period)) return false;
+            seen.add(p.period); return true;
+          });
+        }
+
+        const targetPeriods = byType[key] ?? [];
+        if (!targetPeriods.length) {
+          setUploadMsg("No data found in this file."); setUploading(false); return;
+        }
+
+        // Generate ONE upload folder for this entire file upload batch
+        const uploadFolder = new Date().toISOString().slice(0, 19).replace("T", "_").replace(/:/g, "-");
+
+        // Save ALL found report types (one upload can populate BS + CF at once)
+        let savedTarget = 0;
+        const savedTypes = new Set<string>();
+        for (const [type, periods] of Object.entries(byType)) {
+          for (const p of periods ?? []) {
+            p.fileName     = fileName;
+            p.reportType   = type as ReportType;
+            p.uploadFolder = uploadFolder;
+            const res = await fetch("/api/account", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(p),
+            });
+            if (res.ok) savedTypes.add(type);
+            if (res.ok && type === key) savedTarget++;
+          }
+        }
+
+        // Save original Excel file into the SAME timestamped folder
+        for (const type of savedTypes) {
+          const fd = new FormData();
+          fd.append("file",         file);
+          fd.append("company",      company);
+          fd.append("type",         type);
+          fd.append("uploadFolder", uploadFolder);
+          await fetch("/api/account/file", { method: "POST", body: fd });
+        }
+
+        setUploadMsg(`✓ ${savedTarget} period${savedTarget>1?"s":""} saved`);
         await fetchPeriods();
-        // Auto-open the first parsed period in the report tab
-        if (parsed.length > 0) { openPeriod(parsed[0]); }
+        if (targetPeriods.length > 0) { openPeriod(targetPeriods[0]); }
       } catch { setUploadMsg("Could not read file."); }
       setUploading(false);
     };
@@ -549,12 +1168,13 @@ function ReportTypeView({
   }, [company, key, fetchPeriods]);
 
   const handleDelete = async (period: PeriodFile) => {
+    const folderParam = period.uploadFolder ? `&uploadFolder=${encodeURIComponent(period.uploadFolder)}` : "";
     await fetch(
-      `/api/account?company=${period.company}&period=${encodeURIComponent(period.period)}&type=${key}`,
+      `/api/account?company=${period.company}&period=${encodeURIComponent(period.period)}&type=${key}${folderParam}`,
       { method: "DELETE" }
     );
     if (selected?.period === period.period) { setSelected(null); setTab("history"); }
-    fetchPeriods();
+    await fetchPeriods();
   };
 
   function openPeriod(p: PeriodFile) {
@@ -629,7 +1249,22 @@ function ReportTypeView({
                   const highlight =
                     key === "balance-sheet"
                       ? p.bs.find(r => r.label.toUpperCase().startsWith("TOTAL ASSETS"))?.value
+                      : key === "trial-balance"
+                      ? (() => {
+                          // New format: sum debits column (values[1]) from line rows
+                          if (p.rows?.length) {
+                            const v = p.rows.filter(r => r.type === "line").reduce((s, r) => s + ((r.values?.[1] ?? 0) > 0 ? (r.values?.[1] ?? 0) : 0), 0);
+                            return v > 0 ? v : null;
+                          }
+                          // Old format (bs array)
+                          const v = p.bs.filter(r => r.type === "line" && (r.value ?? 0) > 0).reduce((s, r) => s + (r.value ?? 0), 0);
+                          return v > 0 ? v : null;
+                        })()
                       : (p.rows ?? []).find(r => r.value != null)?.value;
+                  const highlightLabel =
+                    key === "balance-sheet" ? "Total Assets"
+                    : key === "trial-balance" ? "Total Debits"
+                    : "Total";
                   const isActive = selected?.period === p.period;
                   const uploadDate = new Date(p.uploadedAt);
                   return (
@@ -644,10 +1279,12 @@ function ReportTypeView({
                       <div className="p-4">
                         {/* Status + Delete */}
                         <div className="flex items-start justify-between mb-3">
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                            style={{ background: isActive ? color + "20" : "#f0fdf4", color: isActive ? color : "#16a34a" }}>
-                            {isActive ? "VIEWING" : "READY"}
-                          </span>
+                          {isActive && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                              style={{ background: color + "20", color }}>
+                              VIEWING
+                            </span>
+                          )}
                           <button
                             onClick={() => handleDelete(p)}
                             className="opacity-0 group-hover:opacity-100 flex items-center justify-center h-6 w-6 rounded-lg border border-red-200 text-red-400 hover:text-red-600 hover:bg-red-50 transition-all">
@@ -678,7 +1315,7 @@ function ReportTypeView({
                         <div className="grid grid-cols-2 gap-2 mb-4">
                           <div className="rounded-xl px-3 py-2" style={{ background: iconBg }}>
                             <p className="text-[9px] text-gray-400 uppercase tracking-wide mb-0.5">
-                              {key === "balance-sheet" ? "Total Assets" : "Total"}
+                              {highlightLabel}
                             </p>
                             <p className="text-xs font-bold font-mono truncate" style={{ color: BRAND }}>
                               {highlight != null
@@ -691,6 +1328,11 @@ function ReportTypeView({
                             <p className="text-xs font-semibold text-gray-600 truncate">
                               {uploadDate.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
                             </p>
+                            {p.uploadFolder && (
+                              <p className="text-[9px] text-gray-400 font-mono mt-0.5" title={`Folder: ${p.uploadFolder}`}>
+                                {p.uploadFolder.replace("_", " ")}
+                              </p>
+                            )}
                           </div>
                         </div>
 
@@ -745,8 +1387,15 @@ function ReportTypeView({
                 </>
               )}
 
+              {/* Trial Balance */}
+              {key === "trial-balance" && (
+                selected.rows?.length
+                  ? <ReportTable rows={selected.rows} title={`Trial Balance — ${selected.period}`} columns={selected.columns} />
+                  : <ReportTable rows={selected.bs}  title={`Trial Balance — ${selected.period}`} />
+              )}
+
               {/* Generic report */}
-              {key !== "balance-sheet" && (
+              {key !== "balance-sheet" && key !== "trial-balance" && (
                 <ReportTable
                   rows={selected.rows ?? []}
                   title={`${label} — ${selected.period}`}
@@ -829,8 +1478,15 @@ function ReportTypeView({
                 </>
               )}
 
+              {/* Trial Balance */}
+              {key === "trial-balance" && (
+                selected.rows?.length
+                  ? <ReportTable rows={selected.rows} title={`Trial Balance — ${selected.period}`} columns={selected.columns} />
+                  : <ReportTable rows={selected.bs}  title={`Trial Balance — ${selected.period}`} />
+              )}
+
               {/* Generic report */}
-              {key !== "balance-sheet" && (
+              {key !== "balance-sheet" && key !== "trial-balance" && (
                 <ReportTable
                   rows={selected.rows ?? []}
                   title={`${label} — ${selected.period}`}
@@ -957,10 +1613,6 @@ export default function AccountPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-bold text-gray-800">{rt.label}</span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                          style={{ background: "#dcfce7", color: "#16a34a" }}>
-                          READY
-                        </span>
                       </div>
                       <p className="text-xs text-gray-400 mt-0.5">{rt.description}</p>
                     </div>

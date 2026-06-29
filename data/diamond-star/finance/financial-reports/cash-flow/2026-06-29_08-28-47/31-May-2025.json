@@ -1,0 +1,348 @@
+{
+  "reportType": "cash-flow",
+  "period": "31-May-2025",
+  "company": "diamond-star",
+  "uploadedAt": "2026-06-29T08:28:47.866Z",
+  "bs": [],
+  "cf": [],
+  "rows": [
+    {
+      "label": "OPERATING ACTIVITIES",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "Net income before zakat and income tax",
+      "indent": 0,
+      "value": 255542.41999999798,
+      "values": [
+        255542.41999999798
+      ],
+      "type": "total"
+    },
+    {
+      "label": "Adjustments for:",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "Depreciation and amortization",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Finance charges",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "(Gain)/Loss from sale of property and equipment",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Allowance for Obsolete & slow moving inventory",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Employees’ end of service benefits",
+      "indent": 0,
+      "value": 359740.9,
+      "values": [
+        359740.9
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Changes in operating assets and liabilities:",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "Inventories",
+      "indent": 0,
+      "value": -992885.3899999992,
+      "values": [
+        -992885.3899999992
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Trade receivables",
+      "indent": 0,
+      "value": -1024656.5200000008,
+      "values": [
+        -1024656.5200000008
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Prepayments and other receivables",
+      "indent": 0,
+      "value": -138336,
+      "values": [
+        -138336
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Other current assets",
+      "indent": 0,
+      "value": -986606.7500000003,
+      "values": [
+        -986606.7500000003
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Trade and other payables",
+      "indent": 0,
+      "value": 3545230.8199999984,
+      "values": [
+        3545230.8199999984
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Other current liabilities",
+      "indent": 0,
+      "value": 668647.9600000001,
+      "values": [
+        668647.9600000001
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Cash from operations",
+      "indent": 0,
+      "value": 1686677.4399999958,
+      "values": [
+        1686677.4399999958
+      ],
+      "type": "total"
+    },
+    {
+      "label": "Finance cost paid",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Zakat paid",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Employees’ end of service benefit paid",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Net cash from operating activities",
+      "indent": 0,
+      "value": 1686677.4399999958,
+      "values": [
+        1686677.4399999958
+      ],
+      "type": "total"
+    },
+    {
+      "label": "INVESTING ACTIVITIES",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "Acquisition of property and equipment and intangible assets",
+      "indent": 0,
+      "value": -1099812.7399999998,
+      "values": [
+        -1099812.7399999998
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Owner Contribution",
+      "indent": 0,
+      "value": 135088.68999999994,
+      "values": [
+        135088.68999999994
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Proceeds from disposal of PPE",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Other Financial Liability",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "Short term loan",
+      "indent": 0,
+      "value": -668205.82,
+      "values": [
+        -668205.82
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Net cash from investing activities",
+      "indent": 0,
+      "value": -1632929.8699999996,
+      "values": [
+        -1632929.8699999996
+      ],
+      "type": "total"
+    },
+    {
+      "label": "FINANCING ACTIVITIES",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "Net cash in short term borrowings",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        0
+      ],
+      "type": "total"
+    },
+    {
+      "label": "Proceeds from long term borrowings",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Repayments of long term borrowings",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Principal Payments of lease liability",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Principal Payments of other financial liability",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Net cash (used in)/from financing activities",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        0
+      ],
+      "type": "total"
+    },
+    {
+      "label": "Net change in cash and cash equivalents",
+      "indent": 0,
+      "value": 53747.56999999611,
+      "values": [
+        53747.56999999611
+      ],
+      "type": "total"
+    },
+    {
+      "label": "Cash and cash equivalents, January 1",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Closing Cash and Bank",
+      "indent": 0,
+      "value": 53747.56999999611,
+      "values": [
+        53747.56999999611
+      ],
+      "type": "total"
+    }
+  ],
+  "columns": [
+    "Total"
+  ],
+  "fileName": "DS plstic tb BS & Cf",
+  "uploadFolder": "2026-06-29_08-28-47"
+}

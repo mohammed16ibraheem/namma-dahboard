@@ -1,0 +1,1938 @@
+{
+  "reportType": "profit-loss",
+  "period": "31-May-2026",
+  "company": "diamond-star",
+  "uploadedAt": "2026-06-29T08:28:37.588Z",
+  "bs": [],
+  "cf": [],
+  "rows": [
+    {
+      "label": "5000   Revenue",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "5000-02   Local Sales",
+      "indent": 0,
+      "value": 5925942.93,
+      "values": [
+        5925942.93,
+        1379782.25,
+        995089.5,
+        1051621.8,
+        1400825.56,
+        1098623.82
+      ],
+      "type": "line"
+    },
+    {
+      "label": "5000-03   Other Income",
+      "indent": 0,
+      "value": 1246864.62,
+      "values": [
+        1246864.62,
+        219840.73,
+        241752.79,
+        272055.04,
+        254331.3,
+        258884.76
+      ],
+      "type": "line"
+    },
+    {
+      "label": "9000-07   Bailing & Shredding Service Charges",
+      "indent": 0,
+      "value": 156292.15,
+      "values": [
+        156292.15,
+        156292.15,
+        0,
+        0,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "9000   Cost Of Sales",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "6000-25   Inspection Charges",
+      "indent": 0,
+      "value": 0,
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        3200,
+        -3200
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-05   Other Consumables",
+      "indent": 0,
+      "value": 2249,
+      "values": [
+        2249,
+        0,
+        2249,
+        0,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6012-03   Loading & Un-loading Exp",
+      "indent": 0,
+      "value": 980,
+      "values": [
+        980,
+        0,
+        50,
+        0,
+        650,
+        280
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6020-03   Customs Clearance Charges",
+      "indent": 0,
+      "value": 1115,
+      "values": [
+        1115,
+        0,
+        0,
+        0,
+        1115,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6012-04   Transportation Exp",
+      "indent": 0,
+      "value": 28081,
+      "values": [
+        28081,
+        2850,
+        5927,
+        0,
+        10554,
+        8750
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6012-07   Material Packing Exp",
+      "indent": 0,
+      "value": 100840,
+      "values": [
+        100840,
+        7780,
+        21808,
+        34514,
+        33138,
+        3600
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6012-11   Weightment Exp",
+      "indent": 0,
+      "value": 3204.7,
+      "values": [
+        3204.7,
+        0,
+        0,
+        1817.54,
+        -433.84,
+        1821
+      ],
+      "type": "line"
+    },
+    {
+      "label": "9000-01   Cost Of Sales",
+      "indent": 0,
+      "value": 4082440.32,
+      "values": [
+        4082440.32,
+        1178895.91,
+        664480.5,
+        647350.4,
+        921618.63,
+        670094.88
+      ],
+      "type": "line"
+    },
+    {
+      "label": "9000-02   Material Wastage",
+      "indent": 0,
+      "value": 33569.92,
+      "values": [
+        33569.92,
+        5509.74,
+        5904.77,
+        6548.81,
+        8927.94,
+        6678.66
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Grosss Profit",
+      "indent": 0,
+      "value": 3076619.7600000007,
+      "values": [
+        3076619.7600000007,
+        560879.48,
+        536423.02,
+        633446.09,
+        676387.1300000001,
+        669484.04
+      ],
+      "type": "total"
+    },
+    {
+      "label": "6000   Cost Of Employment",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "6000-01   Salaries & Wages",
+      "indent": 0,
+      "value": 693689,
+      "values": [
+        693689,
+        130758,
+        136493,
+        153092,
+        139162,
+        134184
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6000-05   Overtime",
+      "indent": 0,
+      "value": 55494,
+      "values": [
+        55494,
+        10134,
+        11310,
+        14057,
+        11069,
+        8924
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6000-06   GOSSI Payments",
+      "indent": 0,
+      "value": 81157.08,
+      "values": [
+        81157.08,
+        15894.58,
+        16780.58,
+        16067.08,
+        16069.34,
+        16345.5
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6000-07   Medical Exp",
+      "indent": 0,
+      "value": 16,
+      "values": [
+        16,
+        0,
+        16,
+        0,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6000-08   LFA Expenses",
+      "indent": 0,
+      "value": 26768.58,
+      "values": [
+        26768.58,
+        5988.16,
+        6438.42,
+        4775,
+        4992,
+        4575
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6000-09   Vacation Pay Exp",
+      "indent": 0,
+      "value": 31711.5,
+      "values": [
+        31711.5,
+        4627.66,
+        6454.84,
+        5861,
+        7639,
+        7129
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6000-10   Gratuity Exp",
+      "indent": 0,
+      "value": 42774,
+      "values": [
+        42774,
+        26306.24,
+        -11403.24,
+        6956,
+        10786,
+        10129
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6000-11   Staff Insurance",
+      "indent": 0,
+      "value": 3256.25,
+      "values": [
+        3256.25,
+        0,
+        0,
+        3256.25,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6000-13   Uniform & Safety Supplies",
+      "indent": 0,
+      "value": 1871.87,
+      "values": [
+        1871.87,
+        30.45,
+        1642.29,
+        0,
+        60,
+        139.13
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6000-14   Recruiting / Visa Exp",
+      "indent": 0,
+      "value": 10000,
+      "values": [
+        10000,
+        0,
+        0,
+        0,
+        0,
+        10000
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6000-15   Casual Labour Salaries",
+      "indent": 0,
+      "value": 110564.78,
+      "values": [
+        110564.78,
+        23537,
+        18250,
+        17777.78,
+        21576.92,
+        29423.08
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6000-17   Employees Iqama Exp",
+      "indent": 0,
+      "value": 325,
+      "values": [
+        325,
+        0,
+        0,
+        0,
+        0,
+        325
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6000-18   Employees Work Permit Exp",
+      "indent": 0,
+      "value": 18600,
+      "values": [
+        18600,
+        275,
+        9050,
+        1100,
+        900,
+        7275
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6000-19   Employees Exit & Re-entry Exp",
+      "indent": 0,
+      "value": 1900,
+      "values": [
+        1900,
+        200,
+        1100,
+        0,
+        0,
+        600
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6000-23   Employees Iqama Renewal Exp",
+      "indent": 0,
+      "value": 32677,
+      "values": [
+        32677,
+        4038,
+        15477,
+        7150,
+        5850,
+        162
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6003   Rent & Rates",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "6003-05   RENTAL CONTAINER EXP",
+      "indent": 0,
+      "value": 5892.6,
+      "values": [
+        5892.6,
+        5892.6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6003-01   Factory Rent",
+      "indent": 0,
+      "value": 62730,
+      "values": [
+        62730,
+        12546,
+        12546,
+        12546,
+        12546,
+        12546
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6003-03   Forklift Rent",
+      "indent": 0,
+      "value": 1050,
+      "values": [
+        1050,
+        600,
+        0,
+        0,
+        450,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6005   Depreciation Exp",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "6005-02   Dep Exp-Plant & Machinery",
+      "indent": 0,
+      "value": 53505.71,
+      "values": [
+        53505.71,
+        11021.32,
+        9954.41,
+        11021.64,
+        10754.17,
+        10754.17
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6005-04   Dep Exp-Office Equipments",
+      "indent": 0,
+      "value": 409.18,
+      "values": [
+        409.18,
+        84.56,
+        76.35,
+        84.59,
+        81.84,
+        81.84
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6005-05   Dep Exp-Vehicles",
+      "indent": 0,
+      "value": 28603.55,
+      "values": [
+        28603.55,
+        4730.68,
+        4272.57,
+        466.06,
+        9567.12,
+        9567.12
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6005-06   Dep Exp-Furniture & Fixtures",
+      "indent": 0,
+      "value": 2297.83,
+      "values": [
+        2297.83,
+        474.89,
+        429.02,
+        474.8,
+        459.56,
+        459.56
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6005-11   Dep Exp-Lease Hold Improvments",
+      "indent": 0,
+      "value": 33359.54,
+      "values": [
+        33359.54,
+        55.44,
+        145.07,
+        559.13,
+        16299.95,
+        16299.95
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6005-07   Dep Exp-Computers",
+      "indent": 0,
+      "value": 263.93,
+      "values": [
+        263.93,
+        54.55,
+        48.77,
+        55.05,
+        52.78,
+        52.78
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6005-09   Dep Exp-Store Equipments",
+      "indent": 0,
+      "value": 4303.32,
+      "values": [
+        4303.32,
+        856.77,
+        822.88,
+        883.21,
+        870.23,
+        870.23
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006   Repairs & Maintenance",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "6006-01   R & M- Building",
+      "indent": 0,
+      "value": 618.97,
+      "values": [
+        618.97,
+        161.97,
+        0,
+        0,
+        289,
+        168
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-02   R & M-Plant & Machinery",
+      "indent": 0,
+      "value": 4124.78,
+      "values": [
+        4124.78,
+        677,
+        2090.78,
+        0,
+        1357,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "9000-03   Fire Fighting Expenses",
+      "indent": 0,
+      "value": 1834.78,
+      "values": [
+        1834.78,
+        0,
+        0,
+        0,
+        1260,
+        574.78
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-03   R & M-Fork Lifts & Other Equipments",
+      "indent": 0,
+      "value": 710.9,
+      "values": [
+        710.9,
+        363,
+        347.9,
+        0,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-04   R & M-General (Elect & Mech Spares)",
+      "indent": 0,
+      "value": 263.29,
+      "values": [
+        263.29,
+        0,
+        0,
+        0,
+        250.24,
+        13.05
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-07   R & M-Office Equipment",
+      "indent": 0,
+      "value": 2062.23,
+      "values": [
+        2062.23,
+        1979.83,
+        25,
+        0,
+        57.4,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-08   R & M-Machine MIT # 6 (DSA-MICO-02)",
+      "indent": 0,
+      "value": 5439.67,
+      "values": [
+        5439.67,
+        930,
+        0,
+        0,
+        3614.17,
+        895.5
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-09   R & M Electrical - Exp",
+      "indent": 0,
+      "value": 490,
+      "values": [
+        490,
+        246,
+        34,
+        0,
+        165,
+        45
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-10   R & M YEI Machine # 07 (DSA-YEI-01)",
+      "indent": 0,
+      "value": 21630.98,
+      "values": [
+        21630.98,
+        3407.86,
+        3237.78,
+        248.75,
+        9526.68,
+        5209.91
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-26   R & M-Forklift Toyota",
+      "indent": 0,
+      "value": 16149.06,
+      "values": [
+        16149.06,
+        3024.11,
+        1180,
+        0,
+        11944.95,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-14   R & M Crusher Machine",
+      "indent": 0,
+      "value": 100,
+      "values": [
+        100,
+        0,
+        0,
+        0,
+        60,
+        40
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6002-29   R & M Mico -DSA/MICO/05",
+      "indent": 0,
+      "value": 311.27,
+      "values": [
+        311.27,
+        311.27,
+        0,
+        0,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-30   R&M FORKLIFT (DS-WR-FKT-TOYOTA- 2)",
+      "indent": 0,
+      "value": 626,
+      "values": [
+        626,
+        0,
+        0,
+        0,
+        0,
+        626
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-29   R&M FORKLIFT (DS-WR-FKT-TOYOTA- 1)",
+      "indent": 0,
+      "value": 589.35,
+      "values": [
+        589.35,
+        0,
+        0,
+        0,
+        0,
+        589.35
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-15   R & M Nissan Forklift UNI CAREER Y1F2 (DSA-UF",
+      "indent": 0,
+      "value": 5358.48,
+      "values": [
+        5358.48,
+        1770,
+        245,
+        0,
+        3343.48,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-28   R & M- EPS Hot Melting Compress M-400",
+      "indent": 0,
+      "value": 420,
+      "values": [
+        420,
+        0,
+        400,
+        0,
+        0,
+        20
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-24   R&M Mico MIT#5 (DSA-MICO-04)",
+      "indent": 0,
+      "value": 530,
+      "values": [
+        530,
+        0,
+        530,
+        0,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-16   R & M Bailer Machine",
+      "indent": 0,
+      "value": 158.04,
+      "values": [
+        158.04,
+        0,
+        0,
+        0,
+        158.04,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-25   R & M Coreshredder",
+      "indent": 0,
+      "value": 2577.5,
+      "values": [
+        2577.5,
+        0,
+        1200,
+        0,
+        1377.5,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-27   R & M - Weighbridge",
+      "indent": 0,
+      "value": 2000,
+      "values": [
+        2000,
+        2000,
+        0,
+        0,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-23   R & M - PRESONA MACHINE",
+      "indent": 0,
+      "value": 9989.26,
+      "values": [
+        9989.26,
+        15,
+        5490,
+        0,
+        1284.26,
+        3200
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-37   R&M JCB POCLAIN -NEW",
+      "indent": 0,
+      "value": 64,
+      "values": [
+        64,
+        0,
+        0,
+        0,
+        0,
+        64
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-18   R & M Zamil Chiller",
+      "indent": 0,
+      "value": 950,
+      "values": [
+        950,
+        0,
+        0,
+        0,
+        0,
+        950
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-36   R & M Washing Plant (DSA-WP- 01)",
+      "indent": 0,
+      "value": 12685.35,
+      "values": [
+        12685.35,
+        0,
+        0,
+        0,
+        7197.68,
+        5487.67
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6006-21   R & M MICO MIT # 4 (DSA-MICO-03)",
+      "indent": 0,
+      "value": 3026.02,
+      "values": [
+        3026.02,
+        0,
+        1146.52,
+        0,
+        1360,
+        519.5
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6007   Repair & Maint-Vehicles",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "6007-02   R & M Isuzu EVS-0321",
+      "indent": 0,
+      "value": 3028.96,
+      "values": [
+        3028.96,
+        120,
+        0,
+        0,
+        2623.96,
+        285
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6007-06   R & M -Staff Related Vehicle",
+      "indent": 0,
+      "value": 6710,
+      "values": [
+        6710,
+        1417,
+        1432,
+        1518,
+        1204,
+        1139
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6007-08   R & M -4677-GEA",
+      "indent": 0,
+      "value": 20,
+      "values": [
+        20,
+        0,
+        20,
+        0,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6007-09   R & M -6486 TLA",
+      "indent": 0,
+      "value": 1974.04,
+      "values": [
+        1974.04,
+        620,
+        515.04,
+        0,
+        769,
+        70
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6007-32   R & M Veh & Machinery Service Charge",
+      "indent": 0,
+      "value": 90717.16,
+      "values": [
+        90717.16,
+        13968.61,
+        12077.29,
+        14540.36,
+        25664.27,
+        24466.63
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6007-13   R & M -9054-RJD",
+      "indent": 0,
+      "value": 1921.66,
+      "values": [
+        1921.66,
+        581.44,
+        73.97,
+        220,
+        535.25,
+        511
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6007-14   R & M Exp-V-2634",
+      "indent": 0,
+      "value": 784.16,
+      "values": [
+        784.16,
+        130,
+        30,
+        0,
+        624.16,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6007-33   R & M AYAT PM-34 V#7114",
+      "indent": 0,
+      "value": 170,
+      "values": [
+        170,
+        0,
+        0,
+        0,
+        0,
+        170
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6008   Gasoline Expenses",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "6008-01   Fuel Exp",
+      "indent": 0,
+      "value": 333,
+      "values": [
+        333,
+        0,
+        333,
+        0,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6008-02   Fuel - Generators & ForkLifts",
+      "indent": 0,
+      "value": 13669.4,
+      "values": [
+        13669.4,
+        2776.52,
+        2620.87,
+        821.74,
+        7450.27,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6008-04   Fuel Exp-V-4677 GEA",
+      "indent": 0,
+      "value": 2261.89,
+      "values": [
+        2261.89,
+        509.6,
+        429.68,
+        444.35,
+        439.13,
+        439.13
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6008-06   Fuel Exp EVS-0321",
+      "indent": 0,
+      "value": 2861.13,
+      "values": [
+        2861.13,
+        501.74,
+        545.38,
+        478.26,
+        561.74,
+        774.01
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6008-09   Fuel Exp-V-9054 RJD",
+      "indent": 0,
+      "value": 1930.67,
+      "values": [
+        1930.67,
+        347.96,
+        409.6,
+        417.39,
+        414.81,
+        340.91
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6008-42   Fuel Exp (V#4508 ) Rajesh",
+      "indent": 0,
+      "value": 1189.6,
+      "values": [
+        1189.6,
+        173.91,
+        254.78,
+        258.26,
+        258.29,
+        244.36
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6008-11   Fuel Exp-V-2634",
+      "indent": 0,
+      "value": 2910.52,
+      "values": [
+        2910.52,
+        518.26,
+        527.74,
+        619.07,
+        724.58,
+        520.87
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6008-13   Fuel Exp TLA - 6486",
+      "indent": 0,
+      "value": 6352.65,
+      "values": [
+        6352.65,
+        1300.03,
+        1172.96,
+        1330.43,
+        1395.95,
+        1153.28
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6008-19   Fuel V#6942",
+      "indent": 0,
+      "value": 1377.05,
+      "values": [
+        1377.05,
+        0,
+        317.03,
+        298.56,
+        326.98,
+        434.48
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6008-23   Fuel V#7797",
+      "indent": 0,
+      "value": 1303.62,
+      "values": [
+        1303.62,
+        260.87,
+        260.87,
+        260.87,
+        260.14,
+        260.87
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6008-35   Hydraulic & Engine Oil",
+      "indent": 0,
+      "value": 3247.99,
+      "values": [
+        3247.99,
+        0,
+        1665,
+        0,
+        1582.99,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6008-41   Fuel Exp - EVB - 2317",
+      "indent": 0,
+      "value": 2345.62,
+      "values": [
+        2345.62,
+        434.26,
+        433.93,
+        434.27,
+        434.46,
+        608.7
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6009   Insurance",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "6009-01   Insurance-Vehicle Exp",
+      "indent": 0,
+      "value": 3943.2,
+      "values": [
+        3943.2,
+        0,
+        985.8,
+        985.8,
+        985.8,
+        985.8
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6012-12   Insurance Exp",
+      "indent": 0,
+      "value": 3420,
+      "values": [
+        3420,
+        0,
+        0,
+        0,
+        0,
+        3420
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6009-03   Insurance-Cash In Safe Exp",
+      "indent": 0,
+      "value": 3500,
+      "values": [
+        3500,
+        0,
+        0,
+        3500,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6009-02   Insurance-Medical Exp",
+      "indent": 0,
+      "value": 77510.54,
+      "values": [
+        77510.54,
+        15502.11,
+        15502.11,
+        15502.11,
+        15502.11,
+        15502.11
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6012   Other G & A Expenses",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "6012-23   Group Common Expenses",
+      "indent": 0,
+      "value": 421613.63,
+      "values": [
+        421613.63,
+        51510.11,
+        126487.94,
+        78993.6,
+        59875.36,
+        104746.62
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6012-24   PGI Expenses Recoved",
+      "indent": 0,
+      "value": 268691.72,
+      "values": [
+        268691.72,
+        12389,
+        101200.18,
+        13579.29,
+        103427.25,
+        38096
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6012-02   Office Supplies",
+      "indent": 0,
+      "value": 1859.18,
+      "values": [
+        1859.18,
+        561.83,
+        397.39,
+        0,
+        595.64,
+        304.32
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6012-19   Taxi/Bus Fair",
+      "indent": 0,
+      "value": 612.5,
+      "values": [
+        612.5,
+        0,
+        85,
+        0,
+        200,
+        327.5
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6012-09   Incentive Exp",
+      "indent": 0,
+      "value": 3930,
+      "values": [
+        3930,
+        2070,
+        0,
+        0,
+        0,
+        1860
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6012-08   Others / Business Promotion Exp",
+      "indent": 0,
+      "value": 21173,
+      "values": [
+        21173,
+        0,
+        0,
+        2467,
+        1506,
+        17200
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6012-18   Sewerage Dumping Charges",
+      "indent": 0,
+      "value": 1200,
+      "values": [
+        1200,
+        0,
+        0,
+        0,
+        0,
+        1200
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6012-17   Traffic Fines",
+      "indent": 0,
+      "value": 375,
+      "values": [
+        375,
+        0,
+        375,
+        0,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6012-22   Parking Charges",
+      "indent": 0,
+      "value": 22,
+      "values": [
+        22,
+        0,
+        22,
+        0,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6012-01   Printing & Stationery",
+      "indent": 0,
+      "value": 6171.03,
+      "values": [
+        6171.03,
+        26,
+        3217.83,
+        0,
+        1131.33,
+        1795.87
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6025   Fees & Subscription",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "6025-16   TAMM PORTAL FEE",
+      "indent": 0,
+      "value": 6.9,
+      "values": [
+        6.9,
+        0,
+        0,
+        0,
+        0,
+        6.9
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6025-12   Mwan Export License Fee",
+      "indent": 0,
+      "value": 7492.63,
+      "values": [
+        7492.63,
+        2700.46,
+        2035.17,
+        919,
+        919,
+        919
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6025-11   Software Expenses",
+      "indent": 0,
+      "value": 7500,
+      "values": [
+        7500,
+        0,
+        0,
+        0,
+        0,
+        7500
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6025-04   Legal Service Fees",
+      "indent": 0,
+      "value": 1045,
+      "values": [
+        1045,
+        0,
+        0,
+        0,
+        700,
+        345
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6025-06   Chamber Of Commerce Fee Exp",
+      "indent": 0,
+      "value": 6552.74,
+      "values": [
+        6552.74,
+        6552.74,
+        0,
+        0,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6025-07   Fines & Penalities",
+      "indent": 0,
+      "value": 29000,
+      "values": [
+        29000,
+        0,
+        12000,
+        17000,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6025-14   Muqeem Points Recharge",
+      "indent": 0,
+      "value": 5766.8,
+      "values": [
+        5766.8,
+        0,
+        3484.05,
+        1707.75,
+        0,
+        575
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6025-09   C-R License Fee",
+      "indent": 0,
+      "value": 11433.32,
+      "values": [
+        11433.32,
+        1000,
+        1200,
+        1025,
+        7108.32,
+        1100
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6025-17   ISO Certification Expense",
+      "indent": 0,
+      "value": 7219.8,
+      "values": [
+        7219.8,
+        0,
+        0,
+        7219.8,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Subscription Fee",
+      "indent": 0,
+      "value": 4751.55,
+      "values": [
+        4751.55,
+        1800,
+        2248.25,
+        564.3,
+        1372.34,
+        -1233.34
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6023   Utilities",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "6023-01   Electricity For Off & Factory",
+      "indent": 0,
+      "value": 275354.6,
+      "values": [
+        275354.6,
+        64000,
+        43704.2,
+        57504,
+        52146.4,
+        58000
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6023-02   Telephone Charges",
+      "indent": 0,
+      "value": 1249.17,
+      "values": [
+        1249.17,
+        0,
+        500,
+        0,
+        0,
+        749.17
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6023-03   Gas & Oxygen For Factory",
+      "indent": 0,
+      "value": 398.7,
+      "values": [
+        398.7,
+        286.7,
+        56,
+        0,
+        0,
+        56
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6023-04   Water For Office And Factory",
+      "indent": 0,
+      "value": 25953.06,
+      "values": [
+        25953.06,
+        3646.78,
+        3550.81,
+        3445.92,
+        5216.15,
+        10093.4
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6023-05   Mobile Recharges Exp",
+      "indent": 0,
+      "value": 8346.15,
+      "values": [
+        8346.15,
+        2611.27,
+        140,
+        999.47,
+        3151.5,
+        1443.91
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6014   Computer Running Exp",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "6014-01   Computer Exp",
+      "indent": 0,
+      "value": 390,
+      "values": [
+        390,
+        0,
+        0,
+        0,
+        0,
+        390
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6026   Travelling Expenses",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "6026-04   Air Ticket & Railway Ticket Exp",
+      "indent": 0,
+      "value": 10313,
+      "values": [
+        10313,
+        0,
+        4688,
+        0,
+        0,
+        5625
+      ],
+      "type": "line"
+    },
+    {
+      "label": "6030   Entertainment",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "6030-03   Refreshment Exp",
+      "indent": 0,
+      "value": 380,
+      "values": [
+        380,
+        0,
+        0,
+        0,
+        308,
+        72
+      ],
+      "type": "line"
+    },
+    {
+      "label": "7000   Others Income & Losses",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "7000-06   Round-off Difference",
+      "indent": 0,
+      "value": 7.36,
+      "values": [
+        7.36,
+        4.52,
+        0.09,
+        0.51,
+        2.39,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "7000-07   Non-Claimable Vat",
+      "indent": 0,
+      "value": 406.69,
+      "values": [
+        406.69,
+        0,
+        406.69,
+        0,
+        0,
+        0
+      ],
+      "type": "line"
+    },
+    {
+      "label": "7500   Financial Charges-FC",
+      "indent": 0,
+      "value": null,
+      "values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "type": "section"
+    },
+    {
+      "label": "7500-01   Bank Charges",
+      "indent": 0,
+      "value": 1069.77,
+      "values": [
+        1069.77,
+        386.16,
+        131.13,
+        252.41,
+        160.64,
+        139.43
+      ],
+      "type": "line"
+    },
+    {
+      "label": "Total Expenses",
+      "indent": 0,
+      "value": 2759698.8099999987,
+      "values": [
+        2759698.8099999987,
+        461699.82,
+        601367.72,
+        483738.8599999998,
+        612009.52,
+        600883.0500000002
+      ],
+      "type": "total"
+    },
+    {
+      "label": "Net Profit",
+      "indent": 0,
+      "value": 316920.95000000205,
+      "values": [
+        316920.95000000205,
+        99179.65999999997,
+        -64944.69999999995,
+        149707.23000000016,
+        64377.6100000001,
+        68600.98999999987
+      ],
+      "type": "total"
+    }
+  ],
+  "columns": [
+    "Jan to May",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May"
+  ],
+  "fileName": "DS plstic P&L-detailed",
+  "uploadFolder": "2026-06-29_08-28-37"
+}

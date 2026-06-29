@@ -5,24 +5,35 @@ import * as THREE from "three";
 
 /* ── types ─────────────────────────────────────────────────────────────── */
 interface JarvisData {
-  company:      string;
-  period:       string;
-  revenue:      number;
-  grossProfit:  number;
-  netProfit:    number;
-  gpMargin:     number;
-  netMargin:    number;
-  totalAssets:  number;
-  totalEquity:  number;
-  totalLiab:    number;
-  cashBs:       number;
-  operatingCF:  number;
-  investingCF:  number;
-  financingCF:  number;
-  currentRatio: number;
-  debtToEquity: number;
-  taxTotal:     number;
-  onExport?:    () => void;
+  company:        string;
+  period:         string;
+  revenue:        number;
+  grossProfit:    number;
+  netProfit:      number;
+  gpMargin:       number;
+  netMargin:      number;
+  ebit:           number;
+  totalAssets:    number;
+  totalEquity:    number;
+  totalLiab:      number;
+  cashBs:         number;
+  currAssets:     number;
+  currLiab:       number;
+  operatingCF:    number;
+  investingCF:    number;
+  financingCF:    number;
+  closingCash:    number;
+  currentRatio:   number;
+  debtToEquity:   number;
+  taxTotal:       number;
+  tbPeriod?:      string;
+  tbAccountCount: number;
+  tbTotalDebit:   number;
+  tbTotalCredit:  number;
+  tbBalanced:     boolean;
+  plSections:     { label: string; value: number }[];
+  cfSections:     { label: string; value: number }[];
+  onExport?:      () => void;
 }
 
 /* ── voice config ────────────────────────────────────────────────────────  */
@@ -51,7 +62,10 @@ function timeGreet() {
 
 /* ── opening briefing ────────────────────────────────────────────────────  */
 function openingBriefing(d: JarvisData): string {
-  return `${timeGreet()} I am Diamond Star A.I., responsible for handling and analyzing ${d.company}'s financial data. I am ready to provide you with the financial briefing and answer your questions, sir.`;
+  const noData = d.revenue === 0 && d.totalAssets === 0 && d.operatingCF === 0;
+  if (noData)
+    return `${timeGreet()} I am the financial assistant for ${d.company}. No financial data has been uploaded yet. Please upload an Excel report from the Financial Reports section, and I will provide a full briefing.`;
+  return `${timeGreet()} I am the financial assistant for ${d.company}. Financial data is loaded for the period ending ${d.period}. I am ready to provide your briefing and answer questions, sir.`;
 }
 
 /* ── JARVIS brain ─────────────────────────────────────────────────────────
@@ -61,6 +75,11 @@ function openingBriefing(d: JarvisData): string {
 function jarvisReply(input: string, d: JarvisData): { text: string; farewell: boolean } {
   const q = input.toLowerCase();
   const say = (text: string) => ({ text, farewell: false });
+
+  /* ── no data uploaded yet ── */
+  const noData = d.revenue === 0 && d.totalAssets === 0 && d.operatingCF === 0 && d.tbAccountCount === 0;
+  if (noData && !/help|what can|bye|goodbye|thank|export/.test(q))
+    return say(`No financial data has been uploaded for ${d.company} yet. Please go to Financial Reports and upload an Excel file, then I can answer your question.`);
 
   /* ── farewell ── */
   if (/thank|thanks|bye|goodbye|that.s all|that is all|dismiss|close/.test(q))
@@ -125,11 +144,15 @@ function jarvisReply(input: string, d: JarvisData): { text: string; farewell: bo
        "Cash is adequate but the operating trend should be watched closely."));
 
   /* ── CASH FLOW ── */
-  if (/cash.?flow|operating.?cash|investing|financing/.test(q))
-    return say(`Cash flow breakdown for ${d.period}: ` +
-      `Operating ${sar(d.operatingCF)}, Investing ${sar(d.investingCF)}, Financing ${sar(d.financingCF)}. ` +
+  if (/cash.?flow|operating.?cash|investing|financing/.test(q)) {
+    const cfDetail = d.cfSections.length
+      ? d.cfSections.map(s => `${s.label}: ${sar(s.value)}`).join("; ")
+      : `Operating ${sar(d.operatingCF)}, Investing ${sar(d.investingCF)}, Financing ${sar(d.financingCF)}`;
+    const closing = d.closingCash ? ` Closing cash position is ${sar(d.closingCash)}.` : "";
+    return say(`Cash flow for ${d.period}: ${cfDetail}.${closing} ` +
       (d.operatingCF > 0 ? "Core operations are cash-generative. " : "Operations are consuming cash — review working capital. ") +
       (d.investingCF < 0 ? "Investment outflows suggest active capital expenditure." : "Minimal investing activity this period."));
+  }
 
   /* ── LIQUIDITY — "can we pay our bills?", "short term obligations" ── */
   if (/liquid|pay.*(bill|debt|obligation)|short.?term|current ratio|can we pay/.test(q))
@@ -180,12 +203,38 @@ function jarvisReply(input: string, d: JarvisData): { text: string; farewell: bo
     return say(`Based on the current dashboard, I recommend the following priorities: ${actions.map((a, i) => `${i + 1}. ${a}`).join("; ")}.`);
   }
 
+  /* ── P&L SECTION BREAKDOWN ── */
+  if (/breakdown|section|p.*l detail|profit.*loss detail|revenue.*section|cost section/.test(q)) {
+    if (!d.plSections.length)
+      return say("No detailed P&L section breakdown is available yet. Please upload a Profit & Loss report with section headers.");
+    const lines = d.plSections.map(s =>
+      `${s.label}: ${sar(s.value)}${s.value < 0 ? " (expense)" : ""}`
+    ).join("; ");
+    return say(`P&L section breakdown for ${d.period}: ${lines}.`);
+  }
+
+  /* ── CASH FLOW SECTION BREAKDOWN ── */
+  if (/cash.*section|cf.*breakdown|cash.*flow.*detail/.test(q)) {
+    if (!d.cfSections.length)
+      return say("No detailed cash flow section data is available.");
+    const lines = d.cfSections.map(s => `${s.label}: ${sar(s.value)}`).join("; ");
+    return say(`Cash flow sections for ${d.period}: ${lines}.`);
+  }
+
   /* ── EXPENSES / COSTS ── */
   if (/expense|cost|overhead|opex|spending/.test(q)) {
+    if (d.plSections.length > 0) {
+      const expenseSections = d.plSections.filter(s => s.value < 0);
+      if (expenseSections.length) {
+        const expenseDetail = expenseSections.map(s => `${s.label} ${sar(Math.abs(s.value))}`).join(", ");
+        return say(`Expense sections for ${d.period}: ${expenseDetail}. ` +
+          `Gross profit is ${sar(d.grossProfit)} (${pct(d.gpMargin)} margin). ` +
+          `Net ${d.netProfit >= 0 ? "profit" : "loss"} is ${sar(Math.abs(d.netProfit))}.`);
+      }
+    }
     const opex = d.revenue - d.grossProfit;
-    const opexRatio = d.revenue > 0 ? (opex / d.revenue * 100) : 0;
     return say(`Cost of goods sold consumes ${pct(100 - d.gpMargin)} of revenue, leaving a gross margin of ${pct(d.gpMargin)}. ` +
-      `After gross profit of ${sar(d.grossProfit)}, operating and overhead expenses reduce this to a net profit of ${sar(d.netProfit)}. ` +
+      `After gross profit of ${sar(d.grossProfit)}, operating and overhead expenses reduce this to a net ${d.netProfit >= 0 ? "profit" : "loss"} of ${sar(Math.abs(d.netProfit))}. ` +
       (d.netMargin < d.gpMargin / 2 ? "The gap between gross and net margin is wide — overhead costs are significant." : "The cost structure appears balanced."));
   }
 
@@ -195,6 +244,19 @@ function jarvisReply(input: string, d: JarvisData): { text: string; farewell: bo
       `Debt-to-equity ${d.debtToEquity.toFixed(2)} (${d.debtToEquity <= 1 ? "conservative" : d.debtToEquity <= 2 ? "moderate" : "elevated"}), ` +
       `Gross margin ${pct(d.gpMargin)} (${d.gpMargin >= 35 ? "strong" : d.gpMargin >= 20 ? "acceptable" : "weak"}), ` +
       `Net margin ${pct(d.netMargin)} (${d.netMargin >= 15 ? "excellent" : d.netMargin >= 5 ? "fair" : d.netProfit >= 0 ? "thin" : "loss-making"}).`);
+
+  /* ── TRIAL BALANCE ── */
+  if (/trial.?balance|tb|ledger|account.?list|all accounts/.test(q)) {
+    if (!d.tbPeriod)
+      return say("No trial balance has been uploaded yet. Please upload one from the Financial Reports section.");
+    return say(
+      `Trial balance for the period ${d.tbPeriod} contains ${d.tbAccountCount} accounts. ` +
+      `Total debit balances are ${sar(d.tbTotalDebit)} and total credit balances are ${sar(d.tbTotalCredit)}. ` +
+      (d.tbBalanced
+        ? "The trial balance is fully balanced — debits equal credits. The accounts are in order, sir."
+        : `There is a variance of ${sar(Math.abs(d.tbTotalDebit - d.tbTotalCredit))}. The trial balance is not balanced — this requires immediate attention from your accountant.`)
+    );
+  }
 
   /* ── SUMMARY ── */
   if (/summary|overview|brief|snapshot|tell me everything/.test(q))
@@ -213,7 +275,7 @@ function jarvisReply(input: string, d: JarvisData): { text: string; farewell: bo
 
   /* ── HELP ── */
   if (/help|what can you|what do you know|capabilities/.test(q))
-    return say("I can answer questions about revenue, profitability, cash flow, balance sheet, liquidity, debt, tax, key ratios, risks, and priorities. I can also export the full Excel report. Just ask naturally.");
+    return say("I can answer questions about revenue, P&L section breakdown, profitability, cash flow, balance sheet, liquidity, debt, tax, trial balance, key ratios, risks, and priorities. Try asking: 'P&L breakdown', 'cash flow sections', 'trial balance', or 'give me a summary'. I can also export the full Excel report.");
 
   return say("I didn't catch that clearly. Try asking about revenue, profit, cash flow, risks, or say 'give me a summary'.");
 }
@@ -751,6 +813,7 @@ export default function JarvisAssistant({ data }: { data: JarvisData }) {
                   ["Any red flags?",       "Should I be worried about anything?"],
                   ["Are we profitable?",   "Are we making money?"],
                   ["Cash position",        "What is our cash position?"],
+                  ["Trial Balance",        "Tell me about the trial balance"],
                   ["What to focus on?",    "What should we focus on to improve?"],
                   ["Export Report",        "Export the report"],
                 ] as [string,string][]).map(([label, cmd]) => (

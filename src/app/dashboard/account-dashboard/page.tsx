@@ -36,19 +36,52 @@ const coName = (id: string) => COMPANIES.find(c => c.id === id)?.name ?? id;
 const isAr = (s: string) => /[؀-ۿ]/.test(s);
 
 /* ── row-finder helpers ─────────────────────────────────────────────────── */
+// all-words: every word in key appears somewhere in label (handles typos like "Grosss Profit")
+function allWordsMatch(label: string, key: string): boolean {
+  const lbl = label.toLowerCase();
+  return key.toLowerCase().split(/\s+/).filter(Boolean).every(w => lbl.includes(w));
+}
+
 function bsFind(arr: PeriodFile["bs"], ...keys: string[]): number {
   for (const k of keys) {
-    const r = arr.find(r => r.label.toLowerCase().trim().includes(k.toLowerCase()));
+    let r = arr.find(r => r.label.toLowerCase().trim().includes(k.toLowerCase()));
+    if (r && r.value !== null) return r.value;
+    r = arr.find(r => allWordsMatch(r.label.trim(), k));
     if (r && r.value !== null) return r.value;
   }
   return 0;
 }
+
 function rowFind(arr: NonNullable<PeriodFile["rows"]>, ...keys: string[]): number {
   for (const k of keys) {
-    const r = arr.find(r => r.label.toLowerCase().trim().includes(k.toLowerCase()));
-    if (r && r.value !== null) return r.value;
+    // prefer total-type rows
+    let r = arr.find(r => r.type === "total" && r.label.toLowerCase().trim().includes(k.toLowerCase()) && r.value !== null);
+    if (r) return r.value!;
+    r = arr.find(r => r.label.toLowerCase().trim().includes(k.toLowerCase()) && r.value !== null);
+    if (r) return r.value!;
+    // all-words fallback (handles typos, reordering)
+    r = arr.find(r => r.type === "total" && allWordsMatch(r.label.trim(), k) && r.value !== null);
+    if (r) return r.value!;
+    r = arr.find(r => allWordsMatch(r.label.trim(), k) && r.value !== null);
+    if (r) return r.value!;
   }
   return 0;
+}
+
+// When the P&L has no explicit "Total Revenue" row, sum all line items in the Revenue section
+function computeRevenue(rows: NonNullable<PeriodFile["rows"]>): number {
+  const explicit = rowFind(rows, "total revenue", "net revenue", "total sales", "revenue total", "total income");
+  if (explicit) return explicit;
+  let inRev = false, total = 0;
+  for (const row of rows) {
+    const lbl = row.label.toLowerCase().trim();
+    if ((lbl === "revenue" || lbl === "income" || lbl === "sales") && row.type === "section") { inRev = true; continue; }
+    if (inRev) {
+      if (row.type === "section") break;
+      if (row.type === "line" && row.value !== null) total += row.value;
+    }
+  }
+  return total;
 }
 
 /* ── custom tooltip ──────────────────────────────────────────────────────── */
@@ -80,6 +113,7 @@ export default function AccountDashboardPage() {
   const [plPeriods, setPlPeriods]   = useState<PeriodFile[]>([]);
   const [cfPeriods, setCfPeriods]   = useState<PeriodFile[]>([]);
   const [taxPeriods, setTaxPeriods] = useState<PeriodFile[]>([]);
+  const [tbPeriods,  setTbPeriods]  = useState<PeriodFile[]>([]);
   const [activeIdx, setActiveIdx]   = useState(0);
   const [frCompany, setFrCompany]   = useState("diamond-star");
   const [mounted, setMounted]       = useState(false);
@@ -104,7 +138,7 @@ export default function AccountDashboardPage() {
     return () => window.removeEventListener("companiesChanged", handler);
   }, []);
 
-  /* fetch all 5 report types */
+  /* fetch all 6 report types */
   useEffect(() => {
     if (!frCompany) return;
     Promise.all([
@@ -112,11 +146,13 @@ export default function AccountDashboardPage() {
       fetch(`/api/account?company=${frCompany}&type=profit-loss`).then(r => r.json()),
       fetch(`/api/account?company=${frCompany}&type=cash-flow`).then(r => r.json()),
       fetch(`/api/account?company=${frCompany}&type=tax-report`).then(r => r.json()),
-    ]).then(([bs, pl, cf, tax]) => {
+      fetch(`/api/account?company=${frCompany}&type=trial-balance`).then(r => r.json()),
+    ]).then(([bs, pl, cf, tax, tb]) => {
       setBsPeriods(bs.periods ?? []);
       setPlPeriods(pl.periods ?? []);
       setCfPeriods(cf.periods ?? []);
       setTaxPeriods(tax.periods ?? []);
+      setTbPeriods(tb.periods ?? []);
       setActiveIdx(0);
     }).catch(() => {});
   }, [frCompany]);
@@ -126,47 +162,129 @@ export default function AccountDashboardPage() {
   const plP  = plPeriods[activeIdx]  ?? plPeriods[0];
   const cfP  = cfPeriods[activeIdx]  ?? cfPeriods[0];
   const taxP = taxPeriods[activeIdx] ?? taxPeriods[0];
+  const tbP  = tbPeriods[activeIdx]  ?? tbPeriods[0];
 
   const bsRows  = bsP?.bs   ?? [];
   const plRows  = plP?.rows ?? [];
   const cfRows  = cfP?.rows ?? [];
   const taxRows = taxP?.rows ?? [];
+  // TB: new format stores in rows[] with values=[opening,debits,credits,netChange,closing]
+  // Old format stores in bs[] with value=closing. Support both.
+  const tbIsNew   = (tbP?.rows?.length ?? 0) > 0;
+  const tbRows    = tbIsNew ? (tbP?.rows ?? []) : (tbP?.bs ?? []);
+
+  /* Trial Balance derived values */
+  const tbAccountCount = tbRows.filter(r => r.type === "line").length;
+  const tbTotalDebit   = tbIsNew
+    ? tbRows.filter(r => r.type === "line").reduce((s, r) => {
+        const v = (r as {values?:(number|null)[]}).values?.[1] ?? 0;
+        return s + (v > 0 ? v : 0);
+      }, 0)
+    : tbRows.filter(r => r.type === "line" && (r.value ?? 0) > 0).reduce((s, r) => s + (r.value ?? 0), 0);
+  const tbTotalCredit  = tbIsNew
+    ? tbRows.filter(r => r.type === "line").reduce((s, r) => {
+        const v = (r as {values?:(number|null)[]}).values?.[2] ?? 0;
+        return s + (v > 0 ? v : 0);
+      }, 0)
+    : Math.abs(tbRows.filter(r => r.type === "line" && (r.value ?? 0) < 0).reduce((s, r) => s + (r.value ?? 0), 0));
+  const tbBalanced     = Math.abs(tbTotalDebit - tbTotalCredit) < 1;
+  const tbPeriod       = tbP?.period ?? "";
 
   /* ── derived KPIs ─────────────────────────────────────────────────── */
-  const revenue      = rowFind(plRows, "total revenue");
-  const grossProfit  = rowFind(plRows, "gross profit");
-  const netProfit    = rowFind(plRows, "net profit after tax");
-  const ebit         = rowFind(plRows, "operating profit");
-  const totalAssets  = bsFind(bsRows, "total assets");
-  const totalEquity  = bsFind(bsRows, "total equity");
-  const totalLiab    = bsFind(bsRows, "total liabilities");
-  const cashBs       = bsFind(bsRows, "cash & cash equivalents", "cash and cash equivalents");
-  const currAssets   = bsFind(bsRows, "total current assets");
-  const nonCurrAssets= bsFind(bsRows, "total non-current assets");
-  const currLiab     = bsFind(bsRows, "total current liabilities");
-  const nonCurrLiab  = bsFind(bsRows, "total non-current liabilities");
-  const retainedEarnings = bsFind(bsRows, "retained earnings");
-  const paidCapital  = bsFind(bsRows, "paid-up capital");
+  // P&L — many Excel files use different label formats; fallbacks cover real-world variations
+  const revenue      = computeRevenue(plRows);
+  const grossProfit  = rowFind(plRows, "gross profit", "grosss profit", "gross margin", "gross income");
+  const netProfit    = rowFind(plRows, "net profit after tax", "net profit", "net income", "profit after tax", "profit for the period", "net earnings");
+  const ebit         = rowFind(plRows, "operating profit", "ebit", "profit from operations", "income from operations", "operating income");
 
-  const operatingCF  = rowFind(cfRows, "net cash from operating");
-  const investingCF  = rowFind(cfRows, "net cash from investing");
-  const financingCF  = rowFind(cfRows, "net cash from financing");
-  const closingCash  = rowFind(cfRows, "cash & equivalents — end", "cash at end");
+  // Balance Sheet
+  const totalAssets  = bsFind(bsRows, "total assets");
+  const totalEquity  = bsFind(bsRows, "total equity", "shareholders equity", "total shareholders equity", "stockholders equity", "owners equity");
+  const totalLiab    = bsFind(bsRows, "total liabilities", "total liability");
+  const cashBs       = bsFind(bsRows, "cash & cash equivalents", "cash and cash equivalents", "cash & equivalents", "cash");
+  const currAssets   = bsFind(bsRows, "total current assets", "current assets");
+  const nonCurrAssets= bsFind(bsRows, "total non-current assets", "non-current assets", "non current assets", "fixed assets", "total fixed assets");
+  const currLiab     = bsFind(bsRows, "total current liabilities", "current liabilities");
+  const nonCurrLiab  = bsFind(bsRows, "total non-current liabilities", "non-current liabilities", "non current liabilities", "long term liabilities");
+  const retainedEarnings = bsFind(bsRows, "retained earnings", "retained profit", "accumulated profit");
+  const paidCapital  = bsFind(bsRows, "paid-up capital", "paid up capital", "share capital", "ordinary shares", "issued capital");
+
+  // Cash Flow
+  const operatingCF  = rowFind(cfRows, "net cash from operating", "cash from operations", "operating activities", "net cash provided by operating", "net cash used in operating");
+  const investingCF  = rowFind(cfRows, "net cash from investing", "cash from investing", "investing activities", "net cash used in investing");
+  const financingCF  = rowFind(cfRows, "net cash from financing", "cash from financing", "financing activities", "net cash used in financing");
+  const closingCash  = rowFind(cfRows, "cash & equivalents — end", "cash at end", "closing cash", "closing balance", "cash end of period", "cash at the end", "cash and cash equivalents at end");
 
   const gpMargin     = revenue > 0 ? (grossProfit / revenue) * 100 : 0;
   const netMargin    = revenue > 0 ? (netProfit / revenue) * 100 : 0;
   const currentRatio = currLiab !== 0 ? Math.abs(currAssets) / Math.abs(currLiab) : 0;
   const debtToEquity = totalEquity !== 0 ? Math.abs(totalLiab) / Math.abs(totalEquity) : 0;
 
-  const taxZakat     = rowFind(taxRows, "zakat payable");
-  const taxVatNet    = rowFind(taxRows, "net vat payable");
-  const taxWht       = rowFind(taxRows, "total wht withheld");
-  const taxTotal     = rowFind(taxRows, "total tax payments");
+  // Tax
+  const taxZakat     = rowFind(taxRows, "zakat payable", "zakat");
+  const taxVatNet    = rowFind(taxRows, "net vat payable", "vat payable", "net vat");
+  const taxWht       = rowFind(taxRows, "total wht withheld", "wht withheld", "withholding tax");
+  const taxTotal     = rowFind(taxRows, "total tax payments", "total tax", "tax payable", "income tax");
+
+  // P&L section breakdown: collect top-level sections with their totals
+  const plSections: { label: string; value: number }[] = [];
+  {
+    let i = 0;
+    while (i < plRows.length) {
+      const row = plRows[i];
+      if (row.type === "section" && (row.indent ?? 0) === 0) {
+        // Look for the matching "Total" row for this section
+        const sectionLabel = row.label.replace(/^\S+\s+/, "").trim(); // strip code prefix
+        const totalRow = plRows.slice(i + 1).find(r =>
+          r.type === "total" &&
+          (r.indent ?? 0) === 0 &&
+          r.value !== null
+        );
+        if (totalRow && Math.abs(totalRow.value ?? 0) > 0)
+          plSections.push({ label: sectionLabel, value: totalRow.value! });
+      }
+      i++;
+    }
+  }
+
+  // Cash Flow: total for each CF section
+  const cfSections: { label: string; value: number }[] = [];
+  {
+    let i = 0;
+    while (i < cfRows.length) {
+      const row = cfRows[i];
+      if (row.type === "section" && (row.indent ?? 0) === 0) {
+        const sectionLabel = row.label.trim();
+        const totalRow = cfRows.slice(i + 1).find(r => r.type === "total" && (r.indent ?? 0) === 0 && r.value !== null);
+        if (totalRow && Math.abs(totalRow.value ?? 0) > 0)
+          cfSections.push({ label: sectionLabel, value: totalRow.value! });
+      }
+      i++;
+    }
+  }
 
   /* ── P&L monthly chart data ─────────────────────────────────────────── */
-  const plCols     = (plP?.columns ?? []).slice(1); // drop "Total"
-  const revRowVals = (plRows.find(r => r.label.toLowerCase().includes("total revenue"))?.values ?? []).slice(1).map(v => v ?? 0);
-  const gpRowVals  = (plRows.find(r => r.label.toLowerCase().includes("gross profit") && r.type === "total")?.values ?? []).slice(1).map(v => v ?? 0);
+  const plCols = (plP?.columns ?? []).slice(1); // drop "Total"
+  // find revenue row with flexible matching; if no explicit total, use all revenue-section lines summed per column
+  const revDataRow = plRows.find(r => r.value === revenue && r.values && revenue > 0)
+    ?? plRows.find(r => allWordsMatch(r.label, "total revenue") || allWordsMatch(r.label, "net revenue") || r.label.toLowerCase() === "total revenue");
+  const revRowVals = revDataRow
+    ? (revDataRow.values ?? []).slice(1).map(v => v ?? 0)
+    : plCols.map((_, ci) => {
+        // sum Revenue section per column when no single row holds totals
+        let inRev = false, tot = 0;
+        for (const row of plRows) {
+          const lbl = row.label.toLowerCase().trim();
+          if ((lbl === "revenue" || lbl === "income" || lbl === "sales") && row.type === "section") { inRev = true; continue; }
+          if (inRev) {
+            if (row.type === "section") break;
+            if (row.type === "line" && row.values) tot += row.values[ci + 1] ?? 0;
+          }
+        }
+        return tot;
+      });
+  const gpRow = plRows.find(r => allWordsMatch(r.label.trim(), "gross profit") && r.values);
+  const gpRowVals = (gpRow?.values ?? []).slice(1).map(v => v ?? 0);
 
   /* ── recharts data arrays ────────────────────────────────────────────── */
   const monthlyChartData = plCols.map((month, i) => ({
@@ -191,8 +309,8 @@ export default function AccountDashboardPage() {
   /* ── Period comparison for 2 periods ─────────────────────────────────── */
   const prevBsP  = bsPeriods.length > 1 ? bsPeriods[1 - activeIdx] ?? null : null;
   const prevPlP  = plPeriods.length > 1 ? plPeriods[1 - activeIdx] ?? null : null;
-  const prevRev  = prevPlP ? rowFind(prevPlP.rows ?? [], "total revenue") : 0;
-  const prevNet  = prevPlP ? rowFind(prevPlP.rows ?? [], "net profit after tax") : 0;
+  const prevRev  = prevPlP ? computeRevenue(prevPlP.rows ?? []) : 0;
+  const prevNet  = prevPlP ? rowFind(prevPlP.rows ?? [], "net profit after tax", "net profit", "net income", "profit after tax", "profit for the period") : 0;
   const prevAssets = prevBsP ? bsFind(prevBsP.bs ?? [], "total assets") : 0;
   const revChange  = prevRev > 0 ? ((revenue - prevRev) / prevRev) * 100 : 0;
   const netChange  = prevNet !== 0 ? ((netProfit - prevNet) / Math.abs(prevNet)) * 100 : 0;
@@ -837,6 +955,137 @@ export default function AccountDashboardPage() {
                     </div>
                   )}
 
+                  {/* ── P&L Section Breakdown ──────────────────────── */}
+                  {plSections.length > 0 && (
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                      <div className="px-5 py-3 flex items-center gap-2 border-b border-gray-100"
+                        style={{ background: `linear-gradient(90deg,${BRAND}15,${BRAND}05)` }}>
+                        <BarChart3 size={14} style={{ color: BRAND }} />
+                        <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: BRAND }}>
+                          P&amp;L Section Breakdown — {plP?.period}
+                        </span>
+                      </div>
+                      <div className="divide-y divide-gray-50">
+                        {plSections.map(({ label, value }) => (
+                          <div key={label} className="flex items-center justify-between px-5 py-2.5 hover:bg-gray-50/60">
+                            <span className="text-[12px] text-gray-600 truncate max-w-[60%]">{label}</span>
+                            <span className="text-[12px] font-mono font-semibold tabular-nums"
+                              style={{ color: value < 0 ? "#DC2626" : BRAND }}>
+                              SAR {value < 0
+                                ? `(${Math.abs(value).toLocaleString("en-US",{maximumFractionDigits:0})})`
+                                : value.toLocaleString("en-US",{maximumFractionDigits:0})}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── Trial Balance ──────────────────────────────── */}
+                  {tbRows.length > 0 && (
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                      <div className="px-5 py-3 flex items-center justify-between"
+                        style={{ background: "linear-gradient(90deg,#0f766e18,#0d948518)" }}>
+                        <div className="flex items-center gap-2">
+                          <span style={{ fontSize: 15, color: "#0f766e" }}>⚖</span>
+                          <span className="text-[11px] font-bold uppercase tracking-widest text-teal-700">
+                            Trial Balance — {tbPeriod || tbP?.period}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-[10px] text-gray-400">{tbAccountCount} accounts</span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${tbBalanced ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`}>
+                            {tbBalanced ? "BALANCED ✓" : "UNBALANCED !"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Summary strip */}
+                      <div className="grid grid-cols-3 divide-x divide-gray-100 border-b border-gray-100">
+                        {[
+                          { label: "Total Debits",  val: tbTotalDebit,  color: BRAND },
+                          { label: "Total Credits", val: tbTotalCredit, color: "#DC2626" },
+                          { label: "Net Balance",   val: tbTotalDebit - tbTotalCredit, color: Math.abs(tbTotalDebit - tbTotalCredit) < 1 ? "#059669" : "#DC2626" },
+                        ].map(({ label, val, color }) => (
+                          <div key={label} className="px-5 py-3">
+                            <p className="text-[10px] text-gray-400 mb-0.5">{label}</p>
+                            <p className="text-sm font-bold font-mono tabular-nums" style={{ color }}>
+                              SAR {fmtN(Math.abs(val))}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Account list (scrollable) — multi-column for new format */}
+                      <div className="overflow-auto" style={{ maxHeight: 340 }}>
+                        <table className="w-full text-[11px]" style={{ minWidth: tbIsNew ? 640 : "auto" }}>
+                          <thead className="sticky top-0 z-10">
+                            <tr style={{ background: "#f8fafc" }}>
+                              <th className="text-left px-4 py-2 font-bold text-gray-500 sticky left-0 bg-[#f8fafc]">Account</th>
+                              {tbIsNew ? (
+                                <>
+                                  <th className="text-right px-3 py-2 font-bold text-gray-500">Opening</th>
+                                  <th className="text-right px-3 py-2 font-bold text-gray-500">Debits</th>
+                                  <th className="text-right px-3 py-2 font-bold text-gray-500">Credits</th>
+                                  <th className="text-right px-3 py-2 font-bold text-gray-500">Closing</th>
+                                </>
+                              ) : (
+                                <th className="text-right px-5 py-2 font-bold text-gray-500">Closing (SAR)</th>
+                              )}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {tbRows.map((row, i) => {
+                              const vals = (row as {values?:(number|null)[]}).values;
+                              if (row.type === "section") return (
+                                <tr key={i} style={{ background: "#eef2f9" }}>
+                                  <td colSpan={tbIsNew ? 5 : 2} className="px-4 py-1.5 font-bold text-[10px] uppercase tracking-wider" style={{ color: BRAND }}>
+                                    {row.label}
+                                  </td>
+                                </tr>
+                              );
+                              if (row.type === "total") return (
+                                <tr key={i} style={{ background: "#f0f4fa", borderTop: "1px solid #d1dcea" }}>
+                                  <td className="px-4 py-1.5 font-bold text-[11px] sticky left-0 bg-[#f0f4fa]" style={{ color: BRAND, paddingLeft: `${(row.indent??0)*12+16}px` }}>
+                                    {row.label}
+                                  </td>
+                                  {tbIsNew && vals ? (
+                                    [0,1,2,4].map(vi => (
+                                      <td key={vi} className="px-3 py-1.5 text-right font-mono font-bold tabular-nums" style={{ color: (vals[vi]??0)<0?"#DC2626":BRAND }}>
+                                        {vals[vi]!==null ? fmtNeg(vals[vi]!) : "—"}
+                                      </td>
+                                    ))
+                                  ) : (
+                                    <td className="px-5 py-1.5 text-right font-mono font-bold tabular-nums" style={{ color: BRAND }}>{fmtNeg(row.value??0)}</td>
+                                  )}
+                                </tr>
+                              );
+                              return (
+                                <tr key={i} style={{ background: i%2===0?"#fff":"#fafbfc" }}
+                                  className="hover:bg-blue-50/30 transition-colors">
+                                  <td className="px-4 py-1.5 text-gray-600 sticky left-0" style={{ background:"inherit", paddingLeft:`${(row.indent??0)*12+12}px` }}>
+                                    {row.label}
+                                  </td>
+                                  {tbIsNew && vals ? (
+                                    [0,1,2,4].map(vi => (
+                                      <td key={vi} className="px-3 py-1.5 text-right font-mono tabular-nums" style={{ color: (vals[vi]??0)<0?"#DC2626":(vals[vi]??0)===0?"#d1d5db":"#374151" }}>
+                                        {vals[vi]!==null&&vals[vi]!==0 ? fmtNeg(vals[vi]!) : "—"}
+                                      </td>
+                                    ))
+                                  ) : (
+                                    <td className="px-5 py-1.5 text-right font-mono tabular-nums" style={{ color:(row.value??0)<0?"#DC2626":BRAND }}>
+                                      {row.value!==null ? fmtNeg(row.value) : "—"}
+                                    </td>
+                                  )}
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
                   {/* ── Period Comparison (if 2 periods) ──────────── */}
                   {bsPeriods.length >= 2 && plPeriods.length >= 2 && (
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -926,24 +1175,35 @@ export default function AccountDashboardPage() {
 
       {/* J.A.R.V.I.S floating assistant */}
       <JarvisAssistant data={{
-        company:      coName(frCompany),
-        period:       bsP?.period ?? plP?.period ?? "—",
+        company:        coName(frCompany),
+        period:         (revenue > 0 ? plP?.period : null) ?? bsP?.period ?? cfP?.period ?? "—",
         revenue,
         grossProfit,
         netProfit,
         gpMargin,
         netMargin,
+        ebit,
         totalAssets,
         totalEquity,
         totalLiab,
         cashBs,
+        currAssets,
+        currLiab,
         operatingCF,
         investingCF,
         financingCF,
+        closingCash,
         currentRatio,
         debtToEquity,
         taxTotal,
-        onExport:     exportFullReport,
+        tbPeriod:       tbP?.period,
+        tbAccountCount,
+        tbTotalDebit,
+        tbTotalCredit,
+        tbBalanced,
+        plSections,
+        cfSections,
+        onExport:       exportFullReport,
       }} />
     </div>
   );

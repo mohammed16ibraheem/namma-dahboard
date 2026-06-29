@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -18,18 +19,18 @@ type Tile = {
   Icon: React.ComponentType<{ size?: number; className?: string }>;
 };
 
-const ACCOUNT_DASHBOARD: Tile = {
-  title: "Account Dashboard",
-  description: "Overview of income, payables, receivables & expenses",
-  href: "/dashboard/account-dashboard",
-  Icon: LayoutDashboard,
-};
-
 const FINANCIAL_REPORTS: Tile = {
   title: "Financial Reports",
   description: "Balance Sheet, Profit & Loss, Cash Flow, Executive Summary, Tax Report",
   href: "/dashboard/account",
   Icon: FileBarChart,
+};
+
+const ACCOUNT_DASHBOARD: Tile = {
+  title: "Account Dashboard",
+  description: "Financial KPIs, charts & Diamond Star A.I. powered by real report data",
+  href: "/dashboard/account-dashboard",
+  Icon: LayoutDashboard,
 };
 
 function ModuleCard({ tile, delay }: { tile: Tile; delay: number }) {
@@ -52,59 +53,65 @@ function ModuleCard({ tile, delay }: { tile: Tile; delay: number }) {
           "0 20px 50px -10px rgba(0,0,0,0.35), 0 8px 20px -5px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.08)";
       }}
     >
-      {/* Accent ribbon */}
-      <div
-        className="absolute top-0 left-0 h-1.5 w-full"
-        style={{ background: `linear-gradient(90deg, ${BRAND}, #2e86c1)` }}
-      />
-
-      {/* Soft corner glow */}
-      <div
-        className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(27,58,107,0.12), transparent 70%)",
-        }}
-      />
-
+      <div className="absolute top-0 left-0 h-1.5 w-full"
+        style={{ background: `linear-gradient(90deg, ${BRAND}, #2e86c1)` }} />
+      <div className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{ background: "radial-gradient(circle, rgba(27,58,107,0.12), transparent 70%)" }} />
       <div className="flex items-start gap-5">
-        <div
-          className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-white transition-all duration-300 group-hover:scale-110 group-hover:rotate-3"
-          style={{
-            background: `linear-gradient(135deg, ${BRAND}, #2a5a9e)`,
-            boxShadow: `0 12px 28px ${BRAND}55, inset 0 1px 0 rgba(255,255,255,0.2)`,
-          }}
-        >
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-white transition-all duration-300 group-hover:scale-110 group-hover:rotate-3"
+          style={{ background: `linear-gradient(135deg, ${BRAND}, #2a5a9e)`, boxShadow: `0 12px 28px ${BRAND}55, inset 0 1px 0 rgba(255,255,255,0.2)` }}>
           <Icon size={30} />
         </div>
-
         <div className="flex flex-col pt-1">
-          <h2
-            className="text-xl font-bold tracking-tight"
-            style={{ color: BRAND }}
-          >
-            {title}
-          </h2>
-          <p className="mt-1.5 text-[13px] text-gray-500 leading-relaxed">
-            {description}
-          </p>
+          <h2 className="text-xl font-bold tracking-tight" style={{ color: BRAND }}>{title}</h2>
+          <p className="mt-1.5 text-[13px] text-gray-500 leading-relaxed">{description}</p>
         </div>
       </div>
-
       <div className="mt-7 pt-5 border-t border-gray-100 flex items-center justify-end">
-        <span
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white text-base transition-all duration-300 group-hover:translate-x-1 group-hover:shadow-lg"
-          style={{ background: BRAND, boxShadow: `0 4px 12px ${BRAND}55` }}
-          aria-hidden
-        >
-          →
-        </span>
+        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white text-base transition-all duration-300 group-hover:translate-x-1 group-hover:shadow-lg"
+          style={{ background: BRAND, boxShadow: `0 4px 12px ${BRAND}55` }} aria-hidden>→</span>
       </div>
     </Link>
   );
 }
 
 export default function FinancePage() {
+  const [company, setCompany] = useState("diamond-star");
+  const [hasData, setHasData] = useState(false);
+
+  /* read active company */
+  useEffect(() => {
+    function readCompany() {
+      try {
+        const raw = localStorage.getItem("selected_companies");
+        const ids: string[] = raw ? JSON.parse(raw) : ["diamond-star"];
+        setCompany(ids[0] ?? "diamond-star");
+      } catch {}
+    }
+    readCompany();
+    const handler = (e: Event) => {
+      const ids = (e as CustomEvent<string[]>).detail;
+      if (ids?.length) setCompany(ids[0]);
+    };
+    window.addEventListener("companiesChanged", handler);
+    return () => window.removeEventListener("companiesChanged", handler);
+  }, []);
+
+  /* check all 5 report types — show dashboard tile only when at least one has data */
+  useEffect(() => {
+    if (!company) return;
+    Promise.all([
+      fetch(`/api/account?company=${company}&type=balance-sheet`).then(r => r.json()),
+      fetch(`/api/account?company=${company}&type=trial-balance`).then(r => r.json()),
+      fetch(`/api/account?company=${company}&type=profit-loss`).then(r => r.json()),
+      fetch(`/api/account?company=${company}&type=cash-flow`).then(r => r.json()),
+      fetch(`/api/account?company=${company}&type=executive-summary`).then(r => r.json()),
+      fetch(`/api/account?company=${company}&type=tax-report`).then(r => r.json()),
+    ]).then((results) => {
+      setHasData(results.some(r => (r.periods?.length ?? 0) > 0));
+    }).catch(() => setHasData(false));
+  }, [company]);
+
   return (
     <>
       <style>{`
@@ -132,75 +139,52 @@ export default function FinancePage() {
         }
         .blob-a { animation: floatA 8s ease-in-out infinite; }
         .blob-b { animation: floatB 11s ease-in-out infinite; }
-        .tile {
-          animation: tileIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-        }
+        .tile   { animation: tileIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
       `}</style>
 
       <div className="animated-bg min-h-screen relative overflow-hidden">
-        {/* Decorative blobs */}
-        <div
-          className="blob-a absolute -top-24 -left-24 w-96 h-96 rounded-full opacity-20 pointer-events-none"
-          style={{ background: "radial-gradient(circle, #4a9eda, transparent)" }}
-        />
-        <div
-          className="blob-b absolute -bottom-32 -right-20 w-[28rem] h-[28rem] rounded-full opacity-15 pointer-events-none"
-          style={{ background: "radial-gradient(circle, #2e86c1, transparent)" }}
-        />
+        <div className="blob-a absolute -top-24 -left-24 w-96 h-96 rounded-full opacity-20 pointer-events-none"
+          style={{ background: "radial-gradient(circle, #4a9eda, transparent)" }} />
+        <div className="blob-b absolute -bottom-32 -right-20 w-[28rem] h-[28rem] rounded-full opacity-15 pointer-events-none"
+          style={{ background: "radial-gradient(circle, #2e86c1, transparent)" }} />
+        <div className="absolute inset-0 opacity-5 pointer-events-none"
+          style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
 
-        {/* Grid overlay */}
-        <div
-          className="absolute inset-0 opacity-5 pointer-events-none"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-          }}
-        />
-
-        {/* Top bar */}
         <header className="relative z-20 flex items-center justify-between px-6 md:px-10 py-5 gap-4">
-          <div
-            className="flex items-center bg-white rounded-2xl px-6 py-3 flex-shrink-0"
-            style={{ boxShadow: "0 12px 30px -8px rgba(0,0,0,0.35), 0 4px 10px rgba(0,0,0,0.15)" }}
-          >
+          <div className="flex items-center bg-white rounded-2xl px-6 py-3 flex-shrink-0"
+            style={{ boxShadow: "0 12px 30px -8px rgba(0,0,0,0.35), 0 4px 10px rgba(0,0,0,0.15)" }}>
             <Link href="/dashboard">
               <Image src="/logo.png" alt="Diamond Star Arabia" width={220} height={72} priority
                 className="object-contain h-16 w-auto cursor-pointer" />
             </Link>
           </div>
-
-          <div className="flex-1 flex justify-center">
-            <CompanySelector />
-          </div>
-
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium px-4 py-2 backdrop-blur-md border border-white/15 transition-colors flex-shrink-0"
-          >
-            <LogOut size={16} />
-            Log out
+          <div className="flex-1 flex justify-center"><CompanySelector /></div>
+          <Link href="/login"
+            className="inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium px-4 py-2 backdrop-blur-md border border-white/15 transition-colors flex-shrink-0">
+            <LogOut size={16} /> Log out
           </Link>
         </header>
 
-        {/* Title */}
         <section className="relative z-10 px-6 md:px-10 pt-6 pb-8 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-            Finance
-          </h1>
-          <div
-            className="mx-auto mt-3 h-[3px] w-16 rounded-full"
-            style={{ background: "#ffffff" }}
-          />
+          <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Finance</h1>
+          <div className="mx-auto mt-3 h-[3px] w-16 rounded-full" style={{ background: "#ffffff" }} />
         </section>
 
         <main className="relative z-10 px-6 md:px-12 lg:px-16 pb-20">
           <div className="mx-auto max-w-7xl">
-            {/* Account */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-              <ModuleCard tile={ACCOUNT_DASHBOARD} delay={0} />
-              <ModuleCard tile={FINANCIAL_REPORTS} delay={100} />
+              {/* Financial Reports always visible */}
+              <ModuleCard tile={FINANCIAL_REPORTS} delay={0} />
+              {/* Account Dashboard only when real data exists */}
+              {hasData && <ModuleCard tile={ACCOUNT_DASHBOARD} delay={100} />}
             </div>
+
+            {/* hint when no data yet */}
+            {!hasData && (
+              <p className="mt-10 text-center text-sm text-white/40">
+                Upload financial reports to unlock the Account Dashboard
+              </p>
+            )}
           </div>
         </main>
       </div>
