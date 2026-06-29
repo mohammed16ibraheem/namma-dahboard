@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell, PieChart as RPieChart, Pie,
@@ -20,6 +20,7 @@ import type { PeriodFile } from "@/app/api/account/route";
 import JarvisAssistant from "@/components/jarvis-assistant";
 
 const BRAND = "#1B3A6B";
+const ALL_MONTHS_CONST = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] as const;
 
 /* ── helpers ───────────────────────────────────────────────────────────── */
 const fmtN = (n: number) => Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -117,6 +118,8 @@ export default function AccountDashboardPage() {
   const [activeIdx, setActiveIdx]   = useState(0);
   const [frCompany, setFrCompany]   = useState("diamond-star");
   const [mounted, setMounted]       = useState(false);
+  const [ytdMode, setYtdMode]       = useState(false);
+  const [ytdEndIdx, setYtdEndIdx]   = useState(-1);  // -1 = last available month
 
   useEffect(() => setMounted(true), []);
 
@@ -137,6 +140,13 @@ export default function AccountDashboardPage() {
     window.addEventListener("companiesChanged", handler);
     return () => window.removeEventListener("companiesChanged", handler);
   }, []);
+
+  /* reset YTD state when company changes */
+  useEffect(() => {
+    setYtdMode(false);
+    setYtdEndIdx(-1);
+    setActiveIdx(0);
+  }, [frCompany]);
 
   /* fetch all 6 report types */
   useEffect(() => {
@@ -173,6 +183,52 @@ export default function AccountDashboardPage() {
   const tbIsNew   = (tbP?.rows?.length ?? 0) > 0;
   const tbRows    = tbIsNew ? (tbP?.rows ?? []) : (tbP?.bs ?? []);
 
+  /* ── YTD computation ──────────────────────────────────────────────────── */
+  // Monthly columns from P&L (index 0 = "Total", 1+ = individual months)
+  const plCols = (plP?.columns ?? []).slice(1); // ["Jan","Feb","Mar","Apr","May"]
+  const cfCols = (cfP?.columns ?? []).slice(1);
+
+  // When ytdMode and ytdEndIdx = -1, default to the last available month
+  const effectiveYtdEnd = ytdMode
+    ? (ytdEndIdx >= 0 && ytdEndIdx < plCols.length ? ytdEndIdx : plCols.length - 1)
+    : plCols.length - 1;
+
+  // Month pills: which of the 12 calendar months appear in P&L data
+  const monthAvailability = useMemo(() =>
+    ALL_MONTHS_CONST.map(m => plCols.findIndex(c => c.toLowerCase().startsWith(m.toLowerCase()))),
+  [plCols]);
+
+  // Apply YTD: replace each row's `value` with sum of columns 1..effectiveYtdEnd+1
+  const ytdPlRows = useMemo(() => {
+    if (!ytdMode || plRows.length === 0 || plCols.length <= 1) return plRows;
+    return plRows.map(row => {
+      if (!row.values || row.values.length <= 1) return row;
+      let sum = 0;
+      for (let i = 1; i <= effectiveYtdEnd + 1 && i < row.values.length; i++) {
+        sum += (row.values[i] ?? 0);
+      }
+      return { ...row, value: sum };
+    });
+  }, [ytdMode, plRows, plCols.length, effectiveYtdEnd]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const ytdCfRows = useMemo(() => {
+    if (!ytdMode || cfRows.length === 0 || cfCols.length <= 1) return cfRows;
+    return cfRows.map(row => {
+      if (!row.values || row.values.length <= 1) return row;
+      let sum = 0;
+      for (let i = 1; i <= effectiveYtdEnd + 1 && i < row.values.length; i++) {
+        sum += (row.values[i] ?? 0);
+      }
+      return { ...row, value: sum };
+    });
+  }, [ytdMode, cfRows, cfCols.length, effectiveYtdEnd]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Label for the YTD range shown in section header and KPI sub-text
+  const ytdRangeLabel = ytdMode && plCols.length > 0
+    ? `YTD: ${plCols[0]} – ${plCols[effectiveYtdEnd]}`
+    : null;
+  const ytdMonthCount = ytdMode ? effectiveYtdEnd + 1 : null;
+
   /* Trial Balance derived values */
   const tbAccountCount = tbRows.filter(r => r.type === "line").length;
   const tbTotalDebit   = tbIsNew
@@ -190,12 +246,12 @@ export default function AccountDashboardPage() {
   const tbBalanced     = Math.abs(tbTotalDebit - tbTotalCredit) < 1;
   const tbPeriod       = tbP?.period ?? "";
 
-  /* ── derived KPIs ─────────────────────────────────────────────────── */
+  /* ── derived KPIs (use ytdPlRows / ytdCfRows so YTD mode recalculates) ── */
   // P&L — many Excel files use different label formats; fallbacks cover real-world variations
-  const revenue      = computeRevenue(plRows);
-  const grossProfit  = rowFind(plRows, "gross profit", "grosss profit", "gross margin", "gross income");
-  const netProfit    = rowFind(plRows, "net profit after tax", "net profit", "net income", "profit after tax", "profit for the period", "net earnings");
-  const ebit         = rowFind(plRows, "operating profit", "ebit", "profit from operations", "income from operations", "operating income");
+  const revenue      = computeRevenue(ytdPlRows);
+  const grossProfit  = rowFind(ytdPlRows, "gross profit", "grosss profit", "gross margin", "gross income");
+  const netProfit    = rowFind(ytdPlRows, "net profit after tax", "net profit", "net income", "profit after tax", "profit for the period", "net earnings");
+  const ebit         = rowFind(ytdPlRows, "operating profit", "ebit", "profit from operations", "income from operations", "operating income");
 
   // Balance Sheet
   const totalAssets  = bsFind(bsRows, "total assets");
@@ -209,10 +265,10 @@ export default function AccountDashboardPage() {
   const retainedEarnings = bsFind(bsRows, "retained earnings", "retained profit", "accumulated profit");
   const paidCapital  = bsFind(bsRows, "paid-up capital", "paid up capital", "share capital", "ordinary shares", "issued capital");
 
-  // Cash Flow
-  const operatingCF  = rowFind(cfRows, "net cash from operating", "cash from operations", "operating activities", "net cash provided by operating", "net cash used in operating");
-  const investingCF  = rowFind(cfRows, "net cash from investing", "cash from investing", "investing activities", "net cash used in investing");
-  const financingCF  = rowFind(cfRows, "net cash from financing", "cash from financing", "financing activities", "net cash used in financing");
+  // Cash Flow (ytdCfRows: summed if CF has monthly columns, otherwise same as cfRows)
+  const operatingCF  = rowFind(ytdCfRows, "net cash from operating", "cash from operations", "operating activities", "net cash provided by operating", "net cash used in operating");
+  const investingCF  = rowFind(ytdCfRows, "net cash from investing", "cash from investing", "investing activities", "net cash used in investing");
+  const financingCF  = rowFind(ytdCfRows, "net cash from financing", "cash from financing", "financing activities", "net cash used in financing");
   const closingCash  = rowFind(cfRows, "cash & equivalents — end", "cash at end", "closing cash", "closing balance", "cash end of period", "cash at the end", "cash and cash equivalents at end");
 
   const gpMargin     = revenue > 0 ? (grossProfit / revenue) * 100 : 0;
@@ -226,16 +282,15 @@ export default function AccountDashboardPage() {
   const taxWht       = rowFind(taxRows, "total wht withheld", "wht withheld", "withholding tax");
   const taxTotal     = rowFind(taxRows, "total tax payments", "total tax", "tax payable", "income tax");
 
-  // P&L section breakdown: collect top-level sections with their totals
+  // P&L section breakdown (use ytdPlRows so YTD mode re-slices sections)
   const plSections: { label: string; value: number }[] = [];
   {
     let i = 0;
-    while (i < plRows.length) {
-      const row = plRows[i];
+    while (i < ytdPlRows.length) {
+      const row = ytdPlRows[i];
       if (row.type === "section" && (row.indent ?? 0) === 0) {
-        // Look for the matching "Total" row for this section
         const sectionLabel = row.label.replace(/^\S+\s+/, "").trim(); // strip code prefix
-        const totalRow = plRows.slice(i + 1).find(r =>
+        const totalRow = ytdPlRows.slice(i + 1).find(r =>
           r.type === "total" &&
           (r.indent ?? 0) === 0 &&
           r.value !== null
@@ -247,15 +302,15 @@ export default function AccountDashboardPage() {
     }
   }
 
-  // Cash Flow: total for each CF section
+  // Cash Flow sections (use ytdCfRows)
   const cfSections: { label: string; value: number }[] = [];
   {
     let i = 0;
-    while (i < cfRows.length) {
-      const row = cfRows[i];
+    while (i < ytdCfRows.length) {
+      const row = ytdCfRows[i];
       if (row.type === "section" && (row.indent ?? 0) === 0) {
         const sectionLabel = row.label.trim();
-        const totalRow = cfRows.slice(i + 1).find(r => r.type === "total" && (r.indent ?? 0) === 0 && r.value !== null);
+        const totalRow = ytdCfRows.slice(i + 1).find(r => r.type === "total" && (r.indent ?? 0) === 0 && r.value !== null);
         if (totalRow && Math.abs(totalRow.value ?? 0) > 0)
           cfSections.push({ label: sectionLabel, value: totalRow.value! });
       }
@@ -264,14 +319,12 @@ export default function AccountDashboardPage() {
   }
 
   /* ── P&L monthly chart data ─────────────────────────────────────────── */
-  const plCols = (plP?.columns ?? []).slice(1); // drop "Total"
-  // find revenue row with flexible matching; if no explicit total, use all revenue-section lines summed per column
+  // plCols already defined above; find per-month values from original plRows (bars = individual months)
   const revDataRow = plRows.find(r => r.value === revenue && r.values && revenue > 0)
     ?? plRows.find(r => allWordsMatch(r.label, "total revenue") || allWordsMatch(r.label, "net revenue") || r.label.toLowerCase() === "total revenue");
-  const revRowVals = revDataRow
+  const allRevRowVals = revDataRow
     ? (revDataRow.values ?? []).slice(1).map(v => v ?? 0)
     : plCols.map((_, ci) => {
-        // sum Revenue section per column when no single row holds totals
         let inRev = false, tot = 0;
         for (const row of plRows) {
           const lbl = row.label.toLowerCase().trim();
@@ -283,11 +336,15 @@ export default function AccountDashboardPage() {
         }
         return tot;
       });
-  const gpRow = plRows.find(r => allWordsMatch(r.label.trim(), "gross profit") && r.values);
-  const gpRowVals = (gpRow?.values ?? []).slice(1).map(v => v ?? 0);
+  const allGpRowVals = (plRows.find(r => allWordsMatch(r.label.trim(), "gross profit") && r.values)?.values ?? []).slice(1).map(v => v ?? 0);
+
+  // Slice chart to selected YTD range (ytdMode trims, otherwise show all months)
+  const chartCols   = ytdMode ? plCols.slice(0, effectiveYtdEnd + 1) : plCols;
+  const revRowVals  = allRevRowVals.slice(0, chartCols.length);
+  const gpRowVals   = allGpRowVals.slice(0, chartCols.length);
 
   /* ── recharts data arrays ────────────────────────────────────────────── */
-  const monthlyChartData = plCols.map((month, i) => ({
+  const monthlyChartData = chartCols.map((month, i) => ({
     month,
     Revenue: revRowVals[i] ?? 0,
     "Gross Profit": gpRowVals[i] ?? 0,
@@ -581,7 +638,7 @@ export default function AccountDashboardPage() {
               {hasFinancialData && bsPeriods.length > 1 && (
                 <div className="flex gap-1 bg-white rounded-xl border border-gray-100 shadow-sm p-1">
                   {bsPeriods.map((p, i) => (
-                    <button key={p.period} onClick={() => setActiveIdx(i)}
+                    <button key={p.period} onClick={() => { setActiveIdx(i); setYtdEndIdx(-1); }}
                       className="px-4 py-1.5 rounded-lg text-xs font-bold transition-all"
                       style={{ background: activeIdx === i ? BRAND : "transparent", color: activeIdx === i ? "#fff" : "#6b7280" }}>
                       {p.period}
@@ -598,6 +655,71 @@ export default function AccountDashboardPage() {
           </div>
 
           <>
+              {/* ── YTD Selector Panel ─────────────────────────────────── */}
+              {hasFinancialData && plCols.length > 0 && (
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-3.5 flex items-center gap-4 flex-wrap">
+                  {/* Label */}
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 whitespace-nowrap">
+                    YTD Range
+                  </span>
+
+                  {/* Single / YTD toggle */}
+                  <div className="flex bg-gray-100 rounded-lg p-0.5 gap-0.5 flex-shrink-0">
+                    {(["Single","YTD"] as const).map(mode => (
+                      <button key={mode}
+                        onClick={() => setYtdMode(mode === "YTD")}
+                        className="px-4 py-1.5 rounded-md text-[11px] font-semibold transition-all"
+                        style={{
+                          background: (mode === "YTD") === ytdMode ? BRAND : "transparent",
+                          color:      (mode === "YTD") === ytdMode ? "white" : "#6b7280",
+                        }}>
+                        {mode}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Month pills — 12 calendar slots, grayed if not in data */}
+                  <div className="flex gap-1.5 flex-wrap">
+                    {ALL_MONTHS_CONST.map((m, mi) => {
+                      const colIdx = monthAvailability[mi]; // index in plCols, or -1
+                      const available = colIdx >= 0;
+                      const inRange   = ytdMode && available && colIdx <= effectiveYtdEnd;
+                      const isEnd     = ytdMode && available && colIdx === effectiveYtdEnd;
+                      return (
+                        <button key={m}
+                          disabled={!available}
+                          onClick={() => { setYtdMode(true); setYtdEndIdx(colIdx); }}
+                          title={available ? (ytdMode ? `YTD to ${m}` : `Select ${m}`) : "No data"}
+                          className="px-3 py-1 rounded-full text-[11px] font-medium transition-all"
+                          style={{
+                            background: !available ? "#f3f4f6"
+                              : isEnd    ? BRAND
+                              : inRange  ? "#dbeafe"
+                              : "white",
+                            color: !available ? "#d1d5db"
+                              : isEnd   ? "white"
+                              : inRange ? BRAND
+                              : "#6b7280",
+                            border: `1px solid ${!available ? "#e5e7eb" : isEnd ? BRAND : inRange ? "#93c5fd" : "#e5e7eb"}`,
+                            cursor: !available ? "default" : "pointer",
+                          }}>
+                          {m}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* YTD range badge */}
+                  {ytdMode && plCols.length > 0 && (
+                    <span className="ml-auto whitespace-nowrap text-[11px] font-semibold px-3 py-1.5 rounded-lg flex-shrink-0"
+                      style={{ background: "#dbeafe", color: BRAND }}>
+                      YTD: {plCols[0]} → {plCols[effectiveYtdEnd]}
+                      {ytdMonthCount != null && <span className="ml-1.5 opacity-60 font-normal">{ytdMonthCount}m</span>}
+                    </span>
+                  )}
+                </div>
+              )}
+
               {/* ════════════════════════════════════════════════════════
                    FINANCIAL REPORTS SECTION
               ════════════════════════════════════════════════════════ */}
@@ -608,7 +730,9 @@ export default function AccountDashboardPage() {
                   <div className="flex items-center gap-3">
                     <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
                     <span className="text-[11px] font-bold uppercase tracking-widest text-gray-400 px-3">
-                      Financial Reports — {bsP?.period ?? ""}
+                      {ytdRangeLabel
+                        ? `Financial Reports — ${ytdRangeLabel}`
+                        : `Financial Reports — ${bsP?.period ?? ""}`}
                     </span>
                     <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
                   </div>
@@ -617,46 +741,53 @@ export default function AccountDashboardPage() {
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                     {[
                       {
-                        label: "Revenue", value: fmtM(revenue), sub: "Total period",
+                        label: "Revenue", value: fmtM(revenue),
+                        sub: ytdMode ? `${ytdMonthCount}-month YTD` : "Total period",
                         color: "#0891B2", bg: "linear-gradient(135deg,#ecfeff,#cffafe)",
                         border: "#0891B2", Icon: BarChart3,
-                        change: revChange, showChange: !!prevPlP,
+                        change: revChange, showChange: !!prevPlP && !ytdMode,
+                        ytd: ytdMode,
                       },
                       {
-                        label: "Gross Profit", value: fmtM(grossProfit), sub: `Margin ${gpMargin.toFixed(1)}%`,
+                        label: "Gross Profit", value: fmtM(grossProfit),
+                        sub: ytdMode ? `Margin ${gpMargin.toFixed(1)}% · YTD` : `Margin ${gpMargin.toFixed(1)}%`,
                         color: "#059669", bg: "linear-gradient(135deg,#ecfdf5,#d1fae5)",
                         border: "#059669", Icon: TrendingUp,
-                        change: 0, showChange: false,
+                        change: 0, showChange: false, ytd: ytdMode,
                       },
                       {
-                        label: "Net Profit", value: fmtM(netProfit), sub: `Margin ${netMargin.toFixed(1)}%`,
+                        label: "Net Profit", value: fmtM(netProfit),
+                        sub: ytdMode ? `Margin ${netMargin.toFixed(1)}% · YTD` : `Margin ${netMargin.toFixed(1)}%`,
                         color: netProfit >= 0 ? "#059669" : "#DC2626",
                         bg: netProfit >= 0 ? "linear-gradient(135deg,#ecfdf5,#bbf7d0)" : "linear-gradient(135deg,#fef2f2,#fecaca)",
                         border: netProfit >= 0 ? "#059669" : "#DC2626",
                         Icon: netProfit >= 0 ? ArrowUpRight : ArrowDownRight,
-                        change: netChange, showChange: !!prevPlP,
+                        change: netChange, showChange: !!prevPlP && !ytdMode, ytd: ytdMode,
                       },
                       {
-                        label: "Total Assets", value: fmtM(totalAssets), sub: `Equity ${fmtM(totalEquity)}`,
+                        label: "Total Assets", value: fmtM(totalAssets),
+                        sub: `Equity ${fmtM(totalEquity)}`,
                         color: BRAND, bg: "linear-gradient(135deg,#eff6ff,#dbeafe)",
                         border: BRAND, Icon: PieChart,
-                        change: assetsChange, showChange: !!prevBsP,
+                        change: assetsChange, showChange: !!prevBsP, ytd: false,
                       },
                       {
-                        label: "Cash & Equiv.", value: fmtM(cashBs), sub: "Closing balance",
+                        label: "Cash & Equiv.", value: fmtM(cashBs),
+                        sub: ytdMode ? `Closing ${plCols[effectiveYtdEnd] ?? ""}` : "Closing balance",
                         color: "#7c3aed", bg: "linear-gradient(135deg,#f5f3ff,#ede9fe)",
                         border: "#7c3aed", Icon: Banknote,
-                        change: 0, showChange: false,
+                        change: 0, showChange: false, ytd: false,
                       },
                       {
-                        label: "Operating CF", value: fmtM(operatingCF), sub: operatingCF >= 0 ? "Positive" : "Negative",
+                        label: "Operating CF", value: fmtM(operatingCF),
+                        sub: ytdMode ? `${ytdMonthCount}-month YTD` : (operatingCF >= 0 ? "Positive" : "Negative"),
                         color: operatingCF >= 0 ? "#059669" : "#DC2626",
                         bg: operatingCF >= 0 ? "linear-gradient(135deg,#ecfdf5,#d1fae5)" : "linear-gradient(135deg,#fef2f2,#fecaca)",
                         border: operatingCF >= 0 ? "#059669" : "#DC2626",
                         Icon: operatingCF >= 0 ? ArrowUpRight : ArrowDownRight,
-                        change: 0, showChange: false,
+                        change: 0, showChange: false, ytd: ytdMode,
                       },
-                    ].map(({ label, value, sub, color, bg, border, Icon, change, showChange }) => (
+                    ].map(({ label, value, sub, color, bg, border, Icon, change, showChange, ytd }) => (
                       <div key={label} className="relative bg-white rounded-2xl shadow-sm overflow-hidden p-4 flex flex-col gap-2"
                         style={{ border: `1.5px solid ${border}20` }}>
                         <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: border }} />
@@ -676,7 +807,13 @@ export default function AccountDashboardPage() {
                           <p className="text-lg font-bold tabular-nums leading-tight" style={{ color }}>
                             SAR {value}
                           </p>
-                          <p className="text-[10px] text-gray-400 mt-0.5">{sub}</p>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <p className="text-[10px] text-gray-400">{sub}</p>
+                            {ytd && (
+                              <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full"
+                                style={{ background: "#dbeafe", color: BRAND }}>YTD</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -688,7 +825,10 @@ export default function AccountDashboardPage() {
                     {/* ── Revenue Monthly Trend (Recharts BarChart) ── */}
                     <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100 lg:col-span-1">
                       <p className="text-sm font-bold text-gray-700">Monthly Revenue</p>
-                      <p className="text-[11px] text-gray-400 mb-3">SAR · {plCols.join(", ")}</p>
+                      <p className="text-[11px] text-gray-400 mb-3">
+                        SAR · {chartCols.join(", ")}
+                        {ytdMode && <span className="ml-1.5 font-semibold" style={{ color: BRAND }}>(YTD)</span>}
+                      </p>
                       {mounted && monthlyChartData.length > 0 ? (
                         <div style={{ height: 148 }}>
                           <ResponsiveContainer width="100%" height="100%">
@@ -775,7 +915,9 @@ export default function AccountDashboardPage() {
                     {/* ── Cash Flow (Recharts horizontal BarChart) ── */}
                     <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
                       <p className="text-sm font-bold text-gray-700">Cash Flow Summary</p>
-                      <p className="text-[11px] text-gray-400 mb-3">SAR · {cfP?.period ?? bsP?.period}</p>
+                      <p className="text-[11px] text-gray-400 mb-3">
+                        SAR · {ytdRangeLabel ?? cfP?.period ?? bsP?.period}
+                      </p>
                       {mounted ? (
                         <div style={{ height: 115 }}>
                           <ResponsiveContainer width="100%" height="100%">
@@ -836,19 +978,21 @@ export default function AccountDashboardPage() {
                           <TrendingUp size={15} className="text-white/70" />
                           <span className="text-sm font-bold text-white">Profit & Loss Summary</span>
                         </div>
-                        <span className="text-white/60 text-[11px]">{plP?.period}</span>
+                        <span className="text-white/60 text-[11px]">
+                          {ytdRangeLabel ?? plP?.period}
+                        </span>
                       </div>
                       <div className="divide-y divide-gray-50">
                         {[
                           { label: "Total Revenue",       val: revenue,     color: BRAND,     bold: true,  indent: 0 },
-                          { label: "Cost of Sales",       val: rowFind(plRows, "total cost of sales"), color: "#DC2626", bold: false, indent: 1 },
+                          { label: "Cost of Sales",       val: rowFind(ytdPlRows, "total cost of sales"), color: "#DC2626", bold: false, indent: 1 },
                           { label: "Gross Profit",        val: grossProfit,  color: "#059669", bold: true,  indent: 0 },
                           { label: "GP Margin",           val: gpMargin,     color: "#059669", bold: false, indent: 1, isRatio: true, suffix: "%" },
-                          { label: "Operating Expenses",  val: rowFind(plRows, "total operating expenses"), color: "#D97706", bold: false, indent: 1 },
+                          { label: "Operating Expenses",  val: rowFind(ytdPlRows, "total operating expenses"), color: "#D97706", bold: false, indent: 1 },
                           { label: "Operating Profit (EBIT)", val: ebit,     color: BRAND,     bold: true,  indent: 0 },
-                          { label: "Finance Costs (Net)", val: rowFind(plRows, "finance costs"), color: "#DC2626", bold: false, indent: 1 },
-                          { label: "Net Profit Before Tax", val: rowFind(plRows, "net profit before tax"), color: BRAND, bold: true, indent: 0 },
-                          { label: "Zakat & Tax",         val: rowFind(plRows, "zakat"), color: "#DC2626", bold: false, indent: 1 },
+                          { label: "Finance Costs (Net)", val: rowFind(ytdPlRows, "finance costs"), color: "#DC2626", bold: false, indent: 1 },
+                          { label: "Net Profit Before Tax", val: rowFind(ytdPlRows, "net profit before tax"), color: BRAND, bold: true, indent: 0 },
+                          { label: "Zakat & Tax",         val: rowFind(ytdPlRows, "zakat"), color: "#DC2626", bold: false, indent: 1 },
                           { label: "Net Profit After Tax",val: netProfit,    color: netProfit >= 0 ? "#059669" : "#DC2626", bold: true, indent: 0 },
                           { label: "Net Margin",          val: netMargin,    color: netProfit >= 0 ? "#059669" : "#DC2626", bold: false, indent: 1, isRatio: true, suffix: "%" },
                         ].map(({ label, val, color, bold, indent, isRatio, suffix }) => (
@@ -962,7 +1106,7 @@ export default function AccountDashboardPage() {
                         style={{ background: `linear-gradient(90deg,${BRAND}15,${BRAND}05)` }}>
                         <BarChart3 size={14} style={{ color: BRAND }} />
                         <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: BRAND }}>
-                          P&amp;L Section Breakdown — {plP?.period}
+                          P&amp;L Section Breakdown — {ytdRangeLabel ?? plP?.period}
                         </span>
                       </div>
                       <div className="divide-y divide-gray-50">
@@ -1176,7 +1320,7 @@ export default function AccountDashboardPage() {
       {/* J.A.R.V.I.S floating assistant */}
       <JarvisAssistant data={{
         company:        coName(frCompany),
-        period:         (revenue > 0 ? plP?.period : null) ?? bsP?.period ?? cfP?.period ?? "—",
+        period:         ytdRangeLabel ?? (revenue > 0 ? plP?.period : null) ?? bsP?.period ?? cfP?.period ?? "—",
         revenue,
         grossProfit,
         netProfit,
